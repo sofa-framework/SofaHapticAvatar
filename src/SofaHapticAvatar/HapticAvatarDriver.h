@@ -60,6 +60,7 @@ public:
     Data< Coord > d_posDevice; ///< position of the base of the part of the device    
 
     Data<bool> d_drawDevice;
+    Data<std::string> d_portName;
 
 private:
     void clearDevice();
