@@ -48,6 +48,15 @@ public:
 
     void connectDevice();
 
+    bool writeData(std::string msg);
+
+    //int readData(std::string msg);
+
+
+    int ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
+
+    bool WriteData(char *buffer, unsigned int nbChar);
+
 private:
     //Connection status
     bool m_connected;
