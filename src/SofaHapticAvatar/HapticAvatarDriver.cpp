@@ -6,6 +6,8 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatarDefines.h>
+
 #include <sofa/core/ObjectFactory.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>
@@ -24,7 +26,13 @@ namespace controller
 
 //constructeur
 HapticAvatarDriver::HapticAvatarDriver()
-    : d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
+    : d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
+    , d_orientationBase(initData(&d_orientationBase, Quat(0, 0, 0, 1), "orientationBase", "Orientation of the interface base in the scene world coordinates"))
+    , d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
+    , d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
+    , d_forceScale(initData(&d_forceScale, 1.0, "forceScale", "Default forceScale applied to the force feedback. "))
+    , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))
+    , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
 {
     this->f_listening.setValue(true);
 
