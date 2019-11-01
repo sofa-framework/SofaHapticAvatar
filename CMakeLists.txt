@@ -7,10 +7,13 @@ find_package(SofaHaptics REQUIRED)
 set(SOFAHAPTICAVATAR_SRC_DIR src/SofaHapticAvatar)
 set(HEADER_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/config.h.in
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDriver.h    
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDefines.h 
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarAPI.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDriver.h
 )
 
 set(SOURCE_FILES
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarAPI.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDriver.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp
 )
