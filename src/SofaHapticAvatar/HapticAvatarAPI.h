@@ -23,6 +23,7 @@
 #define SOFA_HAPTICAVATAR_HAPTICAVATARAPI_H
 
 #include <SofaHapticAvatar/config.h>
+#include <string>
 
 namespace sofa 
 {
@@ -39,9 +40,26 @@ namespace controller
 class SOFA_HAPTICAVATAR_API HapticAvatarAPI
 {
 public:
-    HapticAvatarAPI();
+    HapticAvatarAPI(const std::string& portName);
 
     virtual ~HapticAvatarAPI();
+
+    bool IsConnected() { return m_connected; }
+
+    void connectDevice();
+
+private:
+    //Connection status
+    bool m_connected;
+
+    //Serial comm handler
+    HANDLE m_hSerial;
+    //Get various information about the connection
+    COMSTAT m_status;
+    //Keep track of last error
+    DWORD m_errors;
+
+    std::string m_portName;
 };
 
 } // namespace controller

@@ -11,7 +11,10 @@
 namespace HapticAvatar
 {
 
+#define OUTGOING_DATA_LEN 64
+#define INCOMING_DATA_LEN 512
 #define NBJOINT 6
+#define ARDUINO_WAIT_TIME 2000
 
 
 } // namespace HapticAvatar

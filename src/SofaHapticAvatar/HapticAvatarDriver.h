@@ -15,6 +15,8 @@
 
 #include <SofaUserInteraction/Controller.h>
 
+#include <SofaHapticAvatar/HapticAvatarAPI.h>
+
 namespace sofa 
 {
 
@@ -61,6 +63,9 @@ public:
 
 private:
     void clearDevice();
+
+private:
+    HapticAvatarAPI * m_HA_API;
 };
 
 } // namespace controller

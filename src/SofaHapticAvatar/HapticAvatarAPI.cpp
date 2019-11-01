@@ -20,6 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
+#include <SofaHapticAvatar/HapticAvatarDefines.h>
 #include <SofaHapticAvatar/HapticAvatarAPI.h>
 #include <iostream>
 
@@ -32,14 +33,98 @@ namespace component
 namespace controller
 {
 
-HapticAvatarAPI::HapticAvatarAPI()
+HapticAvatarAPI::HapticAvatarAPI(const std::string& portName)
+    : m_connected(false)
+    , m_portName(portName)
 {
+    connectDevice();
 
+    if (m_connected == true)
+    {
+        std::cout << "## Connected!!!!" << std::endl;
+    }
+    else
+    {
+        std::cout << "## Not Connected...." << std::endl;
+    }
+}
+
+void HapticAvatarAPI::connectDevice()
+{
+    //Try to connect to the given port throuh CreateFile
+    m_hSerial = CreateFileA(m_portName.c_str(),
+        GENERIC_READ | GENERIC_WRITE,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    //Check if the connection was successfull
+    if (m_hSerial == INVALID_HANDLE_VALUE)
+    {
+        //If not success full display an Error
+        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+
+            //Print Error if neccessary
+            std::cout << "ERROR: Handle was not attached. Reason: " << m_portName << " not available." << std::endl;
+        }
+        else
+        {
+            std::cout << "ERROR!!!" << std::endl;
+        }
+    }
+    else
+    {
+        //If connected we try to set the comm parameters
+        DCB dcbSerialParams = { 0 };
+
+        //Try to get the current
+        if (!GetCommState(m_hSerial, &dcbSerialParams))
+        {
+            //If impossible, show an error
+            std::cout << "failed to get current serial parameters!" << std::endl;
+        }
+        else
+        {
+            //Define serial connection parameters for the arduino board
+            dcbSerialParams.BaudRate = CBR_9600;
+            dcbSerialParams.ByteSize = 8;
+            dcbSerialParams.StopBits = ONESTOPBIT;
+            dcbSerialParams.Parity = NOPARITY;
+            //Setting the DTR to Control_Enable ensures that the Arduino is properly
+            //reset upon establishing a connection
+            dcbSerialParams.fDtrControl = DTR_CONTROL_ENABLE;
+
+            //Set the parameters and check for their proper application
+            if (!SetCommState(m_hSerial, &dcbSerialParams))
+            {
+                std::cout << "ALERT: Could not set Serial Port parameters" << std::endl;
+            }
+            else
+            {
+                //If everything went fine we're connected
+                m_connected = true;
+                //Flush any remaining characters in the buffers
+                PurgeComm(m_hSerial, PURGE_RXCLEAR | PURGE_TXCLEAR);
+                //We wait 2s as the arduino board will be reseting
+                Sleep(ARDUINO_WAIT_TIME);
+            }
+        }
+    }
 }
 
 HapticAvatarAPI::~HapticAvatarAPI()
 {
-
+    //Check if we are connected before trying to disconnect
+    if (m_connected)
+    {
+        //We're no longer connected
+        m_connected = false;
+        //Close the serial handler
+        CloseHandle(m_hSerial);
+    }
 }
 
 } // namespace controller

@@ -49,6 +49,8 @@ HapticAvatarDriver::~HapticAvatarDriver()
 void HapticAvatarDriver::init()
 {
     msg_info() << "HapticAvatarDriver::init()";
+    m_HA_API = new HapticAvatarAPI("//./COM3");
+
 }
 
 
