@@ -40,13 +40,20 @@ namespace controller
 class SOFA_HAPTICAVATAR_API PortalController
 {
 public:
-    PortalController();
+    PortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
     virtual ~PortalController() {}
 
+
+    void printInfo();
   
 private:
-  
+    int m_id; ///< 
+    int m_rail; ///< rail number, middle rail has number 0
+    float m_railPos; ///< rail position, mm from centrum in the rail
+    float m_flipAngle; ///< Angles in degrees that the haptic device is flipped 
+    float m_tiltAngle; ///< Angles in degrees that the haptic device is tilted
+    std::string m_comPort; ///< COM port assigned to the device in the portal
 };
 
 } // namespace controller

@@ -23,7 +23,12 @@
 #define SOFA_HAPTICAVATAR_PORTALMANAGER_H
 
 #include <SofaHapticAvatar/config.h>
+#include <SofaHapticAvatar/PortalController.h>
+#include <sofa/core/objectmodel/BaseObject.h>
+#include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
+
+class TiXmlElement;
 
 namespace sofa 
 {
@@ -34,19 +39,37 @@ namespace component
 namespace controller 
 {
 
+   
 /**
 * PortalManager 
 */
-class SOFA_HAPTICAVATAR_API PortalManager
+class SOFA_HAPTICAVATAR_API PortalManager : public sofa::core::objectmodel::BaseObject
 {
 public:
+    SOFA_CLASS(PortalManager, sofa::core::objectmodel::BaseObject);
     PortalManager();
 
     virtual ~PortalManager() {}
 
-  
+    void setFilename(std::string f);
+    const std::string &getFilename();
+
+    virtual void init() override;
+
+    virtual void reinit() override;
+    virtual void handleEvent(core::objectmodel::Event *) override;
+    virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
+
+    void printInfo();
+
+    sofa::core::objectmodel::DataFileName m_configFilename;
+
+protected:
+    bool parseConfigFile();
+    bool getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value);
+    bool getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value);
 private:
-  
+    sofa::helper::vector<PortalController* > m_portals;
 };
 
 } // namespace controller

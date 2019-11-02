@@ -36,11 +36,25 @@ namespace component
 namespace controller
 {
 
-PortalController::PortalController()
+PortalController::PortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
+    : m_id (id)
+    , m_rail(rail)
+    , m_railPos(railPos)
+    , m_flipAngle(flipAngle)
+    , m_tiltAngle(tiltAngle)
+    , m_comPort(comPort)
 {
     
 }
 
+
+void PortalController::printInfo()
+{
+    std::cout << "## PortalController Number: " << m_id << std::endl;
+    std::cout << "# Settings: ComPort: " << m_comPort << " | Rail Number: " << m_rail << std::endl;
+    std::cout << "# values: RailPos: " << m_railPos << " | FlipAngle: " << m_flipAngle << " | TiltAngle: " << m_tiltAngle << std::endl;
+    std::cout << "##################################" << std::endl;
+}
 
 } // namespace controller
 

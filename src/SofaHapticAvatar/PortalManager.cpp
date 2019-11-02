@@ -22,10 +22,15 @@
 
 #include <SofaHapticAvatar/HapticAvatarDefines.h>
 #include <SofaHapticAvatar/PortalManager.h>
+#include <sofa/core/ObjectFactory.h>
+#include <sofa/helper/system/FileRepository.h>
+#include <tinyxml.h>
+
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 namespace sofa
 {
@@ -36,11 +41,175 @@ namespace component
 namespace controller
 {
 
+int PortalManagerClass = core::RegisterObject("TODO detail")
+    .add< PortalManager >()
+    ;
+
+
 PortalManager::PortalManager()
-{
-    
+    : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))
+{    
 }
 
+
+void PortalManager::init()
+{
+    msg_info() << "PortalManager::init()";
+    parseConfigFile();
+
+    printInfo();
+}
+
+void PortalManager::reinit()
+{
+    msg_info() << "PortalManager::reinit()";
+}
+
+void PortalManager::handleEvent(core::objectmodel::Event *)
+{
+    //msg_info() << "PortalManager::handleEvent()";
+}
+
+void PortalManager::draw(const sofa::core::visual::VisualParams* vparams)
+{
+
+}
+
+
+void PortalManager::setFilename(std::string f)
+{
+    m_configFilename.setValue(f);
+}
+
+const std::string& PortalManager::getFilename()
+{
+    return m_configFilename.getValue();
+}
+
+
+bool PortalManager::getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value)
+{
+    int res = elem->QueryIntAttribute(attributeN, value);
+    if (res == TIXML_WRONG_TYPE)
+    {
+        msg_error() << "Wrong XML format attribute, waiting for Int for attribute: " << attributeN;
+        return false;
+    }
+    else if (res == TIXML_NO_ATTRIBUTE)
+    {
+        msg_error() << "Wrong XML attribute, attribute not found: " << attributeN;
+        return false;
+    }
+
+    return true;
+}
+
+bool PortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value)
+{
+    int res = elem->QueryFloatAttribute(attributeN, value);
+    if (res == TIXML_WRONG_TYPE)
+    {
+        msg_error() << "Wrong XML format attribute, waiting for Float for attribute: " << attributeN;
+        return false;
+    }
+    else if (res == TIXML_NO_ATTRIBUTE)
+    {
+        msg_error() << "Wrong XML attribute, attribute not found: " << attributeN;
+        return false;
+    }
+
+    return true;
+}
+
+
+bool PortalManager::parseConfigFile()
+{
+    m_componentstate = sofa::core::objectmodel::ComponentState::Invalid;
+
+    // -- Check filename field:
+    if (m_configFilename.getValue() == "")
+    {
+        msg_error() << "No file to load. Data configFilename is not set.";
+        return false;
+    }
+
+    // -- Check if file exist:
+    const char* filename = m_configFilename.getFullPath().c_str();
+    std::string sfilename(filename);
+
+    if (!sofa::helper::system::DataRepository.findFile(sfilename))
+    {
+        msg_error() << "File: '" << m_configFilename << "' not found. ";
+        return false;
+    }
+
+    TiXmlDocument doc(filename); // the resulting document tree
+    if (!(doc.LoadFile()))
+    {
+        msg_error() << "Failed to open " << filename << "\n" << doc.ErrorDesc() << " at line " << doc.ErrorRow() << " row " << doc.ErrorCol();
+        return false;
+    }
+
+    const TiXmlElement* hRoot = doc.RootElement();
+    if (hRoot == nullptr)
+    {
+        msg_error() << " Empty document: " << filename;
+        return false;
+    }
+
+    // start reading the xml config file:
+    std::string resHeader = hRoot->ValueStr();
+    if (resHeader != "Procedure")
+    {
+        msg_error() << " File format error, searching for Procedure, get: "<< resHeader;
+        return false;
+    }
+
+    const char* procedureName = hRoot->Attribute("Name");
+    std::cout << "procedureName: " << procedureName << std::endl;
+
+    // get portals child node:
+    const TiXmlNode* pChild = hRoot->FirstChild("Portals");
+    if (pChild == nullptr)
+    {
+        msg_error() << " File format error2: " << filename;
+        return false;
+    }
+    
+    for (const TiXmlElement* portalNode = pChild->FirstChildElement("Portal"); portalNode != 0; portalNode = portalNode->NextSiblingElement("Portal"))
+    {
+        if (portalNode == nullptr)
+            continue;
+        const TiXmlElement* portalSettings = portalNode->FirstChildElement("PortalSettings");
+        if (portalSettings == nullptr)
+            continue;
+
+        int idP, rail;
+        bool res = getIntAttribute(portalNode, "Number", &idP);
+
+        getIntAttribute(portalSettings, "Rail", &rail);
+
+        float railPos, flipAngle, tiltAngle;
+        getFloatAttribute(portalSettings, "RailPos", &railPos);
+        getFloatAttribute(portalSettings, "FlipAngle", &flipAngle);
+        getFloatAttribute(portalSettings, "TiltAngle", &tiltAngle);
+
+        PortalController* pController = new PortalController(idP, rail, railPos, flipAngle, tiltAngle, std::string(portalSettings->Attribute("ComPort")));        
+        m_portals.push_back(pController);
+    }
+    
+    m_componentstate = sofa::core::objectmodel::ComponentState::Valid;
+    return true;
+}
+
+
+void PortalManager::printInfo()
+{
+    for (auto pController : m_portals)
+    {
+        pController->printInfo();
+    }
+}
 
 } // namespace controller
 
