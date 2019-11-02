@@ -1,17 +1,64 @@
 <?xml version="1.0"?>
-<Node name="root" gravity="0 0 0" dt="0.01" bbox="-10 -10 -10 10 10 10">
+<Node name="root" gravity="0 0 0" dt="0.01" bbox="-200 -200 -200 200 200 200">
     <RequiredPlugin name="SofaOpenglVisual"/>
     <RequiredPlugin name="SofaHapticAvatar"/>
 
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels" />
 
-    <HapticAvatarDriver name="HADevice" printLog="1" />
+    <PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1"/>
+<!--    <HapticAvatarDriver name="HADevice" printLog="1" listening="1"/>
 	<MechanicalObject template="Rigid3d" name="HA_dof" />
-
+    
+    -->
+    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1" />
+    
+    
+    <Node name="Portal_0">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition0"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_1">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition1"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_2">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition2"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_3">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition3"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_4">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition4"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
     <!-- Example of an instrument controlled with the Geomagic device -->
-    <!--<Node name="mapping">
+    <!--
+    <OglModel name="Visual" src="@ProtalMesh" />
+    <Node name="mapping">
         <MeshObjLoader name="meshLoader_0" filename="mesh/dental_instrument.obj" handleSeams="1" />
-        <OglModel name="Visual" src="@meshLoader_0" color="red"  />
+        
         <RigidMapping input="@.." output="@Visual" />
     </Node>
     
