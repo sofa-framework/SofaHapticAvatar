@@ -51,6 +51,8 @@ public:
     bool writeData(std::string msg);
     //int readData(std::string msg);
 
+    void getAnglesAndLength();
+
     std::string getIdentity();
     int getData(char *buffer, bool do_flush);
     

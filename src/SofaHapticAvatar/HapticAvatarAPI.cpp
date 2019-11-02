@@ -132,6 +132,23 @@ HapticAvatarAPI::~HapticAvatarAPI()
 }
 
 
+void HapticAvatarAPI::getAnglesAndLength()
+{
+    std::cout << "HapticAvatarAPI::getPosition()" << std::endl;
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "2 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteData(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+    int res = getData(incomingData, false);
+   
+    std::string iden = std::string(incomingData);
+    std::cout << "getPosition: " << res << " : " << iden  << std::endl;
+}
+
+
 std::string HapticAvatarAPI::getIdentity()
 {
     char incomingData[INCOMING_DATA_LEN];
@@ -234,7 +251,11 @@ int HapticAvatarAPI::ReadData(char *buffer, unsigned int nbChar, int *queue, boo
 bool HapticAvatarAPI::writeData(std::string msg)
 {
     //writeData
-    return false;
+    char outgoingData[OUTGOING_DATA_LEN];
+    std::strcpy(outgoingData, msg.c_str());
+    int outlen = strlen(outgoingData);
+    
+    return WriteData(outgoingData, outlen);
 }
 
 

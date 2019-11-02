@@ -56,11 +56,18 @@ void HapticAvatarDriver::init()
 
     if (!m_HA_API->IsConnected())
         return;
-
-
+    
+    // get identity
     std::string identity = m_HA_API->getIdentity();
     d_hapticIdentity.setValue(identity);
     std::cout << "HapticAvatarDriver identity: " << identity << std::endl;
+
+
+    // reset all force
+    m_HA_API->writeData("15 \n");
+    char incomingData[INCOMING_DATA_LEN];
+    int res = m_HA_API->getData(incomingData, false);
+    std::cout << "reset: " << incomingData << std::endl;
 
     return;
 }
@@ -83,6 +90,14 @@ void HapticAvatarDriver::reinit()
     msg_info() << "HapticAvatarDriver::reinit()";
 }
 
+void HapticAvatarDriver::updatePosition()
+{
+    if (!m_HA_API)
+        return;
+
+    m_HA_API->getAnglesAndLength();
+}
+
 void HapticAvatarDriver::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!d_drawDevice.getValue())
@@ -98,13 +113,13 @@ void HapticAvatarDriver::handleEvent(core::objectmodel::Event *event)
     //if(m_errorDevice != 0)
     //    return;
 
-    //if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
-    //{
+    if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
+    {
     //    if (m_hStateHandles.size() && m_hStateHandles[0] == HD_INVALID_HANDLE)
     //        return;
 
-    //    updatePosition();
-    //}
+        updatePosition();
+    }
 }
 
 int HapticAvatarDriverClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")

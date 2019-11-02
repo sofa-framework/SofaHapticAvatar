@@ -49,6 +49,8 @@ public:
     virtual void bwdInit() override;
     virtual void reinit() override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
+
+    void updatePosition();
     void handleEvent(core::objectmodel::Event *) override;
 
     Data<Vec3d> d_positionBase; ///< Position of the interface base in the scene world coordinates
