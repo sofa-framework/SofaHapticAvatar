@@ -61,6 +61,7 @@ public:
 
     Data<bool> d_drawDevice;
     Data<std::string> d_portName;
+    Data<std::string> d_hapticIdentity;
 
 private:
     void clearDevice();

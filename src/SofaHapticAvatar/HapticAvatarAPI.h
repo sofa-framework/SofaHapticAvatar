@@ -49,10 +49,11 @@ public:
     void connectDevice();
 
     bool writeData(std::string msg);
-
     //int readData(std::string msg);
 
-
+    std::string getIdentity();
+    int getData(char *buffer, bool do_flush);
+    
     int ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
 
     bool WriteData(char *buffer, unsigned int nbChar);

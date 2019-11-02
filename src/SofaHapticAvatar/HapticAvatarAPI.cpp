@@ -132,6 +132,58 @@ HapticAvatarAPI::~HapticAvatarAPI()
 }
 
 
+std::string HapticAvatarAPI::getIdentity()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "1 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteData(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+    int res = getData(incomingData, false);
+    std::cout << "getIdentity: " << res << std::endl;
+    std::string iden = std::string(incomingData);
+
+    return iden;
+}
+
+
+int HapticAvatarAPI::getData(char *buffer, bool do_flush)
+{
+    bool response = false;
+    int cptSecu = 0;
+    int n = 0;
+    int que = 0;
+    char * pch;
+    int num_cr = 0;
+    while (!response && cptSecu < 1000)
+    {
+        n = ReadData(buffer, INCOMING_DATA_LEN, &que, do_flush);        
+        if (n > 0) 
+        {
+            // count the number of /n in the return string
+            pch = strchr(buffer, '\n');
+            while (pch != NULL)
+            {
+                num_cr++;
+                pch = strchr(pch + 1, 's');
+            }
+            response = true;
+        }
+
+        cptSecu++;
+    }
+
+    if (!response) // secu loop reach end
+    {
+        std::cerr << "Error getData failed for " << buffer << std::endl;
+    }
+
+    return n;
+}
+
+
 int HapticAvatarAPI::ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
 {
     //Number of bytes we'll have read

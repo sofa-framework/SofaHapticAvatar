@@ -34,9 +34,11 @@ HapticAvatarDriver::HapticAvatarDriver()
     , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
+    , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
 {
     this->f_listening.setValue(true);
-
+    
+    d_hapticIdentity.setReadOnly(true);
 }
 
 
@@ -55,37 +57,12 @@ void HapticAvatarDriver::init()
     if (!m_HA_API->IsConnected())
         return;
 
-    char incomingData[INCOMING_DATA_LEN];
-    char flushData[512]; // don't forget to pre-allocate memory
-    int dataLength = 512;
-    int que = 0;
-    unsigned int num_read_bytes = 0, failed_to_send_times = 0, loop_num = 0, num_reads = 0;
-    char outgoingData[OUTGOING_DATA_LEN] = "2 2 2 2 2 2 \n";
-    char outgoingData2[OUTGOING_DATA_LEN];
-    for (int k = 0; k < OUTGOING_DATA_LEN - 1; k++)
-        outgoingData2[k] = '0';
-    outgoingData2[OUTGOING_DATA_LEN - 1] = 'X';
 
-    // flush the read buffer
-    bool read_flag = true;
-    while (read_flag) {
-        int n = m_HA_API->ReadData(flushData, 512, &que, true);
-        num_read_bytes += n;
-        read_flag = (n > 0);
-        //Sleep(1);
-        num_reads++;
-    }
+    std::string identity = m_HA_API->getIdentity();
+    d_hapticIdentity.setValue(identity);
+    std::cout << "HapticAvatarDriver identity: " << identity << std::endl;
 
-    int outlen = strlen(outgoingData);
-    bool write_success = m_HA_API->WriteData(outgoingData, outlen);
-    if (!write_success) {
-        failed_to_send_times++;
-        std::cout << "failed_to_send_times" << std::endl;
-    }
-
-    int n = 0;
-    n = m_HA_API->ReadData(incomingData, INCOMING_DATA_LEN, &que, false);
-    std::cout << "ReadData: " << n << std::endl;
+    return;
 }
 
 
