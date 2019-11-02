@@ -23,6 +23,7 @@
 #define SOFA_HAPTICAVATAR_PORTALCONTROLLER_H
 
 #include <SofaHapticAvatar/config.h>
+#include <sofa/defaulttype/RigidTypes.h>
 #include <string>
 
 namespace sofa 
@@ -40,12 +41,18 @@ namespace controller
 class SOFA_HAPTICAVATAR_API PortalController
 {
 public:
+    typedef sofa::defaulttype::RigidTypes::Coord Coord;
+
     PortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
     virtual ~PortalController() {}
 
 
+    void portalSetup();
+
     void printInfo();
+
+    const Coord& getPortalPosition() {return m_portalPosition;}
   
 private:
     int m_id; ///< 
@@ -54,6 +61,8 @@ private:
     float m_flipAngle; ///< Angles in degrees that the haptic device is flipped 
     float m_tiltAngle; ///< Angles in degrees that the haptic device is tilted
     std::string m_comPort; ///< COM port assigned to the device in the portal
+
+    Coord m_portalPosition;
 };
 
 } // namespace controller

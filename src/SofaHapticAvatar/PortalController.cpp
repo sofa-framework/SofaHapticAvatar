@@ -22,6 +22,7 @@
 
 #include <SofaHapticAvatar/HapticAvatarDefines.h>
 #include <SofaHapticAvatar/PortalController.h>
+#include <sofa/helper/Quater.h>
 #include <iostream>
 #include <algorithm>
 #include <stdio.h>
@@ -48,11 +49,34 @@ PortalController::PortalController(int id, int rail, float railPos, float flipAn
 }
 
 
+void PortalController::portalSetup()
+{
+    m_portalPosition[0] = m_railPos;
+    float railDistance = float(RAIL_DISTANCE);
+    m_portalPosition[2] = m_rail * railDistance;
+    if (fabs(m_rail) >= 2)
+    {
+        m_portalPosition[1] = 174.23f;  // this is the outer rails
+    }
+    else
+    {
+        m_portalPosition[1] = 194.23f; //mm
+    }
+
+    sofa::defaulttype::Quat orientation;
+    orientation = orientation.fromEuler(0.0f, m_flipAngle, m_tiltAngle);
+    //std::cout << "m_flipAngle: " << m_flipAngle << std::endl;
+    //std::cout << "m_tiltAngle: " << m_tiltAngle << std::endl;
+    //std::cout << "orientation: " << orientation << std::endl;
+    m_portalPosition.getOrientation() = orientation;    
+}
+
 void PortalController::printInfo()
 {
     std::cout << "## PortalController Number: " << m_id << std::endl;
     std::cout << "# Settings: ComPort: " << m_comPort << " | Rail Number: " << m_rail << std::endl;
     std::cout << "# values: RailPos: " << m_railPos << " | FlipAngle: " << m_flipAngle << " | TiltAngle: " << m_tiltAngle << std::endl;
+    std::cout << "# Position: " << m_portalPosition << std::endl;
     std::cout << "##################################" << std::endl;
 }
 

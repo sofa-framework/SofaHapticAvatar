@@ -28,6 +28,9 @@
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
 
+#include <sofa/defaulttype/SolidTypes.h>
+#include <sofa/defaulttype/RigidTypes.h>
+
 class TiXmlElement;
 
 namespace sofa 
@@ -39,7 +42,8 @@ namespace component
 namespace controller 
 {
 
-   
+using namespace sofa::defaulttype;
+
 /**
 * PortalManager 
 */
@@ -47,6 +51,13 @@ class SOFA_HAPTICAVATAR_API PortalManager : public sofa::core::objectmodel::Base
 {
 public:
     SOFA_CLASS(PortalManager, sofa::core::objectmodel::BaseObject);
+    typedef RigidTypes::Coord Coord;
+    typedef RigidTypes::VecCoord VecCoord;
+    typedef SolidTypes<double>::Transform Transform;
+
+    typedef defaulttype::Vec4f Vec4f;
+    typedef defaulttype::Vector3 Vector3;
+
     PortalManager();
 
     virtual ~PortalManager() {}
@@ -63,11 +74,17 @@ public:
     void printInfo();
 
     sofa::core::objectmodel::DataFileName m_configFilename;
-
+    Data< Coord> m_portalPosition0;
+    Data< Coord> m_portalPosition1;
+    Data< Coord> m_portalPosition2;
+    Data< Coord> m_portalPosition3;
+    Data< Coord> m_portalPosition4;
 protected:
     bool parseConfigFile();
     bool getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value);
     bool getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value);
+
+    void portalsSetup();
 private:
     sofa::helper::vector<PortalController* > m_portals;
 };

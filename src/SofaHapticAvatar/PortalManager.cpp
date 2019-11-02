@@ -48,6 +48,11 @@ int PortalManagerClass = core::RegisterObject("TODO detail")
 
 PortalManager::PortalManager()
     : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))
+    , m_portalPosition0(initData(&m_portalPosition0, "portalPosition0", "portal rigid position test"))
+    , m_portalPosition1(initData(&m_portalPosition1, "portalPosition1", "portal rigid position test"))
+    , m_portalPosition2(initData(&m_portalPosition2, "portalPosition2", "portal rigid position test"))
+    , m_portalPosition3(initData(&m_portalPosition3, "portalPosition3", "portal rigid position test"))
+    , m_portalPosition4(initData(&m_portalPosition4, "portalPosition4", "portal rigid position test"))
 {    
 }
 
@@ -56,8 +61,34 @@ void PortalManager::init()
 {
     msg_info() << "PortalManager::init()";
     parseConfigFile();
-
+    portalsSetup();
+  /*  PortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
+    pos.resize(m_portals.size());
+    m_portalsPosition.endEdit();*/
     printInfo();
+}
+
+void PortalManager::portalsSetup()
+{
+    int cpt = 0;
+    for (auto pController : m_portals)
+    {
+        pController->portalSetup();
+        // TODO need to find a better way of doing this
+        if (cpt == 0)
+            m_portalPosition0 = pController->getPortalPosition();
+        else if (cpt == 1)
+            m_portalPosition1 = pController->getPortalPosition();
+        else if (cpt == 2)
+            m_portalPosition2 = pController->getPortalPosition();
+        else if (cpt == 3)
+            m_portalPosition3 = pController->getPortalPosition();
+        else if (cpt == 4)
+            m_portalPosition4 = pController->getPortalPosition();
+        
+        std::cout << "pController->getPortalPosition(): " << pController->getPortalPosition() << std::endl;
+        cpt++;
+    }
 }
 
 void PortalManager::reinit()
