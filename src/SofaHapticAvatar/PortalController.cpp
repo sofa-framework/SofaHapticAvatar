@@ -63,8 +63,10 @@ void PortalController::portalSetup()
         m_portalPosition[1] = 194.23f; //mm
     }
 
-    sofa::defaulttype::Quat orientation;
-    orientation = orientation.fromEuler(0.0f, m_flipAngle, m_tiltAngle);
+    sofa::defaulttype::Quat orientation = orientation.fromEuler(0.0f, m_flipAngle*EULER_TO_RAD, m_tiltAngle*EULER_TO_RAD);
+    if (m_flipAngle == 180) // TODO: remove this hack. FIX problem in fromEuler sign in SOFA for extrem angles.
+        orientation[0] *= -1;
+
     //std::cout << "m_flipAngle: " << m_flipAngle << std::endl;
     //std::cout << "m_tiltAngle: " << m_tiltAngle << std::endl;
     //std::cout << "orientation: " << orientation << std::endl;
