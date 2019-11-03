@@ -55,6 +55,7 @@ HapticAvatarPortalManager::HapticAvatarPortalManager()
     , m_portalPosition4(initData(&m_portalPosition4, "portalPosition4", "portal rigid position test"))
     , m_portalPosition5(initData(&m_portalPosition5, "portalPosition5", "portal rigid position test"))
 {    
+    this->f_listening.setValue(true);
 }
 
 
@@ -76,6 +77,7 @@ void HapticAvatarPortalManager::portalsSetup()
     {
         pController->portalSetup();
     }
+    updatePositionData();
 }
 
 
