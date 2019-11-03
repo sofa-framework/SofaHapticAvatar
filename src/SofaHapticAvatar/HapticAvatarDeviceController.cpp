@@ -56,7 +56,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
-    , portId(-1)
+    , m_portId(-1)
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
     , m_deviceReady(false)
     , m_terminate(true)
@@ -114,9 +114,7 @@ void HapticAvatarDeviceController::init()
     //m_taskScheduler = sofa::simulation::TaskScheduler::getInstance();
     //m_taskScheduler->init(mNbThread);
     //m_taskScheduler->addTask(new HapticEmulatorTask(this, &m_simStepStatus));
-    m_terminate = false;
-    m_deviceReady = true;
-    haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
+   
 
     return;
 }
@@ -136,18 +134,22 @@ void HapticAvatarDeviceController::clearDevice()
 void HapticAvatarDeviceController::bwdInit()
 {   
     msg_info() << "HapticAvatarDeviceController::bwdInit()";
-    if (!m_deviceReady)
+    if (!m_portalMgr)
         return;
     
-    portId = m_portalMgr->getPortalId(d_portName.getValue());
-    if (portId == -1)
+    m_portId = m_portalMgr->getPortalId(d_portName.getValue());
+    if (m_portId == -1)
     {
         msg_error("HapticAvatarDeviceController no portal id found");
         m_deviceReady = false;
         return;
     }
 
-    msg_info() << "Portal Id found: " << portId;
+    msg_info() << "Portal Id found: " << m_portId;
+
+    m_terminate = false;
+    m_deviceReady = true;
+    haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
 }
 
 

@@ -92,7 +92,7 @@ public:
     static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
     std::atomic<bool> m_terminate;
-    int portId;
+    int m_portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 private:
     void clearDevice();
