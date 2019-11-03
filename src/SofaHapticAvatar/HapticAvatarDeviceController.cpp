@@ -5,7 +5,7 @@
 * Contact information:                                                        *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatarDeviceController.h>
 #include <SofaHapticAvatar/HapticAvatarDefines.h>
 
 #include <sofa/core/ObjectFactory.h>
@@ -24,7 +24,7 @@ namespace component
 namespace controller
 {
 
-HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDriver* ptr, CpuTask::Status* pStatus)
+HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus)
     :CpuTask(pStatus)
     , m_driver(ptr)
 {
@@ -40,7 +40,7 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 
 
 //constructeur
-HapticAvatarDriver::HapticAvatarDriver()
+HapticAvatarDeviceController::HapticAvatarDeviceController()
     : d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
     , d_orientationBase(initData(&d_orientationBase, Quat(0, 0, 0, 1), "orientationBase", "Orientation of the interface base in the scene world coordinates"))
     , d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
@@ -57,16 +57,16 @@ HapticAvatarDriver::HapticAvatarDriver()
 }
 
 
-HapticAvatarDriver::~HapticAvatarDriver()
+HapticAvatarDeviceController::~HapticAvatarDeviceController()
 {
     clearDevice();
 }
 
 
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatarDriver::init()
+void HapticAvatarDeviceController::init()
 {
-    msg_info() << "HapticAvatarDriver::init()";
+    msg_info() << "HapticAvatarDeviceController::init()";
     m_HA_API = new HapticAvatarAPI(d_portName.getValue());
 
     if (!m_HA_API->IsConnected())
@@ -75,7 +75,7 @@ void HapticAvatarDriver::init()
     // get identity
     std::string identity = m_HA_API->getIdentity();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatarDriver identity: " << identity << std::endl;
+    std::cout << "HapticAvatarDeviceController identity: " << identity << std::endl;
 
 
     // reset all force
@@ -88,24 +88,24 @@ void HapticAvatarDriver::init()
 }
 
 
-void HapticAvatarDriver::clearDevice()
+void HapticAvatarDeviceController::clearDevice()
 {
-    msg_info() << "HapticAvatarDriver::clearDevice()";
+    msg_info() << "HapticAvatarDeviceController::clearDevice()";
 }
 
 
-void HapticAvatarDriver::bwdInit()
+void HapticAvatarDeviceController::bwdInit()
 {
-    msg_info() << "HapticAvatarDriver::bwdInit()";
+    msg_info() << "HapticAvatarDeviceController::bwdInit()";
 }
 
 
-void HapticAvatarDriver::reinit()
+void HapticAvatarDeviceController::reinit()
 {
-    msg_info() << "HapticAvatarDriver::reinit()";
+    msg_info() << "HapticAvatarDeviceController::reinit()";
 }
 
-void HapticAvatarDriver::updatePosition()
+void HapticAvatarDeviceController::updatePosition()
 {
     if (!m_HA_API)
         return;
@@ -113,7 +113,7 @@ void HapticAvatarDriver::updatePosition()
     m_HA_API->getAnglesAndLength();
 }
 
-void HapticAvatarDriver::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!d_drawDevice.getValue())
         return;
@@ -123,7 +123,7 @@ void HapticAvatarDriver::draw(const sofa::core::visual::VisualParams* vparams)
 }
 
 
-void HapticAvatarDriver::handleEvent(core::objectmodel::Event *event)
+void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
 {
     //if(m_errorDevice != 0)
     //    return;
@@ -137,8 +137,8 @@ void HapticAvatarDriver::handleEvent(core::objectmodel::Event *event)
     }
 }
 
-int HapticAvatarDriverClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-    .add< HapticAvatarDriver >()
+int HapticAvatarDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+    .add< HapticAvatarDeviceController >()
 ;
 
 } // namespace controller

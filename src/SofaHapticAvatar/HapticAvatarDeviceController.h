@@ -4,8 +4,8 @@
 * Authors:                                                                    *
 * Contact information:                                                        *
 ******************************************************************************/
-#ifndef SOFA_HAPTICAVATAR_HAPTICAVATARDRIVER_H
-#define SOFA_HAPTICAVATAR_HAPTICAVATARDRIVER_H
+#ifndef SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
+#define SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
 
 #include <SofaHapticAvatar/config.h>
 #include <sofa/defaulttype/SolidTypes.h>
@@ -33,37 +33,37 @@ using namespace sofa::defaulttype;
 using namespace sofa::simulation;
 
 
-class HapticAvatarDriver;
+class HapticAvatarDeviceController;
 
 class SOFA_HAPTICAVATAR_API HapticEmulatorTask : public CpuTask
 {
 public:
-    HapticEmulatorTask(HapticAvatarDriver* ptr, CpuTask::Status* pStatus);
+    HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus);
 
     virtual ~HapticEmulatorTask() {}
 
     virtual MemoryAlloc run() override final;
 
 private:
-    HapticAvatarDriver * m_driver;
+    HapticAvatarDeviceController * m_driver;
 };
 
 
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarDriver : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatarDeviceController : public Controller
 {
 
 public:
-    SOFA_CLASS(HapticAvatarDriver, Controller);
+    SOFA_CLASS(HapticAvatarDeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
 
-    HapticAvatarDriver();
+    HapticAvatarDeviceController();
 
-	virtual ~HapticAvatarDriver();
+	virtual ~HapticAvatarDeviceController();
 
     virtual void init() override;
     virtual void bwdInit() override;
@@ -101,4 +101,4 @@ private:
 
 } // namespace sofa
 
-#endif // SOFA_HAPTICAVATAR_HAPTICAVATARDRIVER_H
+#endif // SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
