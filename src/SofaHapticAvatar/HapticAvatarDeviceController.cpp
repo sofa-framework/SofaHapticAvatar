@@ -188,13 +188,21 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        _driver->getAnglesAndLength();
+        sofa::helper::fixed_array<float, 4> results = _driver->getAnglesAndLength();
+        std::cout << "results: " << results << std::endl;
+        _deviceCtrl->updateAnglesAndLength(results);
 
         std::this_thread::sleep_for(wait_duration);
         auto t2 = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
         std::cout << "Haptics loop: " << duration << std::endl;
     }
+}
+
+
+void HapticAvatarDeviceController::updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
+{
+    m_portalMgr->updatePostion(m_portId, values[3], values[1]);
 }
 
 void HapticAvatarDeviceController::updatePosition()

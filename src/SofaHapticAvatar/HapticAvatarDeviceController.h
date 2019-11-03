@@ -76,6 +76,8 @@ public:
     void updatePosition();
     void handleEvent(core::objectmodel::Event *) override;
 
+    void updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
+
     Data<Vec3d> d_positionBase; ///< Position of the interface base in the scene world coordinates
     Data<Quat> d_orientationBase; ///< Orientation of the interface base in the scene world coordinates
     Data<Quat> d_orientationTool; ///< Orientation of the tool
