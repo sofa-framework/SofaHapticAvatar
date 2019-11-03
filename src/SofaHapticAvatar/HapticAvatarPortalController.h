@@ -36,16 +36,16 @@ namespace controller
 {
 
 /**
-* PortalController 
+* HapticAvatarPortalController 
 */
-class SOFA_HAPTICAVATAR_API PortalController
+class SOFA_HAPTICAVATAR_API HapticAvatarPortalController
 {
 public:
     typedef sofa::defaulttype::RigidTypes::Coord Coord;
 
-    PortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
+    HapticAvatarPortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
-    virtual ~PortalController() {}
+    virtual ~HapticAvatarPortalController() {}
 
 
     void portalSetup();

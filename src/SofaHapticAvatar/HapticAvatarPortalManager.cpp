@@ -21,7 +21,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarDefines.h>
-#include <SofaHapticAvatar/PortalManager.h>
+#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <tinyxml.h>
@@ -41,12 +41,12 @@ namespace component
 namespace controller
 {
 
-int PortalManagerClass = core::RegisterObject("TODO detail")
-    .add< PortalManager >()
+int HapticAvatarPortalManagerClass = core::RegisterObject("TODO detail")
+    .add< HapticAvatarPortalManager >()
     ;
 
 
-PortalManager::PortalManager()
+HapticAvatarPortalManager::HapticAvatarPortalManager()
     : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))
     , m_portalPosition0(initData(&m_portalPosition0, "portalPosition0", "portal rigid position test"))
     , m_portalPosition1(initData(&m_portalPosition1, "portalPosition1", "portal rigid position test"))
@@ -57,18 +57,18 @@ PortalManager::PortalManager()
 }
 
 
-void PortalManager::init()
+void HapticAvatarPortalManager::init()
 {
-    msg_info() << "PortalManager::init()";
+    msg_info() << "HapticAvatarPortalManager::init()";
     parseConfigFile();
     portalsSetup();
-  /*  PortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
+  /*  HapticAvatarPortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
     pos.resize(m_portals.size());
     m_portalsPosition.endEdit();*/
     printInfo();
 }
 
-void PortalManager::portalsSetup()
+void HapticAvatarPortalManager::portalsSetup()
 {
     int cpt = 0;
     for (auto pController : m_portals)
@@ -91,34 +91,34 @@ void PortalManager::portalsSetup()
     }
 }
 
-void PortalManager::reinit()
+void HapticAvatarPortalManager::reinit()
 {
-    msg_info() << "PortalManager::reinit()";
+    msg_info() << "HapticAvatarPortalManager::reinit()";
 }
 
-void PortalManager::handleEvent(core::objectmodel::Event *)
+void HapticAvatarPortalManager::handleEvent(core::objectmodel::Event *)
 {
-    //msg_info() << "PortalManager::handleEvent()";
+    //msg_info() << "HapticAvatarPortalManager::handleEvent()";
 }
 
-void PortalManager::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatarPortalManager::draw(const sofa::core::visual::VisualParams* vparams)
 {
 
 }
 
 
-void PortalManager::setFilename(std::string f)
+void HapticAvatarPortalManager::setFilename(std::string f)
 {
     m_configFilename.setValue(f);
 }
 
-const std::string& PortalManager::getFilename()
+const std::string& HapticAvatarPortalManager::getFilename()
 {
     return m_configFilename.getValue();
 }
 
 
-bool PortalManager::getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value)
+bool HapticAvatarPortalManager::getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value)
 {
     int res = elem->QueryIntAttribute(attributeN, value);
     if (res == TIXML_WRONG_TYPE)
@@ -135,7 +135,7 @@ bool PortalManager::getIntAttribute(const TiXmlElement* elem, const char* attrib
     return true;
 }
 
-bool PortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value)
+bool HapticAvatarPortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value)
 {
     int res = elem->QueryFloatAttribute(attributeN, value);
     if (res == TIXML_WRONG_TYPE)
@@ -153,7 +153,7 @@ bool PortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attr
 }
 
 
-bool PortalManager::parseConfigFile()
+bool HapticAvatarPortalManager::parseConfigFile()
 {
     m_componentstate = sofa::core::objectmodel::ComponentState::Invalid;
 
@@ -225,7 +225,7 @@ bool PortalManager::parseConfigFile()
         getFloatAttribute(portalSettings, "FlipAngle", &flipAngle);
         getFloatAttribute(portalSettings, "TiltAngle", &tiltAngle);
 
-        PortalController* pController = new PortalController(idP, rail, railPos, flipAngle, tiltAngle, std::string(portalSettings->Attribute("ComPort")));        
+        HapticAvatarPortalController* pController = new HapticAvatarPortalController(idP, rail, railPos, flipAngle, tiltAngle, std::string(portalSettings->Attribute("ComPort")));
         m_portals.push_back(pController);
     }
     
@@ -234,7 +234,7 @@ bool PortalManager::parseConfigFile()
 }
 
 
-void PortalManager::printInfo()
+void HapticAvatarPortalManager::printInfo()
 {
     for (auto pController : m_portals)
     {

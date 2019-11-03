@@ -23,7 +23,7 @@
 #define SOFA_HAPTICAVATAR_PORTALMANAGER_H
 
 #include <SofaHapticAvatar/config.h>
-#include <SofaHapticAvatar/PortalController.h>
+#include <SofaHapticAvatar/HapticAvatarPortalController.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
@@ -45,12 +45,12 @@ namespace controller
 using namespace sofa::defaulttype;
 
 /**
-* PortalManager 
+* HapticAvatarPortalManager 
 */
-class SOFA_HAPTICAVATAR_API PortalManager : public sofa::core::objectmodel::BaseObject
+class SOFA_HAPTICAVATAR_API HapticAvatarPortalManager : public sofa::core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(PortalManager, sofa::core::objectmodel::BaseObject);
+    SOFA_CLASS(HapticAvatarPortalManager, sofa::core::objectmodel::BaseObject);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
@@ -58,9 +58,9 @@ public:
     typedef defaulttype::Vec4f Vec4f;
     typedef defaulttype::Vector3 Vector3;
 
-    PortalManager();
+    HapticAvatarPortalManager();
 
-    virtual ~PortalManager() {}
+    virtual ~HapticAvatarPortalManager() {}
 
     void setFilename(std::string f);
     const std::string &getFilename();
@@ -86,7 +86,7 @@ protected:
 
     void portalsSetup();
 private:
-    sofa::helper::vector<PortalController* > m_portals;
+    sofa::helper::vector<HapticAvatarPortalController* > m_portals;
 };
 
 } // namespace controller

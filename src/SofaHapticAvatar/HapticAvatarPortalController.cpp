@@ -21,7 +21,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarDefines.h>
-#include <SofaHapticAvatar/PortalController.h>
+#include <SofaHapticAvatar/HapticAvatarPortalController.h>
 #include <sofa/helper/Quater.h>
 #include <iostream>
 #include <algorithm>
@@ -37,7 +37,7 @@ namespace component
 namespace controller
 {
 
-PortalController::PortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
+HapticAvatarPortalController::HapticAvatarPortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
     : m_id (id)
     , m_rail(rail)
     , m_railPos(railPos)
@@ -49,7 +49,7 @@ PortalController::PortalController(int id, int rail, float railPos, float flipAn
 }
 
 
-void PortalController::portalSetup()
+void HapticAvatarPortalController::portalSetup()
 {
     m_portalPosition[0] = m_railPos;
     float railDistance = float(RAIL_DISTANCE);
@@ -73,9 +73,9 @@ void PortalController::portalSetup()
     m_portalPosition.getOrientation() = orientation;    
 }
 
-void PortalController::printInfo()
+void HapticAvatarPortalController::printInfo()
 {
-    std::cout << "## PortalController Number: " << m_id << std::endl;
+    std::cout << "## HapticAvatarPortalController Number: " << m_id << std::endl;
     std::cout << "# Settings: ComPort: " << m_comPort << " | Rail Number: " << m_rail << std::endl;
     std::cout << "# values: RailPos: " << m_railPos << " | FlipAngle: " << m_flipAngle << " | TiltAngle: " << m_tiltAngle << std::endl;
     std::cout << "# Position: " << m_portalPosition << std::endl;
