@@ -50,6 +50,8 @@ public:
 
     void portalSetup();
 
+    void updatePostion(float yawAngle, float pitchAngle);
+
     void printInfo();
 
     const Coord& getPortalPosition() {return m_portalPosition;}
@@ -62,6 +64,9 @@ private:
     float m_flipAngle; ///< Angles in degrees that the haptic device is flipped 
     float m_tiltAngle; ///< Angles in degrees that the haptic device is tilted
     std::string m_comPort; ///< COM port assigned to the device in the portal
+
+    float m_yawAngle;
+    float m_pitchAngle;
 
     Coord m_portalPosition;
 };

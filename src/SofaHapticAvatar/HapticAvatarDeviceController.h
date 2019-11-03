@@ -48,7 +48,7 @@ public:
     virtual MemoryAlloc run() override final;
 
 private:
-    HapticAvatarDeviceController * m_driver;
+    HapticAvatarDeviceController * m_controller;
 };
 
 
@@ -88,17 +88,25 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
+    /// General Haptic thread methods
+    static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
+
+    std::atomic<bool> m_terminate;
     int portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 private:
     void clearDevice();
 
 private:
-    HapticAvatarDriver * m_HA_API;
     HapticAvatarDriver * m_HA_driver;
     HapticAvatarPortalManager * m_portalMgr;
+    bool m_deviceReady;
+
     sofa::simulation::TaskScheduler* m_taskScheduler;
+    sofa::simulation::CpuTask::Status m_simStepStatus;
     std::mutex lockPosition;
+
+    std::thread haptic_thread;
 
 };
 

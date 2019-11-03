@@ -71,6 +71,8 @@ public:
     virtual void handleEvent(core::objectmodel::Event *) override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
+    void updatePostion(int portId, float yawAngle, float pitchAngle);
+
     void updatePositionData();
     void printInfo();
 

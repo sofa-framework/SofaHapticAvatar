@@ -78,6 +78,7 @@ void HapticAvatarPortalManager::portalsSetup()
     }
 }
 
+
 void HapticAvatarPortalManager::reinit()
 {
     msg_info() << "HapticAvatarPortalManager::reinit()";
@@ -96,6 +97,18 @@ int HapticAvatarPortalManager::getPortalId(std::string comStr)
 
         cpt++;
     }
+}
+
+
+void HapticAvatarPortalManager::updatePostion(int portId, float yawAngle, float pitchAngle)
+{
+    if (portId >= m_portals.size())
+    {
+        msg_error() << "Port id out of bounds: " << portId;
+        return;
+    }
+
+    m_portals[portId]->updatePostion(yawAngle, pitchAngle);
 }
 
 void HapticAvatarPortalManager::updatePositionData()

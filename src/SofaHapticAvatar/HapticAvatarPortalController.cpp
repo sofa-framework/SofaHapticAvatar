@@ -73,6 +73,13 @@ void HapticAvatarPortalController::portalSetup()
     m_portalPosition.getOrientation() = orientation;    
 }
 
+void HapticAvatarPortalController::updatePostion(float yawAngle, float pitchAngle)
+{
+    m_yawAngle = yawAngle;
+    m_pitchAngle = pitchAngle;
+}
+
+
 void HapticAvatarPortalController::printInfo()
 {
     std::cout << "## HapticAvatarPortalController Number: " << m_id << std::endl;
