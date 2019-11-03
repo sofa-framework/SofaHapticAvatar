@@ -106,11 +106,22 @@ void HapticAvatarPortalManager::updatePostion(int portId, float yawAngle, float 
 {
     if (portId >= m_portals.size())
     {
-        msg_error() << "Port id out of bounds: " << portId;
+        msg_error() << "updatePostion: Port id out of bounds: " << portId;
         return;
     }
 
     m_portals[portId]->updatePostion(yawAngle, pitchAngle);
+}
+
+const sofa::defaulttype::Mat4x4f& HapticAvatarPortalManager::getPortalTransform(int portId)
+{
+    if (portId >= m_portals.size())
+    {
+        msg_error() << "getPortalTransform: Port id out of bounds: " << portId;
+        return sofa::defaulttype::Mat4x4f::s_identity;
+    }
+
+    return m_portals[portId]->getPortalTransform();
 }
 
 void HapticAvatarPortalManager::updatePositionData()

@@ -59,6 +59,7 @@ public:
     const Coord& getPortalPosition();
     const std::string& getPortalCom() {return m_comPort;}
   
+    const sofa::defaulttype::Mat4x4f& getPortalTransform() { return m_portalMtx; }
 private:
     int m_id; ///< 
     int m_rail; ///< rail number, middle rail has number 0
@@ -74,6 +75,8 @@ private:
     Vec3f m_rootPosition;
     sofa::defaulttype::Quat m_rootOrientation;
     Coord m_portalPosition;
+
+    sofa::defaulttype::Mat4x4f m_portalMtx;
 };
 
 } // namespace controller
