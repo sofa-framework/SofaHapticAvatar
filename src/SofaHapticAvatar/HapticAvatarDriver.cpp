@@ -132,9 +132,9 @@ HapticAvatarDriver::~HapticAvatarDriver()
 }
 
 
-void HapticAvatarDriver::getAnglesAndLength()
+sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 {
-    std::cout << "HapticAvatarDriver::getPosition()" << std::endl;
+    sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
     char outgoingData[OUTGOING_DATA_LEN] = "2 \n";
     int outlen = strlen(outgoingData);
@@ -142,10 +142,23 @@ void HapticAvatarDriver::getAnglesAndLength()
     if (!write_success) {
         std::cout << "failed_to_send_times" << std::endl;
     }
+
+    // request data
     int res = getData(incomingData, false);
-   
-    std::string iden = std::string(incomingData);
-    std::cout << "getPosition: " << res << " : " << iden  << std::endl;
+
+    // parse Data into floats
+    // 0: rotation angle
+    // 1: Pitch angle
+    // 2: insertion length
+    // 3: yaw angle
+    char* pEnd;
+    results[0] = std::strtof(incomingData, &pEnd);
+    for (unsigned int i = 1; i < 4; ++i)
+    {
+        results[i] = std::strtof(pEnd, &pEnd);
+    }
+    
+    return results;
 }
 
 
@@ -159,7 +172,6 @@ std::string HapticAvatarDriver::getIdentity()
         std::cout << "failed_to_send_times" << std::endl;
     }
     int res = getData(incomingData, false);
-    std::cout << "getIdentity: " << res << std::endl;
     std::string iden = std::string(incomingData);
 
     return iden;

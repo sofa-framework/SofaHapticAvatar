@@ -23,6 +23,7 @@
 #define SOFA_HAPTICAVATAR_HAPTICAVATARDRIVER_H
 
 #include <SofaHapticAvatar/config.h>
+#include <sofa/defaulttype/Vec.h>
 #include <string>
 
 namespace sofa 
@@ -51,7 +52,7 @@ public:
     bool writeData(std::string msg);
     //int readData(std::string msg);
 
-    void getAnglesAndLength();
+    sofa::helper::fixed_array<float, 4> getAnglesAndLength();
 
     std::string getIdentity();
     int getData(char *buffer, bool do_flush);
