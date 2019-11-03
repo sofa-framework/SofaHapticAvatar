@@ -152,10 +152,10 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
     // 2: insertion length
     // 3: yaw angle
     char* pEnd;
-    results[0] = std::strtof(incomingData, &pEnd);
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
     for (unsigned int i = 1; i < 4; ++i)
     {
-        results[i] = std::strtof(pEnd, &pEnd);
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
     }
     
     return results;
