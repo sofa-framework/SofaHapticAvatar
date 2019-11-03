@@ -50,6 +50,9 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
+    , l_portalMgr(initLink("portalManager", "link to portalManager"))
+    , m_HA_driver(nullptr)
+    , m_portalMgr(nullptr)
 {
     this->f_listening.setValue(true);
     
@@ -67,21 +70,34 @@ HapticAvatarDeviceController::~HapticAvatarDeviceController()
 void HapticAvatarDeviceController::init()
 {
     msg_info() << "HapticAvatarDeviceController::init()";
-    m_HA_API = new HapticAvatarDriver(d_portName.getValue());
+    m_HA_driver = new HapticAvatarDriver(d_portName.getValue());
 
-    if (!m_HA_API->IsConnected())
+    if (!m_HA_driver->IsConnected())
         return;
     
     // get identity
-    std::string identity = m_HA_API->getIdentity();
+    std::string identity = m_HA_driver->getIdentity();
     d_hapticIdentity.setValue(identity);
     std::cout << "HapticAvatarDeviceController identity: " << identity << std::endl;
 
+    // get access to portalMgr
+    if (l_portalMgr.empty())
+    {
+        msg_error() << "Link to HapticAvatarPortalManager not set.";
+        return;
+    }
+
+    m_portalMgr = l_portalMgr.get();
+    if (m_portalMgr == nullptr)
+    {
+        msg_error() << "HapticAvatarPortalManager access failed.";
+        return;
+    }
 
     // reset all force
-    m_HA_API->writeData("15 \n");
+    m_HA_driver->writeData("15 \n");
     char incomingData[INCOMING_DATA_LEN];
-    int res = m_HA_API->getData(incomingData, false);
+    int res = m_HA_driver->getData(incomingData, false);
     std::cout << "reset: " << incomingData << std::endl;
 
     return;
@@ -107,10 +123,10 @@ void HapticAvatarDeviceController::reinit()
 
 void HapticAvatarDeviceController::updatePosition()
 {
-    if (!m_HA_API)
+    if (!m_HA_driver)
         return;
 
-    m_HA_API->getAnglesAndLength();
+   // m_HA_driver->getAnglesAndLength();
 }
 
 void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* vparams)

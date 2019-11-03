@@ -85,11 +85,14 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
+    SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 private:
     void clearDevice();
 
 private:
     HapticAvatarDriver * m_HA_API;
+    HapticAvatarDriver * m_HA_driver;
+    HapticAvatarPortalManager * m_portalMgr;
     sofa::simulation::TaskScheduler* m_taskScheduler;
     std::mutex lockPosition;
 
