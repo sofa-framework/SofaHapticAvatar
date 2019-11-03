@@ -24,6 +24,7 @@
 #include <SofaHapticAvatar/HapticAvatarPortalManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/FileRepository.h>
+#include <sofa/simulation/AnimateBeginEvent.h>
 #include <tinyxml.h>
 
 #include <iostream>
@@ -47,12 +48,12 @@ int HapticAvatarPortalManagerClass = core::RegisterObject("TODO detail")
 
 
 HapticAvatarPortalManager::HapticAvatarPortalManager()
-    : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))
-    , m_portalPosition0(initData(&m_portalPosition0, "portalPosition0", "portal rigid position test"))
+    : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))    
     , m_portalPosition1(initData(&m_portalPosition1, "portalPosition1", "portal rigid position test"))
     , m_portalPosition2(initData(&m_portalPosition2, "portalPosition2", "portal rigid position test"))
     , m_portalPosition3(initData(&m_portalPosition3, "portalPosition3", "portal rigid position test"))
     , m_portalPosition4(initData(&m_portalPosition4, "portalPosition4", "portal rigid position test"))
+    , m_portalPosition5(initData(&m_portalPosition5, "portalPosition5", "portal rigid position test"))
 {    
 }
 
@@ -70,24 +71,9 @@ void HapticAvatarPortalManager::init()
 
 void HapticAvatarPortalManager::portalsSetup()
 {
-    int cpt = 0;
     for (auto pController : m_portals)
     {
         pController->portalSetup();
-        // TODO need to find a better way of doing this
-        if (cpt == 0)
-            m_portalPosition0 = pController->getPortalPosition();
-        else if (cpt == 1)
-            m_portalPosition1 = pController->getPortalPosition();
-        else if (cpt == 2)
-            m_portalPosition2 = pController->getPortalPosition();
-        else if (cpt == 3)
-            m_portalPosition3 = pController->getPortalPosition();
-        else if (cpt == 4)
-            m_portalPosition4 = pController->getPortalPosition();
-        
-        std::cout << "pController->getPortalPosition(): " << pController->getPortalPosition() << std::endl;
-        cpt++;
     }
 }
 
@@ -96,9 +82,34 @@ void HapticAvatarPortalManager::reinit()
     msg_info() << "HapticAvatarPortalManager::reinit()";
 }
 
-void HapticAvatarPortalManager::handleEvent(core::objectmodel::Event *)
+void HapticAvatarPortalManager::updatePosition()
+{
+    int cpt = 0;
+    for (auto pController : m_portals)
+    {
+        // TODO need to find a better way of doing this
+        if (cpt == 0)
+            m_portalPosition1 = pController->getPortalPosition();
+        else if (cpt == 1)
+            m_portalPosition2 = pController->getPortalPosition();
+        else if (cpt == 2)
+            m_portalPosition3 = pController->getPortalPosition();
+        else if (cpt == 3)
+            m_portalPosition4 = pController->getPortalPosition();
+        else if (cpt == 4)
+            m_portalPosition5 = pController->getPortalPosition();
+
+        cpt++;
+    }
+}
+
+void HapticAvatarPortalManager::handleEvent(core::objectmodel::Event *event)
 {
     //msg_info() << "HapticAvatarPortalManager::handleEvent()";
+    if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
+    {
+        updatePosition();
+    }
 }
 
 void HapticAvatarPortalManager::draw(const sofa::core::visual::VisualParams* vparams)

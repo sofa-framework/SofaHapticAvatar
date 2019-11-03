@@ -71,14 +71,15 @@ public:
     virtual void handleEvent(core::objectmodel::Event *) override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
+    void updatePosition();
     void printInfo();
 
     sofa::core::objectmodel::DataFileName m_configFilename;
-    Data< Coord> m_portalPosition0;
     Data< Coord> m_portalPosition1;
     Data< Coord> m_portalPosition2;
     Data< Coord> m_portalPosition3;
     Data< Coord> m_portalPosition4;
+    Data< Coord> m_portalPosition5;
 protected:
     bool parseConfigFile();
     bool getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value);
