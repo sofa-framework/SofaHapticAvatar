@@ -17,6 +17,9 @@
 
 #include <SofaHapticAvatar/HapticAvatarAPI.h>
 
+#include <sofa/simulation/TaskScheduler.h>
+#include <sofa/simulation/InitTasks.h>
+
 namespace sofa 
 {
 
@@ -27,6 +30,23 @@ namespace controller
 {
 
 using namespace sofa::defaulttype;
+using namespace sofa::simulation;
+
+
+class HapticAvatarDriver;
+
+class SOFA_HAPTICAVATAR_API HapticEmulatorTask : public CpuTask
+{
+public:
+    HapticEmulatorTask(HapticAvatarDriver* ptr, CpuTask::Status* pStatus);
+
+    virtual ~HapticEmulatorTask() {}
+
+    virtual MemoryAlloc run() override final;
+
+private:
+    HapticAvatarDriver * m_driver;
+};
 
 
 /**
@@ -70,6 +90,9 @@ private:
 
 private:
     HapticAvatarAPI * m_HA_API;
+    sofa::simulation::TaskScheduler* m_taskScheduler;
+    std::mutex lockPosition;
+
 };
 
 } // namespace controller

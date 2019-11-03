@@ -24,6 +24,21 @@ namespace component
 namespace controller
 {
 
+HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDriver* ptr, CpuTask::Status* pStatus)
+    :CpuTask(pStatus)
+    , m_driver(ptr)
+{
+
+}
+
+HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
+{
+    std::cout << "haptic run task" << std::endl;
+
+    return MemoryAlloc::Dynamic;
+}
+
+
 //constructeur
 HapticAvatarDriver::HapticAvatarDriver()
     : d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
