@@ -85,6 +85,7 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
+    int portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 private:
     void clearDevice();

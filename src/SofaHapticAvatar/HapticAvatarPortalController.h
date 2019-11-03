@@ -53,6 +53,7 @@ public:
     void printInfo();
 
     const Coord& getPortalPosition() {return m_portalPosition;}
+    const std::string& getPortalCom() {return m_comPort;}
   
 private:
     int m_id; ///< 

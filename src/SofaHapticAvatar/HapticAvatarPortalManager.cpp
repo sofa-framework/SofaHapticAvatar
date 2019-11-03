@@ -69,6 +69,7 @@ void HapticAvatarPortalManager::init()
     printInfo();
 }
 
+
 void HapticAvatarPortalManager::portalsSetup()
 {
     for (auto pController : m_portals)
@@ -82,7 +83,22 @@ void HapticAvatarPortalManager::reinit()
     msg_info() << "HapticAvatarPortalManager::reinit()";
 }
 
-void HapticAvatarPortalManager::updatePosition()
+
+int HapticAvatarPortalManager::getPortalId(std::string comStr)
+{
+    int res = -1;
+    int cpt = 0;
+    for (auto pController : m_portals)
+    {
+        const std::string& portCom = pController->getPortalCom();
+        if (comStr.find(portCom) != comStr.npos)
+            return cpt;
+
+        cpt++;
+    }
+}
+
+void HapticAvatarPortalManager::updatePositionData()
 {
     int cpt = 0;
     for (auto pController : m_portals)
@@ -108,7 +124,7 @@ void HapticAvatarPortalManager::handleEvent(core::objectmodel::Event *event)
     //msg_info() << "HapticAvatarPortalManager::handleEvent()";
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
-        updatePosition();
+        updatePositionData();
     }
 }
 

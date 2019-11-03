@@ -71,8 +71,10 @@ public:
     virtual void handleEvent(core::objectmodel::Event *) override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
-    void updatePosition();
+    void updatePositionData();
     void printInfo();
+
+    int getPortalId(std::string comStr);
 
     sofa::core::objectmodel::DataFileName m_configFilename;
     Data< Coord> m_portalPosition1;

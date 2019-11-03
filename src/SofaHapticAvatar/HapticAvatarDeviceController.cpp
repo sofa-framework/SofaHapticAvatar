@@ -50,6 +50,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
+    , portId(-1)
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
     , m_HA_driver(nullptr)
     , m_portalMgr(nullptr)
@@ -74,7 +75,7 @@ void HapticAvatarDeviceController::init()
 
     if (!m_HA_driver->IsConnected())
         return;
-    
+        
     // get identity
     std::string identity = m_HA_driver->getIdentity();
     d_hapticIdentity.setValue(identity);
@@ -111,8 +112,20 @@ void HapticAvatarDeviceController::clearDevice()
 
 
 void HapticAvatarDeviceController::bwdInit()
-{
+{   
     msg_info() << "HapticAvatarDeviceController::bwdInit()";
+    if (!m_deviceReady)
+        return;
+    
+    portId = m_portalMgr->getPortalId(d_portName.getValue());
+    if (portId == -1)
+    {
+        msg_error("HapticAvatarDeviceController no portal id found");
+        m_deviceReady = false;
+        return;
+    }
+
+    msg_info() << "Portal Id found: " << portId;
 }
 
 
