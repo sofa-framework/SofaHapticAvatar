@@ -110,6 +110,8 @@ private:
 
     std::thread haptic_thread;
 
+    float m_rotAngle;
+    float m_zLength;
 };
 
 } // namespace controller
