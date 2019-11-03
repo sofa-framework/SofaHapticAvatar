@@ -67,7 +67,7 @@ HapticAvatarDeviceController::~HapticAvatarDeviceController()
 void HapticAvatarDeviceController::init()
 {
     msg_info() << "HapticAvatarDeviceController::init()";
-    m_HA_API = new HapticAvatarAPI(d_portName.getValue());
+    m_HA_API = new HapticAvatarDriver(d_portName.getValue());
 
     if (!m_HA_API->IsConnected())
         return;

@@ -80,4 +80,4 @@ private:
 
 } // namespace sofa
 
-#endif // SOFA_HAPTICAVATAR_HapticAvatarDriver_H
+#endif // SOFA_HAPTICAVATAR_HAPTICAVATARAPI_H

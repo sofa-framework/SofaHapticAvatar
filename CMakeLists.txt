@@ -8,15 +8,15 @@ sofa_find_package(TinyXML REQUIRED)
 set(SOFAHAPTICAVATAR_SRC_DIR src/SofaHapticAvatar)
 set(HEADER_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/config.h.in
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDefines.h 
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDefines.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDriver.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalManager.h
-	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarAPI.h
+	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalController.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.h
 )
 
 set(SOURCE_FILES
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarAPI.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDriver.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalManager.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.cpp

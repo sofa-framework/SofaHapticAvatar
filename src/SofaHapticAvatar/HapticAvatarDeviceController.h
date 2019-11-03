@@ -15,7 +15,7 @@
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatarAPI.h>
+#include <SofaHapticAvatar/HapticAvatarDriver.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
@@ -89,7 +89,7 @@ private:
     void clearDevice();
 
 private:
-    HapticAvatarAPI * m_HA_API;
+    HapticAvatarDriver * m_HA_API;
     sofa::simulation::TaskScheduler* m_taskScheduler;
     std::mutex lockPosition;
 
