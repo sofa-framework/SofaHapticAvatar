@@ -16,9 +16,12 @@
 #include <SofaUserInteraction/Controller.h>
 
 #include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
+
+#include <atomic>
 
 namespace sofa 
 {

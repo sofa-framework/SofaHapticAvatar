@@ -14,6 +14,7 @@
 #include <sofa/simulation/AnimateEndEvent.h>
 
 #include <sofa/core/visual/VisualParams.h>
+#include <chrono>
 
 namespace sofa
 {
@@ -25,8 +26,8 @@ namespace controller
 {
 
 HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus)
-    :CpuTask(pStatus)
-    , m_driver(ptr)
+    : CpuTask(pStatus)
+    , m_controller(ptr)
 {
 
 }
@@ -35,6 +36,11 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 {
     std::cout << "haptic run task" << std::endl;
 
+   /* if (m_driver->m_terminate == false)
+    {
+        TaskScheduler::getInstance()->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
+        Sleep(100);
+    }*/
     return MemoryAlloc::Dynamic;
 }
 
@@ -52,6 +58,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
     , portId(-1)
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
+    , m_deviceReady(false)
+    , m_terminate(true)
     , m_HA_driver(nullptr)
     , m_portalMgr(nullptr)
 {
@@ -101,6 +109,15 @@ void HapticAvatarDeviceController::init()
     int res = m_HA_driver->getData(incomingData, false);
     std::cout << "reset: " << incomingData << std::endl;
 
+    // create task scheduler
+    //unsigned int mNbThread = 2;
+    //m_taskScheduler = sofa::simulation::TaskScheduler::getInstance();
+    //m_taskScheduler->init(mNbThread);
+    //m_taskScheduler->addTask(new HapticEmulatorTask(this, &m_simStepStatus));
+    m_terminate = false;
+    m_deviceReady = true;
+    haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
+
     return;
 }
 
@@ -108,6 +125,11 @@ void HapticAvatarDeviceController::init()
 void HapticAvatarDeviceController::clearDevice()
 {
     msg_info() << "HapticAvatarDeviceController::clearDevice()";
+    if (m_terminate == false)
+    {
+        m_terminate = true;
+        haptic_thread.join();
+    }
 }
 
 
@@ -132,6 +154,45 @@ void HapticAvatarDeviceController::bwdInit()
 void HapticAvatarDeviceController::reinit()
 {
     msg_info() << "HapticAvatarDeviceController::reinit()";
+}
+
+
+void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
+{ 
+    std::cout << "Haptics thread" << std::endl;
+
+    HapticAvatarDeviceController* _deviceCtrl = static_cast<HapticAvatarDeviceController*>(p_this);
+    HapticAvatarDriver* _driver = static_cast<HapticAvatarDriver*>(p_driver);
+
+    if (_deviceCtrl == nullptr)
+    {
+        msg_error("Haptics Thread: HapticAvatarDeviceController cast failed");
+        return;
+    }
+
+    if (_driver == nullptr)
+    {
+        msg_error("Haptics Thread: HapticAvatarDriver cast failed");
+        return;
+    }
+
+    // Loop Timer
+    HANDLE h_timer;
+    long t_ms = 1; // 1ms loop speed
+
+    // Haptics Loop
+    const auto wait_duration = std::chrono::milliseconds(t_ms);
+    while (!terminate)
+    {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
+        _driver->getAnglesAndLength();
+
+        std::this_thread::sleep_for(wait_duration);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+        std::cout << "Haptics loop: " << duration << std::endl;
+    }
 }
 
 void HapticAvatarDeviceController::updatePosition()
@@ -159,8 +220,8 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
 
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
-    //    if (m_hStateHandles.size() && m_hStateHandles[0] == HD_INVALID_HANDLE)
-    //        return;
+       if (!m_deviceReady)
+            return;
 
         updatePosition();
     }
