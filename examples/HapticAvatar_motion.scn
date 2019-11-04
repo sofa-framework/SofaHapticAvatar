@@ -5,13 +5,13 @@
 
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels" />
 
-    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1"/>
-    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" listening="1" portalManager="@portalMgr"/>
+    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr"/>
 	
     <MechanicalObject template="Rigid3d" name="HA_dof" />
     
     
-    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1" />
+    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
     
     
     <Node name="Portal_1">
@@ -54,14 +54,13 @@
         </Node>
     </Node>
     
-    <!-- Example of an instrument controlled with the Geomagic device -->
-    <!--
-    <OglModel name="Visual" src="@ProtalMesh" />
-    <Node name="mapping">
-        <MeshObjLoader name="meshLoader_0" filename="mesh/dental_instrument.obj" handleSeams="1" />
+    <Node name="tool">
+        <MechanicalObject template="Rigid" name="DOFs" position="@../HADevice.positionDevice"/>
         
-        <RigidMapping input="@.." output="@Visual" />
+        <Node name="VisualModel" >
+            <MeshObjLoader name="meshLoader_1" filename="./mesh/Grasper.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
+        </Node>
     </Node>
-    
--->
 </Node>
