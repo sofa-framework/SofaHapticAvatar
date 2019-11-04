@@ -104,7 +104,7 @@ void HapticAvatarDeviceController::init()
     }
 
     // reset all force
-    m_HA_driver->writeData("15 \n");
+    m_HA_driver->writeData("0 15 \n");
     char incomingData[INCOMING_DATA_LEN];
     int res = m_HA_driver->getData(incomingData, false);
     std::cout << "reset: " << incomingData << std::endl;
