@@ -162,6 +162,20 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 }
 
 
+void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
+{
+    std::string msg;
+    if (force[0] == 0.0)
+        msg = "6 0 0 0 \n";
+    else
+        msg = "6 0 50000 0 \n";
+    writeData(msg);
+    /*char incomingData[INCOMING_DATA_LEN];
+    int res = m_HA_driver->getData(incomingData, false);
+    std::cout << "reset: " << incomingData << std::endl;*/
+    
+}
+
 std::string HapticAvatarDriver::getIdentity()
 {
     char incomingData[INCOMING_DATA_LEN];

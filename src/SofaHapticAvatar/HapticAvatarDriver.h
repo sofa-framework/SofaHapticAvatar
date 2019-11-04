@@ -53,6 +53,7 @@ public:
     //int readData(std::string msg);
 
     sofa::helper::fixed_array<float, 4> getAnglesAndLength();
+    void testCollisionForce(sofa::defaulttype::Vector3 force);
 
     std::string getIdentity();
     int getData(char *buffer, bool do_flush);

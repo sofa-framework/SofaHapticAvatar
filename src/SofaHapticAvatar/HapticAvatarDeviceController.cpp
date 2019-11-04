@@ -62,6 +62,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , m_terminate(true)
     , m_HA_driver(nullptr)
     , m_portalMgr(nullptr)
+    , m_forceFeedback(nullptr)
 {
     this->f_listening.setValue(true);
     
@@ -150,6 +151,14 @@ void HapticAvatarDeviceController::bwdInit()
     m_terminate = false;
     m_deviceReady = true;
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
+
+    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
+    m_forceFeedback = context->get<ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+
+    if (m_forceFeedback != nullptr)
+    {
+        msg_info() << "ForceFeedback found";
+    }
 }
 
 
@@ -189,13 +198,38 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         auto t1 = std::chrono::high_resolution_clock::now();
 
         sofa::helper::fixed_array<float, 4> results = _driver->getAnglesAndLength();
-        std::cout << "results: " << results << std::endl;
+        //std::cout << "results: " << results << std::endl;
         _deviceCtrl->updateAnglesAndLength(results);
+
+
+        Vector3 currentForce;
+        double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();
+        if (_deviceCtrl->m_forceFeedback)
+        {
+            Vector3 pos_in_world = _deviceCtrl->d_posDevice.getValue().getCenter();
+            _deviceCtrl->m_forceFeedback->computeForce(pos_in_world[0], pos_in_world[1], pos_in_world[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
+
+            bool contact = false;
+            for (int i = 0; i < 3; i++)
+            {
+                if (currentForce[i] != 0.0)
+                {
+                    //driver->m_isInContact = true;
+                    contact = true;
+                    break;
+                }
+            }
+
+            if (contact)
+                std::cout << "haptic force: " << currentForce << std::endl;
+
+            _driver->testCollisionForce(currentForce);
+        }
 
         std::this_thread::sleep_for(wait_duration);
         auto t2 = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-        std::cout << "Haptics loop: " << duration << std::endl;
+        //std::cout << "Haptics loop: " << duration << std::endl;
     }
 }
 

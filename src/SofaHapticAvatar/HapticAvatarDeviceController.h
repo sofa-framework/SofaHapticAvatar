@@ -21,6 +21,8 @@
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
 
+#include <SofaHaptics/ForceFeedback.h>
+
 #include <atomic>
 
 namespace sofa 
@@ -96,6 +98,7 @@ public:
     std::atomic<bool> m_terminate;
     int m_portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
 private:
     void clearDevice();
 
