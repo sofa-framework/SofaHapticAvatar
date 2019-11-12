@@ -24,6 +24,10 @@ namespace component
 
 namespace controller
 {
+    int HapticAvatarDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+        .add< HapticAvatarDeviceController >()
+        ;
+
 
 HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus)
     : CpuTask(pStatus)
@@ -67,6 +71,9 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     this->f_listening.setValue(true);
     
     d_hapticIdentity.setReadOnly(true);
+
+    m_debugToolPosition = Vector3(0.0, 0.0, 0.0);
+    m_debugForceVector = Vector3(0.0, 0.0, 0.0);
 }
 
 
@@ -208,6 +215,9 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         {
             Vector3 pos_in_world = _deviceCtrl->d_posDevice.getValue().getCenter();
             _deviceCtrl->m_forceFeedback->computeForce(pos_in_world[0], pos_in_world[1], pos_in_world[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
+            
+            _deviceCtrl->m_debugToolPosition = pos_in_world;
+            _deviceCtrl->m_debugForceVector = currentForce;
 
             bool contact = false;
             for (int i = 0; i < 3; i++)
@@ -269,11 +279,16 @@ void HapticAvatarDeviceController::updatePosition()
 
 void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
 {
-    if (!d_drawDevice.getValue())
+    if (!d_drawDevice.getValue() || !m_deviceReady)
         return;
 
     //vparams->drawTool()->saveLastState();
     //vparams->drawTool()->restoreLastState();
+
+    float scale = 10.0f;
+    vparams->drawTool()->drawSphere(m_debugToolPosition, 0.1f, defaulttype::Vec4f(1.0, 0.0, 0.0, 1.0));
+    vparams->drawTool()->drawLine(m_debugToolPosition, (m_debugToolPosition + m_debugForceVector)*scale, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
+    
 }
 
 
@@ -290,10 +305,6 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
         updatePosition();
     }
 }
-
-int HapticAvatarDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-    .add< HapticAvatarDeviceController >()
-;
 
 } // namespace controller
 
