@@ -233,7 +233,8 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             if (contact)
                 std::cout << "haptic force: " << currentForce << std::endl;
 
-            _driver->testCollisionForce(currentForce);
+            SReal fscale = _deviceCtrl->d_forceScale.getValue();
+            _driver->testCollisionForce(currentForce*fscale);
         }
 
         std::this_thread::sleep_for(wait_duration);
@@ -287,7 +288,7 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
 
     float scale = 10.0f;
     vparams->drawTool()->drawSphere(m_debugToolPosition, 0.1f, defaulttype::Vec4f(1.0, 0.0, 0.0, 1.0));
-    vparams->drawTool()->drawLine(m_debugToolPosition, (m_debugToolPosition + m_debugForceVector)*scale, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
+    vparams->drawTool()->drawLine(m_debugToolPosition, m_debugToolPosition + m_debugForceVector*scale, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
     
 }
 

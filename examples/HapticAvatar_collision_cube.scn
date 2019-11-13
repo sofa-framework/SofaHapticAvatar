@@ -4,23 +4,19 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics' />
     <RequiredPlugin name='SofaSparseSolver'/>
-	<VisualStyle displayFlags="showVisualModels showBehaviorModels showCollisionModels" />
+	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
   
-<!--  
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceDetection name="detection" />
     <DefaultContactManager name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="0.15" contactDistance="0.05" angleCone="0.0" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
--->
-    <DefaultPipeline verbose="0" />
-    <BruteForceDetection name="N2" />
-    <DefaultContactManager response="default" />
-    <MinProximityIntersection name="Proximity" alarmDistance="0.8" contactDistance="0.5" />
+
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr"/>
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    drawDevice="1" forceScale="1"/>
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
     <Node name="Portal_1">
@@ -107,7 +103,7 @@
         <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
         <TetrahedronSetTopologyModifier name="Modifier" />
         <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="1" drawScaleTetrahedra="0.8"/>
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
     
         <BoxROI name="boxRoi" box="100 -1 -10 180 10 80" drawBoxes="1"/>
         <FixedConstraint name="FixedConstraint" indices="@boxRoi.indices" />
