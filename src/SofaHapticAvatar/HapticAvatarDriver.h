@@ -57,7 +57,7 @@ public:
     
     std::string getIdentity();
 
-    std::string convertSingleData(char *buffer, bool removeEoL = true);
+    std::string convertSingleData(char *buffer, bool forceRemoveEoL = false);
 
     void testCollisionForce(sofa::defaulttype::Vector3 force);
 

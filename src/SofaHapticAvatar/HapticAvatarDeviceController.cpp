@@ -121,6 +121,8 @@ void HapticAvatarDeviceController::init()
     else
         std::cerr << "## Error, failed to reset force using command: '" << resFMsg << "'" << std::endl;
 
+    sofa::defaulttype::Vector3 force;
+    
     // create task scheduler
     //unsigned int mNbThread = 2;
     //m_taskScheduler = sofa::simulation::TaskScheduler::getInstance();
@@ -238,7 +240,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 std::cout << "haptic force: " << currentForce << std::endl;
 
             SReal fscale = _deviceCtrl->d_forceScale.getValue();
-            //_driver->testCollisionForce(currentForce*fscale);
+            _driver->testCollisionForce(currentForce*fscale);
         }
 
         std::this_thread::sleep_for(wait_duration);
@@ -246,6 +248,10 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
         //std::cout << "Haptics loop: " << duration << std::endl;
     }
+
+    // ensure no force
+    _driver->testCollisionForce(Vector3(0.0, 0.0, 0.0));
+    std::cout << "Haptics thread END!!" << std::endl;
 }
 
 

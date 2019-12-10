@@ -190,30 +190,33 @@ void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
     if (res > 0)
     {
         if (res > 20)
-            ZPWM = -20;
+            ZPWM = 20;
         else
-            ZPWM = -1 * res;
+            ZPWM = -82.93 * res;
     }
         
     std::string msg;
     msg = "35 " + std::to_string(RotPWM)
         + " " + std::to_string(PitchPWM)
         + " " + std::to_string(ZPWM)
-        + " " + std::to_string(YawPWM);
+        + " " + std::to_string(YawPWM)
+        + "\n";
 
-    std::cout << "Force: '" << msg << "'" << " | res: " << res << std::endl;
+
+    std::cout << "Force: '" << ZPWM << "'" << std::endl;
 
     //if (force[0] == 0.0)
     //    msg = "6 0 0 0 0 \n";
     //else
     //    msg = "6 1000 1000 10000 1000 \n";
 
-    //bool resB = writeData(msg);
+    bool resB = writeData(msg);
     //std::cout << "force resB: " << resB << std::endl;
     //
     //char incomingData[INCOMING_DATA_LEN];
-    //int resMsg = getData(incomingData, false);
-    //std::cout << "force return msg: " << incomingData << std::endl;
+    //int resMsg = getDataImpl(incomingData, false);
+    //if (resMsg == 1)
+    //    std::cout << "force return msg: " << incomingData << std::endl;
 
     /*char incomingData[INCOMING_DATA_LEN];
     int res = m_HA_driver->getData(incomingData, false);
@@ -245,16 +248,17 @@ std::string HapticAvatarDriver::getIdentity()
 }
 
 
-std::string HapticAvatarDriver::convertSingleData(char *buffer, bool removeEoL)
+std::string HapticAvatarDriver::convertSingleData(char *buffer, bool forceRemoveEoL)
 {
     std::string res = std::string(buffer);
-    if (removeEoL)
-    {
-        if (res.back() == '\n')
-            res.pop_back();
+    if (forceRemoveEoL)
+        res.pop_back();
+    else if (res.back() == '\n')
+        res.pop_back();
 
-        if (res.back() == ' ')
-            res.pop_back();
+    while (res.back() == ' ')
+    {
+        res.pop_back();
     }
 
     return res;
@@ -283,12 +287,19 @@ bool HapticAvatarDriver::setSingleCommand(const std::string& cmdMsg, std::string
     {
         char incomingData[INCOMING_DATA_LEN];
         int numL = getDataImpl(incomingData, true);
-        if (numL != 1)
+
+        if (numL == -1)
         {
-            std::cerr << "Error not only one line return for getSingleResponse, got: " << numL << std::endl;
+            std::cerr << "Error no message catched for setSingleCommand: '" << cmdMsg << "'" << std::endl;
             return false;
         }
 
+        if (numL != 1)
+        {
+            std::cerr << "Error not a single line message returned for setSingleCommand: '" << cmdMsg << "', got Nb line: : " << numL << std::endl;
+            return false;
+        }
+        
         result = convertSingleData(incomingData);
     }
 
@@ -328,7 +339,7 @@ int HapticAvatarDriver::getDataImpl(char *buffer, bool do_flush)
 
     if (!response) // secu loop reach end
     {
-        std::cerr << "## Error getData failed for " << buffer << std::endl;
+        std::cerr << "## Error getData no message returned. Reach security loop limit: " << cptSecu << std::endl;
         return -1;
     }
 
