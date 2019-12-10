@@ -92,7 +92,7 @@ sofa::defaulttype::Mat4x4f MatFromTranslation(sofa::defaulttype::Vec3f trans)
     mat.identity();
     for (unsigned int i = 0; i < 3; ++i)
         mat[i][0] = trans[i];
-    std::cout << mat << std::endl;
+    std::cout << "MatFromTranslation: " << mat << std::endl;
 
     return mat;
 }
@@ -107,7 +107,7 @@ sofa::defaulttype::Mat4x4f MatFromRotation(sofa::defaulttype::Quat rot)
     for (unsigned int i = 0; i < 3; i++)
         for (unsigned int j = 0; j < 3; j++)
             mat[i][j] = rotM[i][j];
-    std::cout << mat << std::endl;
+    std::cout << "MatFromRotation: " << mat << std::endl;
     return mat;
 }
 

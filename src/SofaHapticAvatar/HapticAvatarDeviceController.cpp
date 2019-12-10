@@ -95,7 +95,7 @@ void HapticAvatarDeviceController::init()
     // get identity
     std::string identity = m_HA_driver->getIdentity();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatarDeviceController identity: " << identity << std::endl;
+    std::cout << "HapticAvatarDeviceController identity: '" << identity << "'" << std::endl;
 
     // get access to portalMgr
     if (l_portalMgr.empty())
@@ -114,8 +114,8 @@ void HapticAvatarDeviceController::init()
     // reset all force
     m_HA_driver->writeData("0 15 \n");
     char incomingData[INCOMING_DATA_LEN];
-    int res = m_HA_driver->getData(incomingData, false);
-    std::cout << "reset: " << incomingData << std::endl;
+    int res = m_HA_driver->getData(incomingData, true);
+    std::cout << "reset: '" << incomingData << "'" << std::endl;
 
     // create task scheduler
     //unsigned int mNbThread = 2;
@@ -234,7 +234,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 std::cout << "haptic force: " << currentForce << std::endl;
 
             SReal fscale = _deviceCtrl->d_forceScale.getValue();
-            _driver->testCollisionForce(currentForce*fscale);
+            //_driver->testCollisionForce(currentForce*fscale);
         }
 
         std::this_thread::sleep_for(wait_duration);
