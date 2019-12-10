@@ -164,14 +164,47 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 
 void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
 {
-    std::string msg;
-   /* if (force[0] == 0.0)
-        msg = "6 0 0 0 0 \n";
-    else*/
-        msg = "6 1000 1000 10000 1000 \n";
-    bool res = writeData(msg);
+    // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 
-    std::cout << "force res: " << res << std::endl;
+    // SET_MANUAL_PWM RotPWM PitchPWM ZPWM YawPWM
+    // SET_MANUAL_PWM is command number 35.
+
+    // RotPWM = int(-17.56 * Rot_torque)
+    // PitchPWM = int(-2.34 * Pitch_torque)
+    // ZPWM = int(-82.93*Z_force)
+    // YawPWM = int(3.41*Yaw_torque)
+
+    double res = force.norm();
+
+    int RotPWM = 0;
+    int PitchPWM = 0;
+    int ZPWM = 0;
+    int YawPWM = 0;
+
+    if (res > 0)
+    {
+        if (res > 20)
+            ZPWM = -20;
+        else
+            ZPWM = -1 * res;
+    }
+        
+    std::string msg;
+    msg = "35 " + std::to_string(RotPWM)
+        + " " + std::to_string(PitchPWM)
+        + " " + std::to_string(ZPWM)
+        + " " + std::to_string(YawPWM);
+
+    std::cout << "Force: '" << msg << "'" << " | res: " << res << std::endl;
+
+    //if (force[0] == 0.0)
+    //    msg = "6 0 0 0 0 \n";
+    //else
+    //    msg = "6 1000 1000 10000 1000 \n";
+
+    //bool resB = writeData(msg);
+    //std::cout << "force resB: " << resB << std::endl;
+    //
     //char incomingData[INCOMING_DATA_LEN];
     //int resMsg = getData(incomingData, false);
     //std::cout << "force return msg: " << incomingData << std::endl;
@@ -179,8 +212,10 @@ void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
     /*char incomingData[INCOMING_DATA_LEN];
     int res = m_HA_driver->getData(incomingData, false);
     std::cout << "reset: " << incomingData << std::endl;*/
-    
 }
+
+
+
 
 std::string HapticAvatarDriver::getIdentity()
 {
