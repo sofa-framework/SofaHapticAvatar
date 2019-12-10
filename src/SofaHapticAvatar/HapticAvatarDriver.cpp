@@ -191,10 +191,24 @@ std::string HapticAvatarDriver::getIdentity()
     if (!write_success) {
         std::cout << "failed_to_send_times" << std::endl;
     }
-    int res = getData(incomingData, false);
-    std::string iden = std::string(incomingData);
+    int numL = getData(incomingData, false);
 
+    if (numL != 1)
+    {
+        std::cerr << "Error not only one line return for getIdentity, got: " << numL << std::endl;
+        return "";
+    }
+
+    std::string iden = convertSingleData(incomingData);
     return iden;
+}
+
+
+std::string HapticAvatarDriver::convertSingleData(char *buffer, bool removeEoL)
+{
+    std::string res = std::string(buffer);
+    if (removeEoL && res.back() == '\n')
+        res.pop_back();
 }
 
 
@@ -208,28 +222,44 @@ int HapticAvatarDriver::getData(char *buffer, bool do_flush)
     int num_cr = 0;
     while (!response && cptSecu < 1000)
     {
-        n = ReadData(buffer, INCOMING_DATA_LEN, &que, do_flush);        
+        n = ReadData(buffer, INCOMING_DATA_LEN, &que, do_flush);
         if (n > 0) 
         {
             // count the number of /n in the return string
             pch = strchr(buffer, '\n');
             while (pch != NULL)
             {
+                //std::cout << "FOUND Nn: "<< buffer << std::endl;
                 num_cr++;
-                pch = strchr(pch + 1, 's');
+                pch = strchr(pch + 1, '\n');
             }
             response = true;
+            //if (buffer[n - 1] == '\n')
+            //{
+            //    std::cout << "last is Nn" << std::endl;
+            //    buffer[n - 1] = '\0';
+            //}
+            //std::cout << "---start---" << std::endl;
+            //for (unsigned int i = 0; i < n; i++)
+            //{
+            //    std::cout << "Carac: " << i << " -> " << buffer[i] << std::endl;
+            //}
+            //std::cout << "---stop---" << std::endl;
+
+            
+            //std::cout << "last carac: " << n << " -> " << buffer[0] << std::endl;
+
         }
 
         cptSecu++;
     }
-
+    
     if (!response) // secu loop reach end
     {
-        std::cerr << "Error getData failed for " << buffer << std::endl;
+        std::cerr << "## Error getData failed for " << buffer << std::endl;
     }
 
-    return n;
+    return num_cr;
 }
 
 
@@ -263,20 +293,6 @@ int HapticAvatarDriver::ReadData(char *buffer, unsigned int nbChar, int *queue, 
 
     }
     return bytesRead;
-
-    ////Check if there is something to read
-    //if (queue > 0)
-    //{
-    //	//Try to read the required number of chars, and return the number of read bytes on success
-    //	if (ReadFile(this->hSerial, buffer, min(queue, nbChar), &bytesRead, NULL))
-    //	{
-    //		return bytesRead;
-    //	}
-
-    //}
-
-    ////If nothing has been read, or that an error was detected return 0
-    //return 0;
 }
 
 

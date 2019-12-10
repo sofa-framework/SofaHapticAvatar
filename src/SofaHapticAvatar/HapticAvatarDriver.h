@@ -55,7 +55,12 @@ public:
     sofa::helper::fixed_array<float, 4> getAnglesAndLength();
     void testCollisionForce(sofa::defaulttype::Vector3 force);
 
+
     std::string getIdentity();
+
+    std::string convertSingleData(char *buffer, bool removeEoL = true);
+
+
     int getData(char *buffer, bool do_flush);
     
     int ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
