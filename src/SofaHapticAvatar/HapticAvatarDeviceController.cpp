@@ -112,10 +112,14 @@ void HapticAvatarDeviceController::init()
     }
 
     // reset all force
-    m_HA_driver->writeData("0 15 \n");
-    char incomingData[INCOMING_DATA_LEN];
-    int res = m_HA_driver->getData(incomingData, true);
-    std::cout << "reset: '" << incomingData << "'" << std::endl;
+    std::string resFMsg = "0 15 \n";
+    std::string resultRes;
+
+    bool res = m_HA_driver->setSingleCommand(resFMsg, resultRes);
+    if (res)
+        std::cout << "Reset force return message: '" << resultRes << "'" << std::endl;
+    else
+        std::cerr << "## Error, failed to reset force using command: '" << resFMsg << "'" << std::endl;
 
     // create task scheduler
     //unsigned int mNbThread = 2;

@@ -271,6 +271,45 @@ int HapticAvatarDriver::getData(char *buffer, bool do_flush)
 }
 
 
+bool HapticAvatarDriver::writeData(std::string msg)
+{
+    //writeData
+    char outgoingData[OUTGOING_DATA_LEN];
+    std::strcpy(outgoingData, msg.c_str());
+    int outlen = strlen(outgoingData);
+    
+    return WriteDataImpl(outgoingData, outlen);
+}
+
+
+bool HapticAvatarDriver::setSingleCommand(const std::string& cmdMsg, std::string& result)
+{
+    char outgoingData[OUTGOING_DATA_LEN];
+    std::strcpy(outgoingData, cmdMsg.c_str());
+    int outlen = strlen(outgoingData);
+
+    bool res = WriteDataImpl(outgoingData, outlen);
+    if (res)
+    {
+        char incomingData[INCOMING_DATA_LEN];
+        int numL = getData(incomingData, true);
+        if (numL != 1)
+        {
+            std::cerr << "Error not only one line return for getSingleResponse, got: " << numL << std::endl;
+            return false;
+        }
+
+        result = convertSingleData(incomingData);
+    }
+
+    return res;
+}
+
+
+//////////////////////////////////////////////////////////
+/////    Internal Methods for device communication   /////
+//////////////////////////////////////////////////////////
+
 int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
 {
     //Number of bytes we'll have read
@@ -301,17 +340,6 @@ int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *que
 
     }
     return bytesRead;
-}
-
-
-bool HapticAvatarDriver::writeData(std::string msg)
-{
-    //writeData
-    char outgoingData[OUTGOING_DATA_LEN];
-    std::strcpy(outgoingData, msg.c_str());
-    int outlen = strlen(outgoingData);
-    
-    return WriteDataImpl(outgoingData, outlen);
 }
 
 
