@@ -53,8 +53,6 @@ public:
 
     bool setSingleCommand(const std::string& cmdMsg, std::string& result);
 
-    int getData(char *buffer, bool do_flush);
-
     sofa::helper::fixed_array<float, 4> getAnglesAndLength();    
     
     std::string getIdentity();
@@ -64,6 +62,8 @@ public:
     void testCollisionForce(sofa::defaulttype::Vector3 force);
 
 protected:
+    int getDataImpl(char *buffer, bool do_flush);
+
     int ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
 
     bool WriteDataImpl(char *buffer, unsigned int nbChar);    

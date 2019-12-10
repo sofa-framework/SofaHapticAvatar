@@ -144,7 +144,13 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
     }
 
     // request data
-    int res = getData(incomingData, false);
+    int numL = getDataImpl(incomingData, false);
+
+    if (numL != 1)
+    {
+        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << numL << std::endl;
+        return results;
+    }
 
     // parse Data into floats
     // 0: rotation angle
@@ -226,7 +232,7 @@ std::string HapticAvatarDriver::getIdentity()
     if (!write_success) {
         std::cout << "failed_to_send_times" << std::endl;
     }
-    int numL = getData(incomingData, false);
+    int numL = getDataImpl(incomingData, false);
 
     if (numL != 1)
     {
@@ -255,57 +261,6 @@ std::string HapticAvatarDriver::convertSingleData(char *buffer, bool removeEoL)
 }
 
 
-int HapticAvatarDriver::getData(char *buffer, bool do_flush)
-{
-    bool response = false;
-    int cptSecu = 0;
-    int n = 0;
-    int que = 0;
-    char * pch;
-    int num_cr = 0;
-    while (!response && cptSecu < 1000)
-    {
-        n = ReadDataImpl(buffer, INCOMING_DATA_LEN, &que, do_flush);
-        if (n > 0) 
-        {
-            // count the number of /n in the return string
-            pch = strchr(buffer, '\n');
-            while (pch != NULL)
-            {
-                //std::cout << "FOUND Nn: "<< buffer << std::endl;
-                num_cr++;
-                pch = strchr(pch + 1, '\n');
-            }
-            response = true;
-            //if (buffer[n - 1] == '\n')
-            //{
-            //    std::cout << "last is Nn" << std::endl;
-            //    buffer[n - 1] = '\0';
-            //}
-            //std::cout << "---start---" << std::endl;
-            //for (unsigned int i = 0; i < n; i++)
-            //{
-            //    std::cout << "Carac: " << i << " -> " << buffer[i] << std::endl;
-            //}
-            //std::cout << "---stop---" << std::endl;
-
-            
-            //std::cout << "last carac: " << n << " -> " << buffer[0] << std::endl;
-
-        }
-
-        cptSecu++;
-    }
-    
-    if (!response) // secu loop reach end
-    {
-        std::cerr << "## Error getData failed for " << buffer << std::endl;
-    }
-
-    return num_cr;
-}
-
-
 bool HapticAvatarDriver::writeData(std::string msg)
 {
     //writeData
@@ -327,7 +282,7 @@ bool HapticAvatarDriver::setSingleCommand(const std::string& cmdMsg, std::string
     if (res)
     {
         char incomingData[INCOMING_DATA_LEN];
-        int numL = getData(incomingData, true);
+        int numL = getDataImpl(incomingData, true);
         if (numL != 1)
         {
             std::cerr << "Error not only one line return for getSingleResponse, got: " << numL << std::endl;
@@ -344,6 +299,42 @@ bool HapticAvatarDriver::setSingleCommand(const std::string& cmdMsg, std::string
 //////////////////////////////////////////////////////////
 /////    Internal Methods for device communication   /////
 //////////////////////////////////////////////////////////
+
+int HapticAvatarDriver::getDataImpl(char *buffer, bool do_flush)
+{
+    bool response = false;
+    int cptSecu = 0;
+    int n = 0;
+    int que = 0;
+    char * pch;
+    int num_cr = 0;
+    while (!response && cptSecu < 10000)
+    {
+        n = ReadDataImpl(buffer, INCOMING_DATA_LEN, &que, do_flush);
+        if (n > 0)
+        {
+            // count the number of \n in the return string
+            pch = strchr(buffer, '\n');
+            while (pch != NULL)
+            {
+                num_cr++;
+                pch = strchr(pch + 1, '\n');
+            }
+            response = true;
+        }
+
+        cptSecu++;
+    }
+
+    if (!response) // secu loop reach end
+    {
+        std::cerr << "## Error getData failed for " << buffer << std::endl;
+        return -1;
+    }
+
+    return num_cr;
+}
+
 
 int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
 {
