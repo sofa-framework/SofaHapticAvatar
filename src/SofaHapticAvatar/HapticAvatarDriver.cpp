@@ -138,7 +138,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
     char incomingData[INCOMING_DATA_LEN];
     char outgoingData[OUTGOING_DATA_LEN] = "2 \n";
     int outlen = strlen(outgoingData);
-    bool write_success = WriteData(outgoingData, outlen);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
     if (!write_success) {
         std::cout << "failed_to_send_times" << std::endl;
     }
@@ -187,7 +187,7 @@ std::string HapticAvatarDriver::getIdentity()
     char incomingData[INCOMING_DATA_LEN];
     char outgoingData[OUTGOING_DATA_LEN] = "1 \n";
     int outlen = strlen(outgoingData);
-    bool write_success = WriteData(outgoingData, outlen);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
     if (!write_success) {
         std::cout << "failed_to_send_times" << std::endl;
     }
@@ -207,8 +207,16 @@ std::string HapticAvatarDriver::getIdentity()
 std::string HapticAvatarDriver::convertSingleData(char *buffer, bool removeEoL)
 {
     std::string res = std::string(buffer);
-    if (removeEoL && res.back() == '\n')
-        res.pop_back();
+    if (removeEoL)
+    {
+        if (res.back() == '\n')
+            res.pop_back();
+
+        if (res.back() == ' ')
+            res.pop_back();
+    }
+
+    return res;
 }
 
 
@@ -222,7 +230,7 @@ int HapticAvatarDriver::getData(char *buffer, bool do_flush)
     int num_cr = 0;
     while (!response && cptSecu < 1000)
     {
-        n = ReadData(buffer, INCOMING_DATA_LEN, &que, do_flush);
+        n = ReadDataImpl(buffer, INCOMING_DATA_LEN, &que, do_flush);
         if (n > 0) 
         {
             // count the number of /n in the return string
@@ -263,7 +271,7 @@ int HapticAvatarDriver::getData(char *buffer, bool do_flush)
 }
 
 
-int HapticAvatarDriver::ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
+int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
 {
     //Number of bytes we'll have read
     DWORD bytesRead = 0;
@@ -303,11 +311,11 @@ bool HapticAvatarDriver::writeData(std::string msg)
     std::strcpy(outgoingData, msg.c_str());
     int outlen = strlen(outgoingData);
     
-    return WriteData(outgoingData, outlen);
+    return WriteDataImpl(outgoingData, outlen);
 }
 
 
-bool HapticAvatarDriver::WriteData(char *buffer, unsigned int nbChar)
+bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
 {
     DWORD bytesSend;
 

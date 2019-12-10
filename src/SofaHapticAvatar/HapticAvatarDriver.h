@@ -50,22 +50,22 @@ public:
     void connectDevice();
 
     bool writeData(std::string msg);
-    //int readData(std::string msg);
 
-    sofa::helper::fixed_array<float, 4> getAnglesAndLength();
-    void testCollisionForce(sofa::defaulttype::Vector3 force);
+    int getData(char *buffer, bool do_flush);
 
-
+    sofa::helper::fixed_array<float, 4> getAnglesAndLength();    
+    
     std::string getIdentity();
 
     std::string convertSingleData(char *buffer, bool removeEoL = true);
 
+    void testCollisionForce(sofa::defaulttype::Vector3 force);
 
-    int getData(char *buffer, bool do_flush);
+protected:
     
-    int ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
+    int ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
 
-    bool WriteData(char *buffer, unsigned int nbChar);
+    bool WriteDataImpl(char *buffer, unsigned int nbChar);    
 
 private:
     //Connection status
