@@ -67,9 +67,9 @@
             <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
             
             <MechanicalObject name="instrumentState" template="Rigid3d" />
-            <UniformMass name="mass" totalMass="1000.0" />
+            <UniformMass name="mass" totalMass="1.0" />
             
-            <LCPForceFeedback activate="true" forceCoef="0.001"/>            
+            <LCPForceFeedback activate="true" forceCoef="0.0001"/>            
             <RestShapeSpringsForceField stiffness='1000000000000' angularStiffness='1000000000000' external_rest_shape='@../DOFs' points='0' external_points='0' />
             <UncoupledConstraintCorrection/>
             
@@ -94,9 +94,7 @@
   
     
     
-    <Node name="Cube">
-        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
-        <CGLinearSolver iterations="25" name="linear solver" />
+    <Node name="Cube_0">
         <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 40 40"/>
         <MechanicalObject src="@loader" name="Volume" />
         
@@ -105,29 +103,47 @@
         <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
     
-        <BoxROI name="boxRoi" box="100 -1 -10 180 10 80" drawBoxes="1"/>
-        <FixedConstraint name="FixedConstraint" indices="@boxRoi.indices" />
-        <UniformMass totalMass="1" />
-
-        <TetrahedronFEMForceField youngModulus="600" poissonRatio="0.45" topology="@ContainerTetra"/>
-
-        <Node name="Surface">
+        <Node name="Surface_0">
             <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
             <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel />
-            <LineCollisionModel />
+            <TriangleCollisionModel group="1"/>
+            <LineCollisionModel group="1"/>
             
-            <Node name="VisuSurface">
+            <Node name="VisuSurface_0">
                 <OglModel name="Visual" color="1.000 1.000 1.000 0.6" />
                 <BarycentricMapping input="@.." output="@Visual" />
             </Node>
         </Node>
+    </Node>
+    
+    <Node name="Cube_1">
+        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 110 0"/>
+        <MechanicalObject src="@loader" name="Volume" />
         
-        <PrecomputedConstraintCorrection recompute="0" fileCompliance="./Cube-78-0.01.comp" printLog="0"/>
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
+    
+        <Node name="Surface_1">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+            <TriangleCollisionModel group="1"/>
+            <LineCollisionModel group="1"/>
+            
+            <Node name="VisuSurface_1">
+                <OglModel name="Visual" color="1.000 1.000 1.000 0.6" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
     </Node>
     
     
