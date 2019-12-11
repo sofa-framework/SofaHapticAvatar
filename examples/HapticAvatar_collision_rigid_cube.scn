@@ -95,7 +95,7 @@
     
     
     <Node name="Cube_0">
-        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 40 40"/>
+        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="20 0 60"/>
         <MechanicalObject src="@loader" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
@@ -121,7 +121,7 @@
     </Node>
     
     <Node name="Cube_1">
-        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 110 0"/>
+        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 70 40"/>
         <MechanicalObject src="@loader" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
