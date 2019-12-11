@@ -75,6 +75,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     m_debugToolPosition = Vector3(0.0, 0.0, 0.0);
     m_debugForceVector = Vector3(0.0, 0.0, 0.0);
     m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
+    m_toolRot.identity();
 }
 
 
@@ -236,12 +237,18 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                     break;
                 }
             }
-
+            
             if (contact)
+            {
+                std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
                 std::cout << "haptic force: " << currentForce << std::endl;
 
-            SReal fscale = _deviceCtrl->d_forceScale.getValue();
-            _driver->setTranslationForce(currentForce*fscale);
+                SReal fscale = _deviceCtrl->d_forceScale.getValue();
+                
+                _driver->setTranslationForce(_deviceCtrl->m_toolRot * (currentForce*fscale));
+            }
+            else
+                _driver->releaseForce();
         }
 
         std::this_thread::sleep_for(wait_duration);
@@ -270,6 +277,7 @@ void HapticAvatarDeviceController::updatePosition()
 
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
     m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
+    //std::cout << "portalMtx: " << portalMtx << std::endl;    
 
     sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, -m_rotAngle, 0.0f);
     sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, m_zLength, 0.0f));
@@ -279,14 +287,24 @@ void HapticAvatarDeviceController::updatePosition()
 
     sofa::defaulttype::Mat3x3f rotM;
     for (unsigned int i = 0; i < 3; i++)
-        for (unsigned int j = 0; j < 3; j++)
+        for (unsigned int j = 0; j < 3; j++) {
             rotM[i][j] = instrumentMtx[i][j];
+            m_toolRot[i][j] = portalMtx[i][j];
+        }
+
+    m_toolRot = m_toolRot.inverted();
 
     HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
     sofa::defaulttype::Quat orien;
     orien.fromMatrix(rotM);
     posDevice.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
+    //std::cout << "posDevice: " << posDevice << std::endl;
+
+    //Vec3f test = Vec3f(0, 1, 0);
+    //Vec3f testT = rotM* test;
+    //std::cout << "testT: " << testT << std::endl;
+
     d_posDevice.endEdit();
 }
 
