@@ -138,12 +138,14 @@ const HapticAvatarPortalController::Coord& HapticAvatarPortalController::getPort
     bool debug = false;
     if (debug)
     {
+        std::cout << "------ portalId: " << m_id << " ------" << std::endl;
         std::cout << "T_gear: " << T_gear << std::endl;
         std::cout << "T_portal: " << T_portal << std::endl;
         std::cout << "R_tiltflip: " << R_tiltflip << std::endl;
         std::cout << "R_yaw: " << R_yaw << std::endl;
         std::cout << "R_pitch: " << R_pitch << std::endl;
         std::cout << "m_portalMtx: " << m_portalMtx << std::endl;
+        std::cout << "---------------------------------" << std::endl;
     }
 
     sofa::defaulttype::Mat3x3f rotM;

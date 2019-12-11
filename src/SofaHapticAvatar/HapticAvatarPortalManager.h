@@ -78,6 +78,7 @@ public:
 
     int getPortalId(std::string comStr);
     const sofa::defaulttype::Mat4x4f& getPortalTransform(int portId);
+    const Coord& getPortalPosition(int portId);
 
     sofa::core::objectmodel::DataFileName m_configFilename;
     Data< Coord> m_portalPosition1;

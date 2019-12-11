@@ -124,6 +124,19 @@ const sofa::defaulttype::Mat4x4f& HapticAvatarPortalManager::getPortalTransform(
     return m_portals[portId]->getPortalTransform();
 }
 
+
+const HapticAvatarPortalManager::Coord& HapticAvatarPortalManager::getPortalPosition(int portId)
+{
+    if (portId >= m_portals.size())
+    {
+        msg_error() << "getPortalTransform: Port id out of bounds: " << portId;
+        return HapticAvatarPortalManager::Coord();
+    }
+
+    return m_portals[portId]->getPortalPosition();
+}
+
+
 void HapticAvatarPortalManager::updatePositionData()
 {
     int cpt = 0;
