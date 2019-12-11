@@ -279,7 +279,7 @@ void HapticAvatarDeviceController::updatePosition()
     m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
     //std::cout << "portalMtx: " << portalMtx << std::endl;    
 
-    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, -m_rotAngle, 0.0f);
+    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, m_rotAngle, 0.0f);
     sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, m_zLength, 0.0f));
     sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
     
