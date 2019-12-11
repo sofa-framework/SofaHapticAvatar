@@ -79,6 +79,9 @@ void HapticAvatarPortalController::portalSetup()
 
 void HapticAvatarPortalController::updatePostion(float yawAngle, float pitchAngle)
 {
+   // std::cout << "yawAngle: " << yawAngle << std::endl;
+    //std::cout << "pitchAngle: " << pitchAngle << std::endl;
+
     m_yawAngle = yawAngle;
     m_pitchAngle = pitchAngle;
     m_hasMoved = true;

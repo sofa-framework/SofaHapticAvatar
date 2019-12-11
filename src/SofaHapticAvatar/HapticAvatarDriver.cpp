@@ -180,18 +180,23 @@ void HapticAvatarDriver::setTranslationForce(sofa::defaulttype::Vector3 force)
     // ZPWM = int(-82.93*Z_force)
     // YawPWM = int(3.41*Yaw_torque)
 
-    double res = force.norm();
+    std::cout << "setTranslationForce: " << force << std::endl;
+    //double res = force.norm();
+
+    sofa::defaulttype::Vector3 toolDir = sofa::defaulttype::Vector3(0, 1, 0);
+    sofa::defaulttype::Vector3 yawDir = sofa::defaulttype::Vector3(0, 0, 1);
+    sofa::defaulttype::Vector3 pitchDir = sofa::defaulttype::Vector3(-1, 0, 0);
 
     float rotTorque = 0.0f;
-    float pitchTorque = 0.0f;
-    float zForce = 0.0f;
-    float yawTorque = 0.0f;
+    float pitchTorque = pitchDir * force * 10;
+    float zForce = toolDir * force;
+    float yawTorque = 0.0f;//yawDir * force * 100;
 
-    if (res > 20)
+    /*if (res > 20)
         zForce = 20;
     else
         zForce = res;
-
+        */
     writeRoughForce(rotTorque, pitchTorque, zForce, yawTorque);
 }
 
@@ -378,23 +383,44 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
 
 void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
-    int RotPWM = int(-17.56 * rotTorque);
-    int PitchPWM = int(-2.34 * pitchTorque);
-    int ZPWM = int(-82.93 * zforce);
-    int YawPWM = int(3.41 * yawTorque);
+    bool sendForce = false;
+    if (pitchTorque != 0.0f || zforce != 0.0f || yawTorque != 0.0f)
+    {
+        std::cout << "Force: rotTorque: " << rotTorque
+            << " | pitchTorque: " << pitchTorque
+            << " | zforce: " << zforce
+            << " | yawTorque: " << yawTorque
+            << std::endl;
+        sendForce = true;
+    }
 
-    // TODO put security here
-    if (ZPWM > 200 || ZPWM < -200)
-        ZPWM = 0;
+    sofa::helper::fixed_array<int, 4> values;     
+    values[0] = int(-17.56 * rotTorque); // RotPWM
+    values[1] = int(2.34 * pitchTorque); // PitchPWM
+    values[2] = int(-82.93 * zforce); // ZPWM
+    values[3] = int(3.41 * yawTorque); // YawPWM
+   
+    int maxPWM = 1000;
+    for (int i = 0; i < 4; i++)
+    {
+        if (values[i] < -maxPWM)
+            values[i] = -maxPWM;
+        else if (values[i] > maxPWM)
+            values[i] = maxPWM;
+    }
 
     std::string msg;
-    msg = "35 " + std::to_string(RotPWM)
-        + " " + std::to_string(PitchPWM)
-        + " " + std::to_string(ZPWM)
-        + " " + std::to_string(YawPWM)
+    msg = "35 " + std::to_string(values[0])
+        + " " + std::to_string(values[1])
+        + " " + std::to_string(values[2])
+        + " " + std::to_string(values[3])
         + "\n";
 
-    std::cout << "Force: '" << ZPWM << "'" << std::endl;
+    if (sendForce)
+    {
+        std::cout << "Force: '" << msg << "'";
+    }
+    
 
     //if (force[0] == 0.0)
     //    msg = "6 0 0 0 0 \n";
