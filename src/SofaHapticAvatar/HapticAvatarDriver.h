@@ -59,14 +59,18 @@ public:
 
     std::string convertSingleData(char *buffer, bool forceRemoveEoL = false);
 
-    void testCollisionForce(sofa::defaulttype::Vector3 force);
+    void setTranslationForce(sofa::defaulttype::Vector3 force);
+
+    void releaseForce();
 
 protected:
     int getDataImpl(char *buffer, bool do_flush);
 
     int ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
 
-    bool WriteDataImpl(char *buffer, unsigned int nbChar);    
+    bool WriteDataImpl(char *buffer, unsigned int nbChar);
+
+    void writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque);
 
 private:
     //Connection status

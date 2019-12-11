@@ -168,7 +168,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 }
 
 
-void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
+void HapticAvatarDriver::setTranslationForce(sofa::defaulttype::Vector3 force)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 
@@ -182,48 +182,28 @@ void HapticAvatarDriver::testCollisionForce(sofa::defaulttype::Vector3 force)
 
     double res = force.norm();
 
-    int RotPWM = 0;
-    int PitchPWM = 0;
-    int ZPWM = 0;
-    int YawPWM = 0;
+    float rotTorque = 0.0f;
+    float pitchTorque = 0.0f;
+    float zForce = 0.0f;
+    float yawTorque = 0.0f;
 
-    if (res > 0)
-    {
-        if (res > 20)
-            ZPWM = 20;
-        else
-            ZPWM = -82.93 * res;
-    }
-        
-    std::string msg;
-    msg = "35 " + std::to_string(RotPWM)
-        + " " + std::to_string(PitchPWM)
-        + " " + std::to_string(ZPWM)
-        + " " + std::to_string(YawPWM)
-        + "\n";
+    if (res > 20)
+        zForce = 20;
+    else
+        zForce = res;
 
-
-    std::cout << "Force: '" << ZPWM << "'" << std::endl;
-
-    //if (force[0] == 0.0)
-    //    msg = "6 0 0 0 0 \n";
-    //else
-    //    msg = "6 1000 1000 10000 1000 \n";
-
-    bool resB = writeData(msg);
-    //std::cout << "force resB: " << resB << std::endl;
-    //
-    //char incomingData[INCOMING_DATA_LEN];
-    //int resMsg = getDataImpl(incomingData, false);
-    //if (resMsg == 1)
-    //    std::cout << "force return msg: " << incomingData << std::endl;
-
-    /*char incomingData[INCOMING_DATA_LEN];
-    int res = m_HA_driver->getData(incomingData, false);
-    std::cout << "reset: " << incomingData << std::endl;*/
+    writeRoughForce(rotTorque, pitchTorque, zForce, yawTorque);
 }
 
 
+void HapticAvatarDriver::releaseForce()
+{
+    //writeRoughForce(0.0, 0.0, 0.0, 0.0);
+    std::string msg;
+    msg = "35 0 0 0 0\n";
+
+    bool resB = writeData(msg);
+}
 
 
 std::string HapticAvatarDriver::getIdentity()
@@ -394,6 +374,44 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
     }
     else
         return true;
+}
+
+void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+{
+    int RotPWM = int(-17.56 * rotTorque);
+    int PitchPWM = int(-2.34 * pitchTorque);
+    int ZPWM = int(-82.93 * zforce);
+    int YawPWM = int(3.41 * yawTorque);
+
+    // TODO put security here
+    if (ZPWM > 200 || ZPWM < -200)
+        ZPWM = 0;
+
+    std::string msg;
+    msg = "35 " + std::to_string(RotPWM)
+        + " " + std::to_string(PitchPWM)
+        + " " + std::to_string(ZPWM)
+        + " " + std::to_string(YawPWM)
+        + "\n";
+
+    std::cout << "Force: '" << ZPWM << "'" << std::endl;
+
+    //if (force[0] == 0.0)
+    //    msg = "6 0 0 0 0 \n";
+    //else
+    //    msg = "6 1000 1000 10000 1000 \n";
+
+    bool resB = writeData(msg);
+    //std::cout << "force resB: " << resB << std::endl;
+    //
+    //char incomingData[INCOMING_DATA_LEN];
+    //int resMsg = getDataImpl(incomingData, false);
+    //if (resMsg == 1)
+    //    std::cout << "force return msg: " << incomingData << std::endl;
+
+    /*char incomingData[INCOMING_DATA_LEN];
+    int res = m_HA_driver->getData(incomingData, false);
+    std::cout << "reset: " << incomingData << std::endl;*/
 }
 
 

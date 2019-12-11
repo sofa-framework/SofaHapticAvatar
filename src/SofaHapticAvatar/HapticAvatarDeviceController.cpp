@@ -240,7 +240,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 std::cout << "haptic force: " << currentForce << std::endl;
 
             SReal fscale = _deviceCtrl->d_forceScale.getValue();
-            _driver->testCollisionForce(currentForce*fscale);
+            _driver->setTranslationForce(currentForce*fscale);
         }
 
         std::this_thread::sleep_for(wait_duration);
@@ -250,7 +250,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     }
 
     // ensure no force
-    _driver->testCollisionForce(Vector3(0.0, 0.0, 0.0));
+    _driver->releaseForce();
     std::cout << "Haptics thread END!!" << std::endl;
 }
 
