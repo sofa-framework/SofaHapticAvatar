@@ -92,9 +92,10 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
-    Vector3 m_debugToolPosition;
+    Vector3 m_debugToolPosition;    
     Vector3 m_debugForceVector;
 
+    Coord m_debugRootPosition;
     /// General Haptic thread methods
     static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 

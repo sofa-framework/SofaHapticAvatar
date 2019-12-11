@@ -74,6 +74,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
 
     m_debugToolPosition = Vector3(0.0, 0.0, 0.0);
     m_debugForceVector = Vector3(0.0, 0.0, 0.0);
+    m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
 }
 
 
@@ -268,6 +269,7 @@ void HapticAvatarDeviceController::updatePosition()
         return;
 
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
+    m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
 
     sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, -m_rotAngle, 0.0f);
     sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, m_zLength, 0.0f));
@@ -299,7 +301,23 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     float scale = 10.0f;
     vparams->drawTool()->drawSphere(m_debugToolPosition, 0.1f, defaulttype::Vec4f(1.0, 0.0, 0.0, 1.0));
     vparams->drawTool()->drawLine(m_debugToolPosition, m_debugToolPosition + m_debugForceVector*scale, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
-    
+ 
+
+    {
+        vparams->drawTool()->disableLighting();
+
+        const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
+        float glRadius = float(d_scale.getValue());
+        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+
+        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+    }
+
+
 }
 
 
