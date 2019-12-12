@@ -132,6 +132,23 @@ HapticAvatarDriver::~HapticAvatarDriver()
 }
 
 
+void HapticAvatarDriver::resetDevice()
+{
+    sofa::helper::fixed_array<float, 4> results;
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "0 15 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+
+    // request data
+    int numL = getDataImpl(incomingData, false);
+    std::cout << "reset return response: "<< incomingData << std::endl;
+}
+
+
 sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 {
     sofa::helper::fixed_array<float, 4> results;

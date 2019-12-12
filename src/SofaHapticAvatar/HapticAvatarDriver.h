@@ -48,6 +48,7 @@ public:
     bool IsConnected() { return m_connected; }
 
     void connectDevice();
+    void resetDevice();
 
     bool writeData(std::string msg);
 
