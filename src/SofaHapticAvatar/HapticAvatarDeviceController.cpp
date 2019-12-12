@@ -51,19 +51,24 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 
 //constructeur
 HapticAvatarDeviceController::HapticAvatarDeviceController()
-    : d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
-    , d_orientationBase(initData(&d_orientationBase, Quat(0, 0, 0, 1), "orientationBase", "Orientation of the interface base in the scene world coordinates"))
-    , d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
-    , d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
-    , d_forceScale(initData(&d_forceScale, 1.0, "forceScale", "Default forceScale applied to the force feedback. "))
-    , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))
-    , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
+    : d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
+    //, d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
+    //, d_orientationBase(initData(&d_orientationBase, Quat(0, 0, 0, 1), "orientationBase", "Orientation of the interface base in the scene world coordinates"))
+    //, d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
+    , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))        
+    , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
+    
+
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
     , m_portId(-1)
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
+
+    , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
+    , d_fontSize(initData(&d_fontSize, 10, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
     , m_terminate(true)
+
     , m_HA_driver(nullptr)
     , m_portalMgr(nullptr)
     , m_forceFeedback(nullptr)
@@ -243,9 +248,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
                 std::cout << "haptic force: " << currentForce << std::endl;
 
-                SReal fscale = _deviceCtrl->d_forceScale.getValue();
-                
-                _driver->setTranslationForce(_deviceCtrl->m_toolRot * (currentForce*fscale));
+                _driver->setTranslationForce(_deviceCtrl->m_toolRot * currentForce);
             }
             else
                 _driver->releaseForce();
@@ -265,9 +268,8 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
 void HapticAvatarDeviceController::updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
 {
-    m_portalMgr->updatePostion(m_portId, values[3], values[1]);
-    m_rotAngle = values[0];
-    m_zLength = values[2];
+    m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
+    d_toolValues.setValue(values);
 }
 
 void HapticAvatarDeviceController::updatePosition()
@@ -279,8 +281,10 @@ void HapticAvatarDeviceController::updatePosition()
     m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
     //std::cout << "portalMtx: " << portalMtx << std::endl;    
 
-    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, m_rotAngle, 0.0f);
-    sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, m_zLength, 0.0f));
+    const sofa::helper::fixed_array<float, 4>& dofV = d_toolValues.getValue();
+
+    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
+    sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
     sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
     
     sofa::defaulttype::Mat4x4f instrumentMtx = portalMtx * R_rot * T_insert;

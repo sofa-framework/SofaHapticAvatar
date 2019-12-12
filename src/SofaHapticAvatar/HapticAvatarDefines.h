@@ -61,6 +61,14 @@ enum Cmd
 };
 
 
+enum Dof 
+{ 
+    ROT = 0, 
+    PITCH, 
+    Z, 
+    YAW 
+};
+
 
 #define OUTGOING_DATA_LEN 64
 #define INCOMING_DATA_LEN 512

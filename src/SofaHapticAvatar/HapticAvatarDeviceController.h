@@ -80,13 +80,14 @@ public:
 
     void updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
 
-    Data<Vec3d> d_positionBase; ///< Position of the interface base in the scene world coordinates
-    Data<Quat> d_orientationBase; ///< Orientation of the interface base in the scene world coordinates
-    Data<Quat> d_orientationTool; ///< Orientation of the tool
-
+    //Data<Vec3d> d_positionBase; ///< Position of the interface base in the scene world coordinates
+    //Data<Quat> d_orientationBase; ///< Orientation of the interface base in the scene world coordinates
+    //Data<Quat> d_orientationTool; ///< Orientation of the tool    
     Data<SReal> d_scale; ///< Default scale applied to the Phantom Coordinates
-    Data<SReal> d_forceScale; ///< Default forceScale applied to the force feedback. 
     Data< Coord > d_posDevice; ///< position of the base of the part of the device    
+
+    /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
+    Data<sofa::helper::fixed_array<float, 4> > d_toolValues;
 
     Data<bool> d_drawDevice;
     Data<std::string> d_portName;
@@ -117,9 +118,6 @@ private:
     std::mutex lockPosition;
 
     std::thread haptic_thread;
-
-    float m_rotAngle;
-    float m_zLength;
 };
 
 } // namespace controller
