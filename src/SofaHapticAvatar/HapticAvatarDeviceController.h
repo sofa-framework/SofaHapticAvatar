@@ -94,6 +94,8 @@ public:
     Data<bool> d_drawDevice;
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
+    Data<int> d_fontSize;
+
 
     Vector3 m_debugToolPosition;    
     Vector3 m_debugForceVector;

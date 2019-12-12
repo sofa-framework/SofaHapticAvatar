@@ -15,6 +15,7 @@
 
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
+#include <iomanip>
 
 namespace sofa
 {
@@ -24,9 +25,12 @@ namespace component
 
 namespace controller
 {
-    int HapticAvatarDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-        .add< HapticAvatarDeviceController >()
-        ;
+
+using namespace HapticAvatar;
+
+int HapticAvatarDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+    .add< HapticAvatarDeviceController >()
+    ;
 
 
 HapticEmulatorTask::HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus)
@@ -66,7 +70,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
 
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
-    , d_fontSize(initData(&d_fontSize, 10, "fontSize", "font size of statistics to display"))
+    , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
     , m_terminate(true)
 
@@ -342,6 +346,36 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     }
 
 
+    size_t newLine = d_fontSize.getValue();    
+    int fontS = d_fontSize.getValue();
+    const sofa::helper::fixed_array<float, 4>& dofV = d_toolValues.getValue();
+    const sofa::helper::fixed_array<float, 4>& motV = d_motorOutput.getValue();
+    defaulttype::Vec4f color(0.0, 1.0, 0.0, 1.0);
+
+    // x, y, size
+    std::string title =      "       Yaw   Pitch   Rot   Z";
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title.c_str());
+    newLine += newLine;
+
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << "Value  "
+        << dofV[Dof::YAW] << "  "
+        << dofV[Dof::PITCH] << "  "
+        << dofV[Dof::ROT] << "  "
+        << dofV[Dof::Z] << "  ";
+    
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+    newLine += newLine;
+    
+    ss.str(std::string());
+    ss << std::fixed << std::setprecision(2) << "Motor  "
+        << motV[Dof::YAW] << "  "
+        << motV[Dof::PITCH] << "  "
+        << motV[Dof::ROT] << "  "
+        << motV[Dof::Z] << "  ";
+
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+    newLine += newLine;
 }
 
 
