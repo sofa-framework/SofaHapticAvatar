@@ -148,7 +148,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 
     if (numL != 1)
     {
-        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << numL << std::endl;
+        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
         return results;
     }
 
@@ -183,7 +183,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorsValues()
     int numL = getDataImpl(incomingData, false);
     if (numL != 1)
     {
-        std::cerr << "Error not only one line return for getMotorsValues, got: " << numL << std::endl;
+        std::cerr << "Error not only one line return for getMotorsValues, got: " << incomingData << std::endl;
         return results;
     }
 
@@ -195,6 +195,63 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorsValues()
     }
 
     return results;
+}
+
+
+sofa::helper::fixed_array<float, 3> HapticAvatarDriver::getCollisionForce()
+{
+    sofa::helper::fixed_array<float, 3> results;
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "22 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+
+    // request data
+    int numL = getDataImpl(incomingData, false);
+
+    if (numL != 1)
+    {
+        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
+        return results;
+    }
+   
+    char* pEnd;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
+    for (unsigned int i = 1; i < 3; ++i)
+    {
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
+    }
+
+    return results;
+}
+
+
+float HapticAvatarDriver::getJawTorque()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "26 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+
+    // request data
+    int numL = getDataImpl(incomingData, false);
+
+    if (numL != 1)
+    {
+        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
+        return 0.0;
+    }
+
+    char* pEnd;
+    float res = std::strtof(incomingData, &pEnd) * 0.0001;
+
+    return res;
 }
 
 
@@ -254,7 +311,7 @@ std::string HapticAvatarDriver::getIdentity()
 
     if (numL != 1)
     {
-        std::cerr << "Error not only one line return for getIdentity, got: " << numL << std::endl;
+        std::cerr << "Error not only one line return for getIdentity, got: " << incomingData << std::endl;
         return "";
     }
 

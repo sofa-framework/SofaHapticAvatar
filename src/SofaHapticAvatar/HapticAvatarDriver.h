@@ -55,6 +55,8 @@ public:
 
     sofa::helper::fixed_array<float, 4> getAnglesAndLength();
     sofa::helper::fixed_array<float, 4> getMotorsValues();
+    sofa::helper::fixed_array<float, 3> getCollisionForce();
+    float getJawTorque();
     
     std::string getIdentity();
 
