@@ -168,6 +168,36 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAnglesAndLength()
 }
 
 
+sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorsValues()
+{
+    sofa::helper::fixed_array<float, 4> results;
+    char incomingData[INCOMING_DATA_LEN];
+    char outgoingData[OUTGOING_DATA_LEN] = "23 \n";
+    int outlen = strlen(outgoingData);
+    bool write_success = WriteDataImpl(outgoingData, outlen);
+    if (!write_success) {
+        std::cout << "failed_to_send_times" << std::endl;
+    }
+
+    // request data
+    int numL = getDataImpl(incomingData, false);
+    if (numL != 1)
+    {
+        std::cerr << "Error not only one line return for getMotorsValues, got: " << numL << std::endl;
+        return results;
+    }
+
+    char* pEnd;
+    results[0] = std::strtof(incomingData, &pEnd);
+    for (unsigned int i = 1; i < 4; ++i)
+    {
+        results[i] = std::strtof(pEnd, &pEnd);
+    }
+
+    return results;
+}
+
+
 void HapticAvatarDriver::setTranslationForce(sofa::defaulttype::Vector3 force)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn

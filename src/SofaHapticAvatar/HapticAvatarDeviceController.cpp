@@ -57,6 +57,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     //, d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
     , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))        
     , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
+    , d_motorOutput(initData(&d_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     
 
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
@@ -217,10 +218,11 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        sofa::helper::fixed_array<float, 4> results = _driver->getAnglesAndLength();
+        sofa::helper::fixed_array<float, 4> toolValues = _driver->getAnglesAndLength();
+        sofa::helper::fixed_array<float, 4> motorValues = _driver->getMotorsValues();
         //std::cout << "results: " << results << std::endl;
-        _deviceCtrl->updateAnglesAndLength(results);
-
+        _deviceCtrl->updateAnglesAndLength(toolValues);
+        _deviceCtrl->d_motorOutput.setValue(motorValues);
 
         Vector3 currentForce;
         double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();

@@ -89,6 +89,8 @@ public:
     /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
     Data<sofa::helper::fixed_array<float, 4> > d_toolValues;
 
+    Data<sofa::helper::fixed_array<float, 4> > d_motorOutput;
+
     Data<bool> d_drawDevice;
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;

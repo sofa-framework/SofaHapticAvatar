@@ -53,7 +53,8 @@ public:
 
     bool setSingleCommand(const std::string& cmdMsg, std::string& result);
 
-    sofa::helper::fixed_array<float, 4> getAnglesAndLength();    
+    sofa::helper::fixed_array<float, 4> getAnglesAndLength();
+    sofa::helper::fixed_array<float, 4> getMotorsValues();
     
     std::string getIdentity();
 
