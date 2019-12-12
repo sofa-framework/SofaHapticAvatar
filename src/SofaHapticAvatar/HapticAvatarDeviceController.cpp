@@ -222,9 +222,9 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        sofa::helper::fixed_array<float, 4> toolValues = _driver->getAnglesAndLength();
-        sofa::helper::fixed_array<float, 4> motorValues = _driver->getMotorsValues();
-        sofa::helper::fixed_array<float, 3> collForces = _driver->getCollisionForce();
+        sofa::helper::fixed_array<float, 4> toolValues = _driver->getAngles_AndLength();
+        sofa::helper::fixed_array<float, 4> motorValues = _driver->getLastPWM();
+        sofa::helper::fixed_array<float, 3> collForces = _driver->getLastCollisionForce();
         float jtorq = _driver->getJawTorque();
 
         //std::cout << "results: " << results << std::endl;
