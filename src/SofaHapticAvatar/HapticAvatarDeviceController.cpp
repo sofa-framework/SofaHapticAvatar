@@ -357,30 +357,49 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     const sofa::helper::fixed_array<float, 4>& motV = d_motorOutput.getValue();
     defaulttype::Vec4f color(0.0, 1.0, 0.0, 1.0);
 
-    // x, y, size
     std::string title =      "       Yaw   Pitch   Rot   Z";
     vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title.c_str());
-    newLine += newLine;
+    newLine += fontS * 2;
 
     std::stringstream ss;
     ss << std::fixed << std::setprecision(2) << "Value  "
         << dofV[Dof::YAW] << "  "
         << dofV[Dof::PITCH] << "  "
         << dofV[Dof::ROT] << "  "
-        << dofV[Dof::Z] << "  ";
+        << dofV[Dof::Z];
     
     vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += newLine;
+    newLine += fontS * 2;
     
     ss.str(std::string());
     ss << std::fixed << std::setprecision(2) << "Motor  "
         << motV[Dof::YAW] << "  "
         << motV[Dof::PITCH] << "  "
         << motV[Dof::ROT] << "  "
-        << motV[Dof::Z] << "  ";
+        << motV[Dof::Z];
 
     vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += newLine;
+    newLine += fontS * 4;
+
+
+
+    std::string title2 = "           XForce  YForce  Zforce  JTorq";
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title2.c_str());
+    newLine += fontS * 2;
+
+    const sofa::helper::fixed_array<float, 3>& colF = d_collisionForce.getValue();
+    float jTorq = d_jawTorq.getValue();
+
+    ss.str(std::string());
+    ss << std::fixed << std::setprecision(2) << "Collision  "
+        << colF[0] << "    "
+        << colF[1] << "    "
+        << colF[2] << "    "
+        << jTorq;
+
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+    newLine += fontS * 2;
+
 }
 
 
