@@ -146,7 +146,6 @@ int HapticAvatarDriver::resetDevice(int mode)
         return -1;
     }
 
-    std::cout << "resetDevice: " << incomingData << std::endl;
     int res = std::atoi(incomingData);    
     return res;
 }
@@ -340,7 +339,7 @@ void HapticAvatarDriver::setForceVector(sofa::defaulttype::Vector3 force)
     // ZPWM = int(-82.93*Z_force)
     // YawPWM = int(3.41*Yaw_torque)
 
-    std::cout << "setTranslationForce: " << force << std::endl;
+    //std::cout << "setTranslationForce: " << force << std::endl;
     //double res = force.norm();
 
     sofa::defaulttype::Vector3 toolDir = sofa::defaulttype::Vector3(0, 1, 0);
@@ -501,16 +500,16 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
 
 void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
-    bool sendForce = false;
-    if (pitchTorque != 0.0f || zforce != 0.0f || yawTorque != 0.0f)
-    {
-        std::cout << "Force: rotTorque: " << rotTorque
-            << " | pitchTorque: " << pitchTorque
-            << " | zforce: " << zforce
-            << " | yawTorque: " << yawTorque
-            << std::endl;
-        sendForce = true;
-    }
+    //bool sendForce = false;
+    //if (pitchTorque != 0.0f || zforce != 0.0f || yawTorque != 0.0f)
+    //{
+    //    std::cout << "Force: rotTorque: " << rotTorque
+    //        << " | pitchTorque: " << pitchTorque
+    //        << " | zforce: " << zforce
+    //        << " | yawTorque: " << yawTorque
+    //        << std::endl;
+    //    sendForce = true;
+    //}
 
     sofa::helper::fixed_array<int, 4> values;     
     values[0] = int(-17.56 * rotTorque); // RotPWM
