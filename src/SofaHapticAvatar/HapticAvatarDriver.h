@@ -56,7 +56,7 @@ public:
     * Command: RESET
     * @param {int} mode: specify what to reset. See doc. 
     */
-    void resetDevice(int mode = 15);
+    int resetDevice(int mode = 15);
 
     /** Ask for the identity and build version of the firmware in the device.
     * Command: GET_IDENTITY
@@ -129,18 +129,20 @@ public:
     void setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque);
     
        
+    /** Will decompose a force vector in device coordinate system to compute torque and force to be sent to apply to the device. Using @sa writeRoughForce.
+    * @param {vec3f} force: force vector to apply to the device in its coordinate space.
+    */
+    void setForceVector(sofa::defaulttype::Vector3 force);
 
     bool writeData(std::string msg);
+    // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
+    void releaseForce();
 
     bool setSingleCommand(const std::string& cmdMsg, std::string& result);
     
     bool sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result);
 
     std::string convertSingleData(char *buffer, bool forceRemoveEoL = false);
-
-    void setTranslationForce(sofa::defaulttype::Vector3 force);
-
-    void releaseForce();
 
 protected:
     int getDataImpl(char *buffer, bool do_flush);

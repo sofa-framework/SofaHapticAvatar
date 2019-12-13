@@ -138,20 +138,17 @@ HapticAvatarDriver::~HapticAvatarDriver()
 /////     Public API methods for device communication     /////
 ///////////////////////////////////////////////////////////////
 
-void HapticAvatarDriver::resetDevice(int mode)
+int HapticAvatarDriver::resetDevice(int mode)
 {
-    sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "0 15 \n";
-    int outlen = strlen(outgoingData);
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
+    std::string arguments = std::to_string(mode);
+    if (sendCommandToDevice(RESET, arguments, incomingData) == false) {
+        return -1;
     }
 
-    // request data
-    int numL = getDataImpl(incomingData, false);
-    std::cout << "reset return response: "<< incomingData << std::endl;
+    std::cout << "resetDevice: " << incomingData << std::endl;
+    int res = std::atoi(incomingData);    
+    return res;
 }
 
 
@@ -169,15 +166,27 @@ std::string HapticAvatarDriver::getIdentity()
 
 int HapticAvatarDriver::getToolID()
 {
-    std::cerr << "Error Method getToolID not yet implemented!" << std::endl;
-    return 0;
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(GET_TOOL_ID, "", incomingData) == false) {
+        return -1;
+    }
+
+    int res = std::atoi(incomingData);
+    std::cout << "getToolID: " << res << std::endl;
+    return res;
 }
 
 
 int HapticAvatarDriver::getDeviceStatus()
 {
-    std::cerr << "Error Method getDeviceStatus not yet implemented!" << std::endl;
-    return 0;
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(GET_STATUS, "", incomingData) == false) {
+        return -1;
+    }
+
+    int res = std::atoi(incomingData);
+    std::cout << "getDeviceStatus: " << res << std::endl;
+    return res;
 }
 
 
@@ -217,8 +226,15 @@ float HapticAvatarDriver::getJawTorque()
 
 float HapticAvatarDriver::getJawOpeningAngle()
 {
-    std::cerr << "Error Method getJawOpeningAngle not yet implemented!" << std::endl;
-    return 0.0f;
+    char incomingData[SET_TOOL_JAW_OPENING_ANGLE];
+    if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
+        return 0.0f;
+    }
+
+    char* pEnd;
+    float res = std::strtof(incomingData, &pEnd) * 0.0001;
+
+    return res;
 }
 
 
@@ -245,8 +261,20 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getLastPWM()
 
 sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorScalingValues()
 {
-    std::cerr << "Error Method getMotorScalingValues not yet implemented!" << std::endl;
-    return sofa::helper::fixed_array<float, 4>();
+    sofa::helper::fixed_array<float, 4> results;
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(GET_MOTOR_SCALING_VALUES, "", incomingData) == false) {
+        return results;
+    }
+
+    char* pEnd;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
+    for (unsigned int i = 1; i < 4; ++i)
+    {
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
+    }
+
+    return results;
 }
 
 
@@ -271,21 +299,35 @@ sofa::helper::fixed_array<float, 3> HapticAvatarDriver::getLastCollisionForce()
 
 void HapticAvatarDriver::setMotorForce_AndTorques(sofa::helper::fixed_array<float, 4> values)
 {
-    SOFA_UNUSED(values);
-    std::cerr << "Error Method setMotorForce_AndTorques not yet implemented!" << std::endl;
+    std::string arguments;
+    for (unsigned int i = 0; i < values.size(); ++i)
+    {
+        int value = int(values[i] * 10000);
+        arguments = arguments + std::to_string(value) + " ";
+    }
+    arguments.pop_back(); // remove last space, too avoid any synthax problem.
+    
+    sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
     return;
 }
 
 void HapticAvatarDriver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque)
 {
-    SOFA_UNUSED(force);
-    SOFA_UNUSED(RotTorque);
-    std::cerr << "Error Method setTipForce_AndRotTorque not yet implemented!" << std::endl;
+    std::string arguments;
+    for (unsigned int i = 0; i < force.size(); ++i)
+    {
+        int value = int(force[i] * 10000);
+        arguments = arguments + std::to_string(value) + " ";
+    }
+    int rotValue = int(RotTorque * 10000);
+    arguments += std::to_string(rotValue);
+
+    sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
     return;
 }
 
 
-void HapticAvatarDriver::setTranslationForce(sofa::defaulttype::Vector3 force)
+void HapticAvatarDriver::setForceVector(sofa::defaulttype::Vector3 force)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 

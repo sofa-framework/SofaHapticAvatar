@@ -124,14 +124,11 @@ void HapticAvatarDeviceController::init()
     }
 
     // reset all force
-    std::string resFMsg = "0 15 \n";
-    std::string resultRes;
-
-    bool res = m_HA_driver->setSingleCommand(resFMsg, resultRes);
-    if (res)
-        std::cout << "Reset force return message: '" << resultRes << "'" << std::endl;
+    int res = m_HA_driver->resetDevice(15);
+    if (res == -1)
+        std::cerr << "## Error, Reset failed!" << std::endl;
     else
-        std::cerr << "## Error, failed to reset force using command: '" << resFMsg << "'" << std::endl;
+        std::cout << "Reset succeed return value: '" << res << "'" << std::endl;
 
     sofa::defaulttype::Vector3 force;
     
@@ -259,7 +256,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
                 std::cout << "haptic force: " << currentForce << std::endl;
 
-                _driver->setTranslationForce(_deviceCtrl->m_toolRot * currentForce);
+                _driver->setForceVector(_deviceCtrl->m_toolRot * currentForce);
             }
             else
                 _driver->releaseForce();
