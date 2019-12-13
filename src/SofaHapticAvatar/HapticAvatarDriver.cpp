@@ -20,7 +20,6 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
 #include <SofaHapticAvatar/HapticAvatarDriver.h>
 #include <iostream>
 #include <algorithm>
@@ -35,6 +34,8 @@ namespace component
 
 namespace controller
 {
+
+using namespace HapticAvatar;
 
 HapticAvatarDriver::HapticAvatarDriver(const std::string& portName)
     : m_connected(false)
@@ -154,6 +155,18 @@ void HapticAvatarDriver::resetDevice(int mode)
 }
 
 
+std::string HapticAvatarDriver::getIdentity()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(GET_IDENTITY, "", incomingData) == false) {
+        return "Unknown";
+    }
+    
+    std::string iden = convertSingleData(incomingData);
+    return iden;
+}
+
+
 int HapticAvatarDriver::getToolID()
 {
     std::cerr << "Error Method getToolID not yet implemented!" << std::endl;
@@ -173,27 +186,10 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAngles_AndLength()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "2 \n";
-    int outlen = strlen(outgoingData);
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
-    }
-
-    // request data
-    int numL = getDataImpl(incomingData, false);
-
-    if (numL != 1)
-    {
-        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
+    if (sendCommandToDevice(GET_ANGLES_AND_LENGTH, "", incomingData) == false) {
         return results;
     }
 
-    // parse Data into floats
-    // 0: rotation angle
-    // 1: Pitch angle
-    // 2: insertion length
-    // 3: yaw angle
     char* pEnd;
     results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
     for (unsigned int i = 1; i < 4; ++i)
@@ -208,22 +204,10 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAngles_AndLength()
 float HapticAvatarDriver::getJawTorque()
 {
     char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "26 \n";
-    int outlen = strlen(outgoingData);
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
+    if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
+        return 0.0f;
     }
-
-    // request data
-    int numL = getDataImpl(incomingData, false);
-
-    if (numL != 1)
-    {
-        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
-        return 0.0;
-    }
-
+        
     char* pEnd;
     float res = std::strtof(incomingData, &pEnd) * 0.0001;
 
@@ -244,18 +228,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getLastPWM()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "23 \n";
-    int outlen = strlen(outgoingData);
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
-    }
-
-    // request data
-    int numL = getDataImpl(incomingData, false);
-    if (numL != 1)
-    {
-        std::cerr << "Error not only one line return for getMotorsValues, got: " << incomingData << std::endl;
+    if (sendCommandToDevice(GET_LAST_PWM, "", incomingData) == false) {
         return results;
     }
 
@@ -281,22 +254,10 @@ sofa::helper::fixed_array<float, 3> HapticAvatarDriver::getLastCollisionForce()
 {
     sofa::helper::fixed_array<float, 3> results;
     char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "22 \n";
-    int outlen = strlen(outgoingData);
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
-    }
-
-    // request data
-    int numL = getDataImpl(incomingData, false);
-
-    if (numL != 1)
-    {
-        std::cerr << "Error not only one line return for getAnglesAndLength, got: " << incomingData << std::endl;
+    if (sendCommandToDevice(GET_LAST_COLLISION_FORCE, "", incomingData) == false) {
         return results;
     }
-   
+    
     char* pEnd;
     results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
     for (unsigned int i = 1; i < 3; ++i)
@@ -359,33 +320,31 @@ void HapticAvatarDriver::setTranslationForce(sofa::defaulttype::Vector3 force)
 
 void HapticAvatarDriver::releaseForce()
 {
-    //writeRoughForce(0.0, 0.0, 0.0, 0.0);
-    std::string msg;
-    msg = "35 0 0 0 0\n";
-
-    bool resB = writeData(msg);
+    sendCommandToDevice(SET_MANUAL_PWM, "0 0 0 0", nullptr);
 }
 
 
-std::string HapticAvatarDriver::getIdentity()
+
+
+
+bool HapticAvatarDriver::sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result)
 {
-    char incomingData[INCOMING_DATA_LEN];
-    char outgoingData[OUTGOING_DATA_LEN] = "1 \n";
+    std::string fullCommand = std::to_string(command) + " " + arguments + " \n";    
+    //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
+    char outgoingData[OUTGOING_DATA_LEN];
+    strcpy(outgoingData, fullCommand.c_str());
+
     int outlen = strlen(outgoingData);
     bool write_success = WriteDataImpl(outgoingData, outlen);
     if (!write_success) {
-        std::cout << "failed_to_send_times" << std::endl;
-    }
-    int numL = getDataImpl(incomingData, false);
-
-    if (numL != 1)
-    {
-        std::cerr << "Error not only one line return for getIdentity, got: " << incomingData << std::endl;
-        return "";
+        return false;
     }
 
-    std::string iden = convertSingleData(incomingData);
-    return iden;
+    // request data
+    if (result != nullptr)
+        getDataImpl(result, false);
+
+    return true;
 }
 
 
@@ -397,7 +356,7 @@ std::string HapticAvatarDriver::convertSingleData(char *buffer, bool forceRemove
     else if (res.back() == '\n')
         res.pop_back();
 
-    while (res.back() == ' ')
+    while (res.back() == ' ' || res.back() == '\n')
     {
         res.pop_back();
     }
@@ -532,6 +491,7 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
         //In case it don't work get comm error and return false
         ClearCommError(m_hSerial, &m_errors, &m_status);
 
+        std::cerr << "Error failed to send command: '" << buffer << "'. Error returned: " << m_errors << std::endl;
         return false;
     }
     else

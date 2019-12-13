@@ -23,6 +23,7 @@
 #define SOFA_HAPTICAVATAR_HAPTICAVATARDRIVER_H
 
 #include <SofaHapticAvatar/config.h>
+#include <SofaHapticAvatar/HapticAvatarDefines.h>
 #include <sofa/defaulttype/Vec.h>
 #include <string>
 
@@ -132,7 +133,8 @@ public:
     bool writeData(std::string msg);
 
     bool setSingleCommand(const std::string& cmdMsg, std::string& result);
-        
+    
+    bool sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result);
 
     std::string convertSingleData(char *buffer, bool forceRemoveEoL = false);
 
