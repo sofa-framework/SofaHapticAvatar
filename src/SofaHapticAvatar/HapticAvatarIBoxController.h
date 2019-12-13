@@ -61,6 +61,8 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
+    float getJawOpeningAngle();
+
 private:
     void clearDevice();
 

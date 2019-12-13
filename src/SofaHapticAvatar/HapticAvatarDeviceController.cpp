@@ -245,6 +245,12 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         sofa::helper::fixed_array<float, 4> motorValues = _driver->getLastPWM();
         sofa::helper::fixed_array<float, 3> collForces = _driver->getLastCollisionForce();
         float jtorq = _driver->getJawTorque();
+        if (_deviceCtrl->m_iboxCtrl)
+        {
+            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            _deviceCtrl->d_jawOpening.setValue(angle);
+        }
+
         //float angle = _driver->getJawOpeningAngle();
 
         //std::cout << "results: " << results << std::endl;
@@ -252,7 +258,6 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         _deviceCtrl->d_motorOutput.setValue(motorValues);
         _deviceCtrl->d_collisionForce.setValue(collForces);
         _deviceCtrl->d_jawTorq.setValue(jtorq);
-        //_deviceCtrl->d_jawOpening.setValue(angle);
 
         Vector3 currentForce;
         double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();

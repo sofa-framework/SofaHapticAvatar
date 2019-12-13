@@ -76,6 +76,11 @@ void HapticAvatarIBoxController::init()
     return;
 }
 
+float HapticAvatarIBoxController::getJawOpeningAngle()
+{
+    sofa::helper::fixed_array<float, 4> values = m_HA_driver->getAngles_AndLength();
+    return values[0];
+}
 
 void HapticAvatarIBoxController::clearDevice()
 {
