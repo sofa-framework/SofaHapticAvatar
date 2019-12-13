@@ -91,6 +91,7 @@ public:
     Data<sofa::helper::fixed_array<float, 4> > d_motorOutput;
     Data<sofa::helper::fixed_array<float, 3> > d_collisionForce;
     Data<float> d_jawTorq;
+    Data<float> d_jawOpening;
 
     Data<bool> d_drawDevice;
     Data<std::string> d_portName;

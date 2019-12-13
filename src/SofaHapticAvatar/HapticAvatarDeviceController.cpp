@@ -223,12 +223,14 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         sofa::helper::fixed_array<float, 4> motorValues = _driver->getLastPWM();
         sofa::helper::fixed_array<float, 3> collForces = _driver->getLastCollisionForce();
         float jtorq = _driver->getJawTorque();
+        //float angle = _driver->getJawOpeningAngle();
 
         //std::cout << "results: " << results << std::endl;
         _deviceCtrl->updateAnglesAndLength(toolValues);
         _deviceCtrl->d_motorOutput.setValue(motorValues);
         _deviceCtrl->d_collisionForce.setValue(collForces);
         _deviceCtrl->d_jawTorq.setValue(jtorq);
+        //_deviceCtrl->d_jawOpening.setValue(angle);
 
         Vector3 currentForce;
         double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();
@@ -320,6 +322,8 @@ void HapticAvatarDeviceController::updatePosition()
     d_posDevice.endEdit();
 }
 
+
+
 void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!d_drawDevice.getValue() || !m_deviceReady)
@@ -393,6 +397,13 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
         << colF[1] << "    "
         << colF[2] << "    "
         << jTorq;
+
+    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+    newLine += fontS * 2;
+
+    ss.str(std::string());
+    ss << std::fixed << std::setprecision(2) << "Jaws opening  "
+        << d_jawOpening.getValue() << "    ";
 
     vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
     newLine += fontS * 2;

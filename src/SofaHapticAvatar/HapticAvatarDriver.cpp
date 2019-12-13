@@ -226,11 +226,12 @@ float HapticAvatarDriver::getJawTorque()
 
 float HapticAvatarDriver::getJawOpeningAngle()
 {
-    char incomingData[SET_TOOL_JAW_OPENING_ANGLE];
-    if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
+    char incomingData[INCOMING_DATA_LEN];
+    std::cout << "getJawOpeningAngle" << std::endl;
+    if (sendCommandToDevice(SET_TOOL_JAW_OPENING_ANGLE, "", incomingData) == false) {
         return 0.0f;
     }
-
+    std::cout << "getJawOpeningAngle out" << std::endl;
     char* pEnd;
     float res = std::strtof(incomingData, &pEnd) * 0.0001;
 
