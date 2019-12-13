@@ -134,24 +134,44 @@ public:
     */
     void setForceVector(sofa::defaulttype::Vector3 force);
 
-    bool writeData(std::string msg);
     // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
     void releaseForce();
 
-    bool setSingleCommand(const std::string& cmdMsg, std::string& result);
-    
+
+    /** Generic method which will format the command and send it to the device using HapticAvatar::Cmd and list of arguments given as input. Result will be stored in input char* result if not null.
+    * @param {HapticAvatar::Cmd} command: the command enum to be sent.
+    * @param {string} arguments: already formatted list of arguments to be sent with the command.
+    * @param {char *} result: if not null, response will be asked to device and stored in this char*.
+    * @returns {bool} true if command success otherwise false before getting result.
+    */
     bool sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result);
 
+    
+    /// Will convert a char* array response into std::string while removing end of line and space at end.
     std::string convertSingleData(char *buffer, bool forceRemoveEoL = false);
 
 protected:
+    /** Internal method to really to get response from the device. Will be looping while calling @sa ReadDataImplLooping with a security of 10k loop.
+    * @param {char *} buffer: array to store the response.
+    * @param {bool} do_flush: to flush after getting response.
+    */
     int getDataImpl(char *buffer, bool do_flush);
-
+    
+    /** Internal low level method to really do the job of getting a response from the device
+    * @param {char *} buffer: array to store the response.
+    * @param {uint} nbChar: size of the command array
+    * @param {int *} queue: queue size to be read.
+    * @param {bool} do_flush: to flush after getting response.
+    */
     int ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
 
+    /** Internal low level method to really do the job of sending a command to the device.
+    * @param {char *} buffer: full command as an array.
+    * @param {uint} nbChar: size of the command array
+    */
     bool WriteDataImpl(char *buffer, unsigned int nbChar);
 
-    // comparable to SET_MANUAL_PWM: Set the force output manually per motor with raw PWM-values. 
+    // Will call SET_MANUAL_PWM: Set the force output manually per motor with raw PWM-values. 
     void writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque);
 
 private:

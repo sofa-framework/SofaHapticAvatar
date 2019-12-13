@@ -407,48 +407,6 @@ std::string HapticAvatarDriver::convertSingleData(char *buffer, bool forceRemove
 }
 
 
-bool HapticAvatarDriver::writeData(std::string msg)
-{
-    //writeData
-    char outgoingData[OUTGOING_DATA_LEN];
-    std::strcpy(outgoingData, msg.c_str());
-    int outlen = strlen(outgoingData);
-    
-    return WriteDataImpl(outgoingData, outlen);
-}
-
-
-bool HapticAvatarDriver::setSingleCommand(const std::string& cmdMsg, std::string& result)
-{
-    char outgoingData[OUTGOING_DATA_LEN];
-    std::strcpy(outgoingData, cmdMsg.c_str());
-    int outlen = strlen(outgoingData);
-
-    bool res = WriteDataImpl(outgoingData, outlen);
-    if (res)
-    {
-        char incomingData[INCOMING_DATA_LEN];
-        int numL = getDataImpl(incomingData, true);
-
-        if (numL == -1)
-        {
-            std::cerr << "Error no message catched for setSingleCommand: '" << cmdMsg << "'" << std::endl;
-            return false;
-        }
-
-        if (numL != 1)
-        {
-            std::cerr << "Error not a single line message returned for setSingleCommand: '" << cmdMsg << "', got Nb line: : " << numL << std::endl;
-            return false;
-        }
-        
-        result = convertSingleData(incomingData);
-    }
-
-    return res;
-}
-
-
 
 ///////////////////////////////////////////////////////////////
 /////      Internal Methods for device communication      /////
@@ -568,25 +526,15 @@ void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, flo
             values[i] = maxPWM;
     }
 
-    std::string msg;
-    msg = "35 " + std::to_string(values[0])
+    std::string args;
+    args = std::to_string(values[0])
         + " " + std::to_string(values[1])
         + " " + std::to_string(values[2])
-        + " " + std::to_string(values[3])
-        + "\n";
+        + " " + std::to_string(values[3]);
 
-    if (sendForce)
-    {
-        std::cout << "Force: '" << msg << "'";
-    }
-    
+    sendCommandToDevice(SET_MANUAL_PWM, args, nullptr);
+        
 
-    //if (force[0] == 0.0)
-    //    msg = "6 0 0 0 0 \n";
-    //else
-    //    msg = "6 1000 1000 10000 1000 \n";
-
-    bool resB = writeData(msg);
     //std::cout << "force resB: " << resB << std::endl;
     //
     //char incomingData[INCOMING_DATA_LEN];
