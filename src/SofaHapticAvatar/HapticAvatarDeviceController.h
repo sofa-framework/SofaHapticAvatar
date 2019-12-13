@@ -17,6 +17,7 @@
 
 #include <SofaHapticAvatar/HapticAvatarDriver.h>
 #include <SofaHapticAvatar/HapticAvatarPortalManager.h>
+#include <SofaHapticAvatar/HapticAvatarIBoxController.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
@@ -110,6 +111,7 @@ public:
     std::atomic<bool> m_terminate;
     int m_portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
 private:
     void clearDevice();
@@ -117,6 +119,7 @@ private:
 private:
     HapticAvatarDriver * m_HA_driver;
     HapticAvatarPortalManager * m_portalMgr;
+    HapticAvatarIBoxController * m_iboxCtrl;
     bool m_deviceReady;
 
     sofa::simulation::TaskScheduler* m_taskScheduler;

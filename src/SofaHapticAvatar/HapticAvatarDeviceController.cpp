@@ -68,6 +68,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
     , m_portId(-1)
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
+    , l_iboxCtrl(initLink("iboxController", "link to portalManager"))    
 
     , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
     , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
@@ -76,6 +77,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
 
     , m_HA_driver(nullptr)
     , m_portalMgr(nullptr)
+    , m_iboxCtrl(nullptr)
     , m_forceFeedback(nullptr)
 {
     this->f_listening.setValue(true);
@@ -177,6 +179,18 @@ void HapticAvatarDeviceController::bwdInit()
     }
 
     msg_info() << "Portal Id found: " << m_portId;
+
+
+    // get ibox if one
+    if (!l_iboxCtrl.empty())
+    {
+        m_iboxCtrl = l_iboxCtrl.get();
+        if (m_iboxCtrl != nullptr)
+        {
+            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
+        }
+    }
+
 
     m_terminate = false;
     m_deviceReady = true;
