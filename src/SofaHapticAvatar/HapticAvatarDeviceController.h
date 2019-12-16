@@ -54,6 +54,21 @@ private:
     HapticAvatarDeviceController * m_controller;
 };
 
+class SOFA_HAPTICAVATAR_API HapticAvatarJaws
+{
+public:
+    HapticAvatarJaws();
+
+
+protected:
+    float m_MaxOpeningAngle;
+    float m_jawLength;
+    float m_jaw1Radius;
+    float m_jaw2Radius;
+    float m_shaftRadius;
+};
+
+
 
 /**
 * Haptic Avatar driver
@@ -98,7 +113,8 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
     Data<int> d_fontSize;
-
+    Data<Coord> d_jawUp;
+    Data<Coord> d_jawDown;
 
     Vector3 m_debugToolPosition;    
     Vector3 m_debugForceVector;

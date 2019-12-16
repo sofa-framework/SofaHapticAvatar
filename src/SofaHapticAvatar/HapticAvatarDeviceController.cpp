@@ -53,6 +53,17 @@ HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
 }
 
 
+HapticAvatarJaws::HapticAvatarJaws()
+    : m_MaxOpeningAngle(60.0f)
+    , m_jawLength(20.0f)
+    , m_jaw1Radius(1.5f)
+    , m_jaw2Radius(1.5f)
+    , m_shaftRadius(2.5f)
+{
+
+}
+
+
 //constructeur
 HapticAvatarDeviceController::HapticAvatarDeviceController()
     : d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
@@ -63,6 +74,9 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     , d_motorOutput(initData(&d_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     
+    , d_jawUp(initData(&d_jawUp, "jawUp", "jaws opening position"))
+    , d_jawDown(initData(&d_jawDown, "jawDown", "jaws opening position"))
+    , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
 
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
@@ -257,7 +271,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         _deviceCtrl->updateAnglesAndLength(toolValues);
         _deviceCtrl->d_motorOutput.setValue(motorValues);
         _deviceCtrl->d_collisionForce.setValue(collForces);
-        _deviceCtrl->d_jawTorq.setValue(jtorq);
+        //_deviceCtrl->d_jawTorq.setValue(jtorq);
 
         Vector3 currentForce;
         double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();
@@ -347,6 +361,22 @@ void HapticAvatarDeviceController::updatePosition()
     //std::cout << "testT: " << testT << std::endl;
 
     d_posDevice.endEdit();
+
+
+    // update jaws
+    HapticAvatarDeviceController::Coord & jawUp = *d_jawUp.beginEdit();
+    HapticAvatarDeviceController::Coord & jawDown = *d_jawDown.beginEdit();
+    float _MaxOpeningAngle = 60.0f;
+    float _OpeningAngle = d_jawOpening.getValue() * _MaxOpeningAngle * 0.01f;
+
+    jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
+    jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
+
+    jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
+    jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
+
+    d_jawUp.endEdit();
+    d_jawDown.endEdit();
 }
 
 
