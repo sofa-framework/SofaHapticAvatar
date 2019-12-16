@@ -16,7 +16,8 @@
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
     <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDevice="1" forceScale="1"/>
+    drawDevice="1" forceScale="1" iboxController="@HAIBox"/>
+    <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
     <Node name="Portal_1">
@@ -60,80 +61,83 @@
     </Node>
     
     
+    <Node name="Instrument" >
+        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/>
+    </Node>
     
-    <Node name="ArticulatedTool">
-        <MechanicalObject template="Rigid3d" name="Articulations" position="@../HADevice.positionDevice"/>
-        
-        <Node name="Grasper" >
-            <EulerImplicitSolver name="cg_odesolver"  />
-            <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
+    <Node name="Jaw_Up" >
+        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.jawUp"/>
+    </Node>
+    
+    <Node name="Jaw_Down" >
+        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.jawDown"/>
+    </Node>
+    
 
-            <MechanicalObject name="GrasperDOFs" template="Rigid" position="0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1  "/>
-
-            
-            <UniformMass name="mass" totalMass="1.0" />
-                
-            <LCPForceFeedback activate="true" forceCoef="0.0001"/>            
-            <RestShapeSpringsForceField stiffness='1000000000000' angularStiffness='1000000000000' external_rest_shape='@../Articulations' points='0' external_points='0' />
-            <UncoupledConstraintCorrection/>
-            
-            <Node name="Shaft_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
-            </Node>
-            
-            <Node name="Shaft_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="0.2" contactStiffness="10" group="0" /> 
-                <LineCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" />
-            </Node>
-            
-            
-            <Node name="Jaws_up_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
-            </Node>
-            
-            <Node name="Jaws_up_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="0.2" contactStiffness="10" group="0" /> 
-                <LineCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" />
-            </Node>
+    <Node name="Grasper" >     
+        <EulerImplicitSolver name="cg_odesolver"  />
+        <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
+        
+        <MechanicalObject name="instrumentState" template="Rigid3d" position="0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1"/>
+        <UniformMass name="mass" totalMass="1000.0" />
+        
+        <LCPForceFeedback activate="true" forceCoef="0.001"/>            
+        <RestShapeSpringsForceField points="0 1 2" 
+        stiffness='1000000000000 1000000000000 1000000000000' 
+        angularStiffness='1000000000000 1000000000000 1000000000000' 
+        external_rest_shape='@../Instrument/GrasperDOFs'  />
+        <UncoupledConstraintCorrection/>
+        
+        <Node name="Shaft_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="0"/>
+        </Node>
+        
+        <Node name="Shaft_visu" >
+            <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="0"/>
+        </Node>
         
         
-            <Node name="Jaws_down_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
-            </Node>
-            
-            <Node name="Jaws_down_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="0.2" contactStiffness="10" group="0" /> 
-                <LineCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" />
-            </Node>
+        <Node name="JawUp_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="1"/>
+        </Node>
+        
+        <Node name="JawUp_visu" >
+            <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="1"/>
+        </Node>
+        
+        
+        <Node name="JawDown_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
+        </Node>
+        
+        <Node name="JawDown_visu" >
+            <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="2"/>
         </Node>
     </Node>
-
-    
   
   
   
-  
-  
-  
-    
     
     <Node name="Cube_0">
         <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="20 0 60"/>
@@ -155,32 +159,6 @@
             <LineCollisionModel group="1"/>
             
             <Node name="VisuSurface_0">
-                <OglModel name="Visual" color="1.000 1.000 1.000 0.6" />
-                <BarycentricMapping input="@.." output="@Visual" />
-            </Node>
-        </Node>
-    </Node>
-    
-    <Node name="Cube_1">
-        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 70 40"/>
-        <MechanicalObject src="@loader" name="Volume" />
-        
-        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
-        <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
-    
-        <Node name="Surface_1">
-            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
-            <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
-            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
-            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
-
-            <TriangleCollisionModel group="1"/>
-            <LineCollisionModel group="1"/>
-            
-            <Node name="VisuSurface_1">
                 <OglModel name="Visual" color="1.000 1.000 1.000 0.6" />
                 <BarycentricMapping input="@.." output="@Visual" />
             </Node>
