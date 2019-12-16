@@ -77,6 +77,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_jawUp(initData(&d_jawUp, "jawUp", "jaws opening position"))
     , d_jawDown(initData(&d_jawDown, "jawDown", "jaws opening position"))
     , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
+    , d_testPosition(initData(&d_testPosition, "testPosition", "jaws opening position"))
+    
 
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
@@ -102,6 +104,10 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     m_debugForceVector = Vector3(0.0, 0.0, 0.0);
     m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
     m_toolRot.identity();
+
+    HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
+    testPosition.resize(3);
+    d_testPosition.endEdit();
 }
 
 
@@ -280,6 +286,8 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             Vector3 pos_in_world = _deviceCtrl->d_posDevice.getValue().getCenter();
             _deviceCtrl->m_forceFeedback->computeForce(pos_in_world[0], pos_in_world[1], pos_in_world[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
             
+
+
             _deviceCtrl->m_debugToolPosition = pos_in_world;
             _deviceCtrl->m_debugForceVector = currentForce;
 
@@ -349,6 +357,9 @@ void HapticAvatarDeviceController::updatePosition()
 
     m_toolRot = m_toolRot.inverted();
 
+    HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
+    testPosition.resize(3);
+
     HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
     sofa::defaulttype::Quat orien;
     orien.fromMatrix(rotM);
@@ -361,6 +372,9 @@ void HapticAvatarDeviceController::updatePosition()
     //std::cout << "testT: " << testT << std::endl;
 
     d_posDevice.endEdit();
+    testPosition[0] = posDevice;
+
+    
 
 
     // update jaws
@@ -375,8 +389,11 @@ void HapticAvatarDeviceController::updatePosition()
     jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
 
+    testPosition[1] = jawUp;
+    testPosition[2] = jawDown;
     d_jawUp.endEdit();
     d_jawDown.endEdit();
+    d_testPosition.endEdit();
 }
 
 

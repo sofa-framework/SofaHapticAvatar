@@ -116,6 +116,8 @@ public:
     Data<Coord> d_jawUp;
     Data<Coord> d_jawDown;
 
+    Data<VecCoord> d_testPosition;
+
     Vector3 m_debugToolPosition;    
     Vector3 m_debugForceVector;
 
