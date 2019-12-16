@@ -3,10 +3,11 @@
     <RequiredPlugin name="SofaOpenglVisual"/>
     <RequiredPlugin name="SofaHapticAvatar"/>
 
-	<VisualStyle displayFlags="showVisualModels showBehaviorModels" />
+	<VisualStyle displayFlags="showVisualModels showBehaviorModels " />
 
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" drawDevice="1"/>
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    iboxController="@HAIBox" drawDevice="1"/>
     <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
 	
     
@@ -54,27 +55,32 @@
     </Node>
     
     <Node name="ArticulatedTool">
-<!--        <MechanicalObject template="Rigid3d" name="Articulations" position="@../HADevice.positionDevice"/>-->
+        <MechanicalObject template="Rigid3d" name="Articulations" position="@../HADevice.positionDevice"/>
         
-        <Node name="Grasper" >
-            <MechanicalObject name="GrasperDOFs" template="Rigid" position="@../../HADevice.positionDevice"/>
-            <Node name="Shaft_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
-            </Node>           
-            
+        <Node name="Shaft_visu" >
+            <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
+            <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
+        </Node>
+        
+        <Node name="Jaw_Up" >
+            <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../../HADevice.jawUp"/>
+            <!--<RigidRigidMapping input="@../Articulations" output="@GrasperDOFs" printLog="1" index="0"/>-->
             <Node name="Jaws_up_visu" >
                 <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
                 <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
             </Node>
+        </Node>
         
+        <Node name="Jaw_Down" >
+            <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../../HADevice.jawDown"/>
+            
             <Node name="Jaws_down_visu" >
                 <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
                 <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
-            </Node>
+            </Node>            
         </Node>
     </Node>
 </Node>
