@@ -106,7 +106,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     m_toolRot.identity();
 
     HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
-    testPosition.resize(3);
+    testPosition.resize(6);
     d_testPosition.endEdit();
 }
 
@@ -358,7 +358,7 @@ void HapticAvatarDeviceController::updatePosition()
     m_toolRot = m_toolRot.inverted();
 
     HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
-    testPosition.resize(3);
+    testPosition.resize(6);
 
     HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
     sofa::defaulttype::Quat orien;
@@ -372,25 +372,34 @@ void HapticAvatarDeviceController::updatePosition()
     //std::cout << "testT: " << testT << std::endl;
 
     d_posDevice.endEdit();
-    testPosition[0] = posDevice;
-
-    
-
+    testPosition[0] = m_debugRootPosition;
+    testPosition[1] = posDevice;
 
     // update jaws
-    HapticAvatarDeviceController::Coord & jawUp = *d_jawUp.beginEdit();
+    HapticAvatarDeviceController::Coord & jawUp = *d_jawUp.beginEdit();    
     HapticAvatarDeviceController::Coord & jawDown = *d_jawDown.beginEdit();
-    float _MaxOpeningAngle = 60.0f;
-    float _OpeningAngle = d_jawOpening.getValue() * _MaxOpeningAngle * 0.01f;
+    float _OpeningAngle = d_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
 
     jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
     jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
     jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
+    
+    HapticAvatarDeviceController::Coord jawUpExtrem = jawUp;
+    HapticAvatarDeviceController::Coord jawDownExtrem = jawDown;
 
-    testPosition[1] = jawUp;
-    testPosition[2] = jawDown;
+
+    Vec3f posExtrem = Vec3f(0.0, -m_jawsData.m_jawLength, 0.0);
+    jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
+    jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
+    
+    testPosition[2] = jawUp;
+    testPosition[3] = jawUpExtrem;
+
+    testPosition[4] = jawDown;
+    testPosition[5] = jawDownExtrem;
+    
     d_jawUp.endEdit();
     d_jawDown.endEdit();
     d_testPosition.endEdit();
@@ -409,17 +418,27 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     {
         vparams->drawTool()->disableLighting();
 
-        const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
-        float glRadius = float(d_scale.getValue());
-        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-        vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+    //    const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
+    //    float glRadius = float(d_scale.getValue());
+    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
 
-        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-        vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+    
+
+    const HapticAvatarDeviceController::VecCoord & testPosition = d_testPosition.getValue();
+    float glRadius = float(d_scale.getValue());
+    for (unsigned int i = 0; i < testPosition.size(); ++i)
+    {
+        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
     }
 
+    }
 
     size_t newLine = d_fontSize.getValue();    
     int fontS = d_fontSize.getValue();

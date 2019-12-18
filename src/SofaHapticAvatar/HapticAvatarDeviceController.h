@@ -54,13 +54,15 @@ private:
     HapticAvatarDeviceController * m_controller;
 };
 
+
+// Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
 class SOFA_HAPTICAVATAR_API HapticAvatarJaws
 {
 public:
     HapticAvatarJaws();
 
 
-protected:
+public:
     float m_MaxOpeningAngle;
     float m_jawLength;
     float m_jaw1Radius;
@@ -145,6 +147,8 @@ private:
     std::mutex lockPosition;
 
     std::thread haptic_thread;
+
+    HapticAvatarJaws m_jawsData;
 };
 
 } // namespace controller
