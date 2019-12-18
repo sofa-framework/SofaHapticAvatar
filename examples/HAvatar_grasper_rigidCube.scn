@@ -65,42 +65,34 @@
         <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/>
     </Node>
     
-    <Node name="Jaw_Up" >
-        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.jawUp"/>
-    </Node>
-    
-    <Node name="Jaw_Down" >
-        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.jawDown"/>
-    </Node>
-    
-
+        
     <Node name="Grasper" >     
         <EulerImplicitSolver name="cg_odesolver"  />
         <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
         
-        <MechanicalObject name="instrumentState" template="Rigid3d" position="0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1"/>
+        <MechanicalObject name="instrumentState" template="Rigid3d" position="0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1  0 0 0 0 0 0 1"/>
         <UniformMass name="mass" totalMass="1000.0" />
         
         <LCPForceFeedback activate="true" forceCoef="0.001"/>            
-        <RestShapeSpringsForceField points="0 1 2" 
-        stiffness='1000000000000 1000000000000 1000000000000' 
-        angularStiffness='1000000000000 1000000000000 1000000000000' 
+        <RestShapeSpringsForceField points="0 1 2 3 4 5" 
+        stiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
+        angularStiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
         external_rest_shape='@../Instrument/GrasperDOFs'  />
         <UncoupledConstraintCorrection/>
-        
+    
         <Node name="Shaft_collision" tags="toolCollision">
             <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
             <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
             <LineCollisionModel group="0"/>
-            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="1"/>
         </Node>
         
         <Node name="Shaft_visu" >
             <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
             <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="0"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="1"/>
         </Node>
         
         
@@ -110,13 +102,13 @@
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
             <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
             <LineCollisionModel group="0"/>
-            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="1"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
         </Node>
         
         <Node name="JawUp_visu" >
             <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
             <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="1"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="2"/>
         </Node>
         
         
@@ -126,13 +118,13 @@
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
             <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
             <LineCollisionModel group="0"/>
-            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
         </Node>
         
         <Node name="JawDown_visu" >
             <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
             <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="2"/>
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
         </Node>
     </Node>
   

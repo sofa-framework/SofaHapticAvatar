@@ -60,7 +60,7 @@
         <Node name="Shaft_visu" >
             <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
             <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" />
+            <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="1"/>
         </Node>
         
         <Node name="Jaw_Up" >
@@ -69,7 +69,7 @@
             <Node name="Jaws_up_visu" >
                 <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
+                <RigidMapping input="@../.." output="@InstrumentVisualModel" index="2"/>
             </Node>
         </Node>
         
@@ -79,7 +79,7 @@
             <Node name="Jaws_down_visu" >
                 <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping input="@.." output="@InstrumentVisualModel" index="0"/>
+                <RigidMapping input="@../.." output="@InstrumentVisualModel" index="4"/>
             </Node>            
         </Node>
     </Node>
