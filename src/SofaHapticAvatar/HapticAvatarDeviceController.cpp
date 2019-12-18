@@ -406,11 +406,6 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     //vparams->drawTool()->saveLastState();
     //vparams->drawTool()->restoreLastState();
 
-    float scale = 10.0f;
-    vparams->drawTool()->drawSphere(m_debugToolPosition, 0.1f, defaulttype::Vec4f(1.0, 0.0, 0.0, 1.0));
-    vparams->drawTool()->drawLine(m_debugToolPosition, m_debugToolPosition + m_debugForceVector*scale, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
- 
-
     {
         vparams->drawTool()->disableLighting();
 
