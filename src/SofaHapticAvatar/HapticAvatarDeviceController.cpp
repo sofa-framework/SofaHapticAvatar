@@ -100,8 +100,6 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     
     d_hapticIdentity.setReadOnly(true);
 
-    m_debugToolPosition = Vector3(0.0, 0.0, 0.0);
-    m_debugForceVector = Vector3(0.0, 0.0, 0.0);
     m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
     m_toolRot.identity();
 
@@ -288,9 +286,6 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             
 
 
-            _deviceCtrl->m_debugToolPosition = pos_in_world;
-            _deviceCtrl->m_debugForceVector = currentForce;
-
             bool contact = false;
             for (int i = 0; i < 3; i++)
             {
@@ -312,6 +307,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             else
                 _driver->releaseForce();
         }
+
 
         std::this_thread::sleep_for(wait_duration);
         auto t2 = std::chrono::high_resolution_clock::now();
@@ -423,11 +419,6 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
     //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
     //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-
-    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-    //    vparams->drawTool()->drawArrow(m_debugRootPosition.getCenter(), m_debugRootPosition.getCenter() + m_debugRootPosition.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-    
 
     const HapticAvatarDeviceController::VecCoord & testPosition = d_testPosition.getValue();
     float glRadius = float(d_scale.getValue());

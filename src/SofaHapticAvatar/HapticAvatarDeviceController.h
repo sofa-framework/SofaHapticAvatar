@@ -120,9 +120,6 @@ public:
 
     Data<VecCoord> d_testPosition;
 
-    Vector3 m_debugToolPosition;    
-    Vector3 m_debugForceVector;
-
     Coord m_debugRootPosition;
     sofa::defaulttype::Mat3x3f m_toolRot;
     /// General Haptic thread methods
