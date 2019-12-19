@@ -86,7 +86,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
     , l_iboxCtrl(initLink("iboxController", "link to portalManager"))    
 
-    , d_drawDevice(initData(&d_drawDevice, false, "drawDevice", "draw device"))
+    , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
+    , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
     , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
     , m_terminate(true)
@@ -101,6 +102,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     d_hapticIdentity.setReadOnly(true);
 
     m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
+    m_debugForces.resize(6);
     m_toolRot.identity();
 
     HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
@@ -259,9 +261,17 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
+        // Get all info from devices
         sofa::helper::fixed_array<float, 4> toolValues = _driver->getAngles_AndLength();
         sofa::helper::fixed_array<float, 4> motorValues = _driver->getLastPWM();
         sofa::helper::fixed_array<float, 3> collForces = _driver->getLastCollisionForce();
+
+        _deviceCtrl->updateAnglesAndLength(toolValues);
+        _deviceCtrl->d_motorOutput.setValue(motorValues);
+        _deviceCtrl->d_collisionForce.setValue(collForces);
+
+
+        // get info regarding jaws
         float jtorq = _driver->getJawTorque();
         if (_deviceCtrl->m_iboxCtrl)
         {
@@ -269,43 +279,69 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             _deviceCtrl->d_jawOpening.setValue(angle);
         }
 
-        //float angle = _driver->getJawOpeningAngle();
 
-        //std::cout << "results: " << results << std::endl;
-        _deviceCtrl->updateAnglesAndLength(toolValues);
-        _deviceCtrl->d_motorOutput.setValue(motorValues);
-        _deviceCtrl->d_collisionForce.setValue(collForces);
-        //_deviceCtrl->d_jawTorq.setValue(jtorq);
-
-        Vector3 currentForce;
-        double maxInputForceFeedback = 0.001;//driver->d_maxInputForceFeedback.getValue();
+        // Force feedback computation
         if (_deviceCtrl->m_forceFeedback)
         {
-            Vector3 pos_in_world = _deviceCtrl->d_posDevice.getValue().getCenter();
-            _deviceCtrl->m_forceFeedback->computeForce(pos_in_world[0], pos_in_world[1], pos_in_world[2], 0, 0, 0, 0, currentForce[0], currentForce[1], currentForce[2]);
-            
+            const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_testPosition.getValue();
 
+            // Check main force feedback
+            Vector3 tipPosition = testPosition[1].getCenter();
+            Vector3 shaftForce;
+            _deviceCtrl->m_forceFeedback->computeForce(tipPosition[0], tipPosition[1], tipPosition[2], 0, 0, 0, 0, shaftForce[0], shaftForce[1], shaftForce[2]);
 
-            bool contact = false;
+            bool contactShaft = false;
             for (int i = 0; i < 3; i++)
             {
-                if (currentForce[i] != 0.0)
+                if (shaftForce[i] != 0.0)
                 {
-                    //driver->m_isInContact = true;
-                    contact = true;
+                    contactShaft = true;
                     break;
                 }
-            }
+            }            
+
+            // Check jaws force feedback
+            Vector3 jawUpForce, jawDownForce;
+            Vector3 jawUpPosition = testPosition[3].getCenter();
+            Vector3 jawDownPosition = testPosition[5].getCenter();
             
-            if (contact)
+            _deviceCtrl->m_forceFeedback->computeForce(jawUpPosition[0], jawUpPosition[1], jawUpPosition[2], 0, 0, 0, 0, jawUpForce[0], jawUpForce[1], jawUpForce[2]);
+            _deviceCtrl->m_forceFeedback->computeForce(jawDownPosition[0], jawDownPosition[1], jawDownPosition[2], 0, 0, 0, 0, jawDownForce[0], jawDownForce[1], jawDownForce[2]);
+
+            // save debug info
+            _deviceCtrl->m_debugForces[0] = tipPosition;
+            _deviceCtrl->m_debugForces[1] = shaftForce;
+            _deviceCtrl->m_debugForces[2] = jawUpPosition;
+            _deviceCtrl->m_debugForces[3] = jawUpForce;
+            _deviceCtrl->m_debugForces[4] = jawDownPosition;
+            _deviceCtrl->m_debugForces[5] = jawDownForce;
+
+            /*std::cout << "tipPosition: " << tipPosition << " | shaftForce: " << shaftForce << std::endl;
+            std::cout << "jawUpPosition: " << jawUpPosition << " | jawUpForce: " << jawUpForce << std::endl;
+            std::cout << "jawDownPosition: " << jawDownPosition << " | jawDownForce: " << jawDownForce << std::endl;*/
+
+            if (contactShaft)
             {
                 std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                std::cout << "haptic force: " << currentForce << std::endl;
+                std::cout << "haptic shaftForce: " << shaftForce << std::endl;
 
-                _driver->setForceVector(_deviceCtrl->m_toolRot * currentForce);
+                _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
             }
             else
                 _driver->releaseForce();
+
+            
+            //bool contact = false;
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    if (currentForce[i] != 0.0)
+            //    {
+            //        //driver->m_isInContact = true;
+            //        contact = true;
+            //        break;
+            //    }
+            //}
+ 
         }
 
 
@@ -368,7 +404,7 @@ void HapticAvatarDeviceController::updatePosition()
     //std::cout << "testT: " << testT << std::endl;
 
     d_posDevice.endEdit();
-    testPosition[0] = m_debugRootPosition;
+    testPosition[0] = posDevice;
     testPosition[1] = posDevice;
 
     // update jaws
@@ -405,31 +441,39 @@ void HapticAvatarDeviceController::updatePosition()
 
 void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
 {
-    if (!d_drawDevice.getValue() || !m_deviceReady)
+    if (!m_deviceReady)
         return;
 
-    //vparams->drawTool()->saveLastState();
-    //vparams->drawTool()->restoreLastState();
+    // vparams->drawTool()->disableLighting();
 
+    if (d_drawDeviceAxis.getValue())
     {
-        vparams->drawTool()->disableLighting();
+        //    const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
+        //    float glRadius = float(d_scale.getValue());
+        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
 
-    //    const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
-    //    float glRadius = float(d_scale.getValue());
-    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+        const HapticAvatarDeviceController::VecCoord & testPosition = d_testPosition.getValue();
+        float glRadius = float(d_scale.getValue());
+        for (unsigned int i = 0; i < testPosition.size(); ++i)
+        {
+            vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+            vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+            vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+        }
+    }
+        
 
-    const HapticAvatarDeviceController::VecCoord & testPosition = d_testPosition.getValue();
-    float glRadius = float(d_scale.getValue());
-    for (unsigned int i = 0; i < testPosition.size(); ++i)
+    if (!d_drawDebugForce.getValue())
+        return;
+    
+
+    for (unsigned int i = 0; i < m_debugForces.size()*0.5; ++i)
     {
-        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+        vparams->drawTool()->drawLine(m_debugForces[i * 2], m_debugForces[i * 2] + m_debugForces[(i * 2) + 1] * 5.0f, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
     }
 
-    }
 
     size_t newLine = d_fontSize.getValue();    
     int fontS = d_fontSize.getValue();

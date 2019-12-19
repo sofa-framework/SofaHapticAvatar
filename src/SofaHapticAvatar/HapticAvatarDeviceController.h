@@ -111,7 +111,9 @@ public:
     Data<float> d_jawTorq;
     Data<float> d_jawOpening;
 
-    Data<bool> d_drawDevice;
+    Data<bool> d_drawDeviceAxis;
+    Data<bool> d_drawDebugForce;
+
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
     Data<int> d_fontSize;
@@ -119,6 +121,8 @@ public:
     Data<Coord> d_jawDown;
 
     Data<VecCoord> d_testPosition;
+
+    sofa::helper::vector<Vector3> m_debugForces;
 
     Coord m_debugRootPosition;
     sofa::defaulttype::Mat3x3f m_toolRot;
