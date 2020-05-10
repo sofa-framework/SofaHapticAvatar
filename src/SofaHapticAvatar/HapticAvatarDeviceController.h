@@ -131,11 +131,26 @@ public:
     /// General Haptic thread methods
     static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
+    static void CopyData(std::atomic<bool>& terminate, void * p_this);
+
     std::atomic<bool> m_terminate;
     int m_portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
     SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
+
+public:
+    struct DeviceData
+    {
+        sofa::helper::fixed_array<float, 4> anglesAndLength;
+        sofa::helper::fixed_array<float, 4> motorValues;
+        sofa::helper::fixed_array<float, 3> collisionForces;
+        float jawOpening;
+    };
+
+    DeviceData m_hapticData;
+    DeviceData m_simuData;
+
 private:
     void clearDevice();
 
@@ -150,6 +165,7 @@ private:
     std::mutex lockPosition;
 
     std::thread haptic_thread;
+    std::thread copy_thread;
 
     HapticAvatarJaws m_jawsData;
 };
