@@ -124,6 +124,8 @@ public:
 
     sofa::helper::vector<Vector3> m_debugForces;
 
+    sofa::helper::vector<float> m_times;
+
     Coord m_debugRootPosition;
     sofa::defaulttype::Mat3x3f m_toolRot;
     /// General Haptic thread methods

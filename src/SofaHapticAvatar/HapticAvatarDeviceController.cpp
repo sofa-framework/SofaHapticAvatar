@@ -232,6 +232,8 @@ void HapticAvatarDeviceController::reinit()
 }
 
 
+using namespace sofa::helper::system::thread;
+
 void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
     std::cout << "Haptics thread" << std::endl;
@@ -253,13 +255,20 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
     // Loop Timer
     HANDLE h_timer;
-    long t_ms = 1; // 1ms loop speed
-
+    long targetSpeedLoop = 1; // Target loop speed: 1ms
+    
+    // Use computer tick for timer
+    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
+    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
+    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
+    
+    ctime_t lastTime = CTime::getRefTime();
+    int cptLoop = 0;    
     // Haptics Loop
-    const auto wait_duration = std::chrono::milliseconds(t_ms);
     while (!terminate)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
+        ctime_t startTime = CTime::getRefTime();
 
         // Get all info from devices
         sofa::helper::fixed_array<float, 4> toolValues = _driver->getAngles_AndLength();
@@ -316,14 +325,14 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             _deviceCtrl->m_debugForces[4] = jawDownPosition;
             _deviceCtrl->m_debugForces[5] = jawDownForce;
 
-            /*std::cout << "tipPosition: " << tipPosition << " | shaftForce: " << shaftForce << std::endl;
-            std::cout << "jawUpPosition: " << jawUpPosition << " | jawUpForce: " << jawUpForce << std::endl;
-            std::cout << "jawDownPosition: " << jawDownPosition << " | jawDownForce: " << jawDownForce << std::endl;*/
+            //std::cout << "tipPosition: " << tipPosition << " | shaftForce: " << shaftForce << std::endl;
+            //std::cout << "jawUpPosition: " << jawUpPosition << " | jawUpForce: " << jawUpForce << std::endl;
+            //std::cout << "jawDownPosition: " << jawDownPosition << " | jawDownForce: " << jawDownForce << std::endl;
 
             if (contactShaft)
             {
-                std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                std::cout << "haptic shaftForce: " << shaftForce << std::endl;
+                //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
+                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;
 
                 _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
             }
@@ -341,19 +350,45 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             //        break;
             //    }
             //}
- 
         }
 
+        ctime_t endTime = CTime::getRefTime();
+        ctime_t duration = endTime - startTime;
 
-        std::this_thread::sleep_for(wait_duration);
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-        //std::cout << "Haptics loop: " << duration << std::endl;
+        // If loop is quicker than the target loop speed. Wait here.
+        while (duration < targetTicksPerLoop)
+        {
+            endTime = CTime::getRefTime();
+            duration = endTime - startTime;
+        }
+
+        // timer dump
+        cptLoop++;
+
+        if (cptLoop % 100 == 0)
+        {
+            ctime_t stepTime = CTime::getRefTime();
+            ctime_t diffLoop = stepTime - lastTime;
+            lastTime = stepTime;
+            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
+            _deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
+
+            auto t2 = std::chrono::high_resolution_clock::now();
+            
+            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
+            t1 = t2;
+            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
+        }
     }
 
     // ensure no force
     _driver->releaseForce();
     std::cout << "Haptics thread END!!" << std::endl;
+
+    for (unsigned int i = 0; i < _deviceCtrl->m_times.size(); i++)
+    {
+        std::cout << _deviceCtrl->m_times[i] << std::endl;
+    }
 }
 
 
@@ -473,6 +508,7 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     {
         vparams->drawTool()->drawLine(m_debugForces[i * 2], m_debugForces[i * 2] + m_debugForces[(i * 2) + 1] * 5.0f, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
     }
+
 
 
     size_t newLine = d_fontSize.getValue();    
