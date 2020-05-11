@@ -17,13 +17,7 @@
 #include <chrono>
 #include <iomanip>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace controller
+namespace sofa::component::controller
 {
 
 using namespace HapticAvatar;
@@ -103,8 +97,4 @@ void HapticAvatarIBoxController::reinit()
 
 
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::controller

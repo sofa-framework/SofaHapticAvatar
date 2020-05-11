@@ -28,13 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace controller
+namespace sofa::component::controller
 {
 
 HapticAvatarPortalController::HapticAvatarPortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
@@ -198,8 +192,4 @@ void HapticAvatarPortalController::printInfo()
     std::cout << "##################################" << std::endl;
 }
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::controller

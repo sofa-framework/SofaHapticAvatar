@@ -19,20 +19,13 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_HAPTICAVATAR_PORTALCONTROLLER_H
-#define SOFA_HAPTICAVATAR_PORTALCONTROLLER_H
+#pragma once
 
 #include <SofaHapticAvatar/config.h>
 #include <sofa/defaulttype/RigidTypes.h>
 #include <string>
 
-namespace sofa 
-{
-
-namespace component 
-{
-
-namespace controller 
+namespace sofa::component::controller
 {
 
 /**
@@ -79,10 +72,4 @@ private:
     sofa::defaulttype::Mat4x4f m_portalMtx;
 };
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
-
-#endif // SOFA_HAPTICAVATAR_PORTALCONTROLLER_H
+} // namespace sofa::component::controller

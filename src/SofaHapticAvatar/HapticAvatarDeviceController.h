@@ -4,8 +4,7 @@
 * Authors:                                                                    *
 * Contact information:                                                        *
 ******************************************************************************/
-#ifndef SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
-#define SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
+#pragma once
 
 #include <SofaHapticAvatar/config.h>
 #include <sofa/defaulttype/SolidTypes.h>
@@ -26,13 +25,7 @@
 
 #include <atomic>
 
-namespace sofa 
-{
-
-namespace component 
-{
-
-namespace controller 
+namespace sofa::component::controller
 {
 
 using namespace sofa::defaulttype;
@@ -170,10 +163,4 @@ private:
     HapticAvatarJaws m_jawsData;
 };
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
-
-#endif // SOFA_HAPTICAVATAR_DEVICECONTROLLER_H
+} // namespace sofa::component::controller

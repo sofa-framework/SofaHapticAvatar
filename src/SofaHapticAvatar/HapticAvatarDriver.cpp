@@ -26,13 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace controller
+namespace sofa::component::controller
 {
 
 using namespace HapticAvatar;
@@ -548,9 +542,4 @@ void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, flo
 }
 
 
-
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::controller

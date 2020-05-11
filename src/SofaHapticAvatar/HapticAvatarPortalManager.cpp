@@ -33,13 +33,7 @@
 #include <stdlib.h>
 
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace controller
+namespace sofa::component::controller
 {
 
 int HapticAvatarPortalManagerClass = core::RegisterObject("TODO detail")
@@ -308,8 +302,4 @@ void HapticAvatarPortalManager::printInfo()
     }
 }
 
-} // namespace controller
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::controller
