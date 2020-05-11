@@ -13,7 +13,9 @@ set(HEADER_FILES
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalManager.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalController.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarIBoxController.h    
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarIBoxController.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.h
+    
 )
 
 set(SOURCE_FILES
@@ -23,6 +25,7 @@ set(SOURCE_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarIBoxController.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.cpp
 )
 
 set(README_FILES Readme.txt)
@@ -34,7 +37,7 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_SOFAHAPTICAVATAR")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} PUBLIC SofaComponentGeneral SofaHaptics SofaOpenglVisual)
+target_link_libraries(${PROJECT_NAME} PUBLIC SofaConstraint SofaHaptics SofaOpenglVisual)
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml) # Private because not exported in API
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
