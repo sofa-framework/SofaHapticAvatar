@@ -475,13 +475,17 @@ void HapticAvatarDeviceController::updatePosition()
         }
 
     m_toolRot = m_toolRot.inverted();
+    sofa::defaulttype::Quat orien;
+    orien.fromMatrix(rotM);
 
     HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
     testPosition.resize(6);
 
-    HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
-    sofa::defaulttype::Quat orien;
-    orien.fromMatrix(rotM);
+    // compute bati position
+    HapticAvatarDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
+    rootPos.getOrientation() = orien;
+
+    HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();    
     posDevice.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
     //std::cout << "posDevice: " << posDevice << std::endl;
@@ -489,9 +493,9 @@ void HapticAvatarDeviceController::updatePosition()
     //Vec3f test = Vec3f(0, 1, 0);
     //Vec3f testT = rotM* test;
     //std::cout << "testT: " << testT << std::endl;
-
     d_posDevice.endEdit();
-    testPosition[0] = posDevice;
+
+    testPosition[0] = rootPos;
     testPosition[1] = posDevice;
 
     // update jaws
