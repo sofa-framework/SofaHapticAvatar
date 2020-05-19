@@ -29,70 +29,51 @@ int HapticAvatarEmulatorClass = core::RegisterObject("Driver allowing interfacin
 
 //constructeur
 HapticAvatarEmulator::HapticAvatarEmulator()
-    : m_HA_driver(nullptr)
-    , d_portName(initData(&d_portName, std::string("//./COM3"), "portName", "position of the base of the part of the device"))
-    , m_portId(-1)
-    , l_portalMgr(initLink("portalManager", "link to portalManager"))
-    , l_iboxCtrl(initLink("iboxController", "link to portalManager"))
+    : HapticAvatarDeviceController()
 {
     this->f_listening.setValue(true);
-   
-
 }
 
-
-HapticAvatarEmulator::~HapticAvatarEmulator()
-{
-    clearDevice();
-    if (m_HA_driver)
-    {
-        delete m_HA_driver;
-        m_HA_driver = nullptr;
-    }
-}
-
-
-//executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatarEmulator::init()
-{
-    msg_info() << "HapticAvatarEmulator::init()";
-    m_HA_driver = new HapticAvatarDriver(d_portName.getValue());
-
-    if (!m_HA_driver->IsConnected())
-        return;
-
-    // get identity
-    std::string identity = m_HA_driver->getIdentity();
-    d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatarDeviceController identity: '" << identity << "'" << std::endl;
-
-    // release force
-    m_HA_driver->releaseForce();
-
-    return;
-}
-
-
-void HapticAvatarEmulator::clearDevice()
-{
-    if (m_terminate == false)
-    {
-        m_terminate = true;
-        haptic_thread.join();
-        copy_thread.join();
-    }
-}
 
 
 void HapticAvatarEmulator::bwdInit()
 {   
     msg_info() << "HapticAvatarEmulator::bwdInit()";
 
+    m_portId = m_portalMgr->getPortalId(d_portName.getValue());
+    if (m_portId == -1)
+    {
+        msg_error("HapticAvatarDeviceController no portal id found");
+        m_deviceReady = false;
+        return;
+    }
+
+    msg_info() << "Portal Id found: " << m_portId;
+
+
+    // get ibox if one
+    if (!l_iboxCtrl.empty())
+    {
+        m_iboxCtrl = l_iboxCtrl.get();
+        if (m_iboxCtrl != nullptr)
+        {
+            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
+        }
+    }
+
+
     m_terminate = false;
     m_deviceReady = true;
+    haptic_thread = std::thread(HapticsEmulated, std::ref(this->m_terminate), this, m_HA_driver);
+    copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
 
-    //haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
-    //copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
+    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
+    m_forceFeedback = context->get<ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+
+    if (m_forceFeedback != nullptr)
+    {
+        msg_info() << "ForceFeedback found";
+    }
 
 }
 
@@ -100,9 +81,9 @@ void HapticAvatarEmulator::bwdInit()
 
 using namespace sofa::helper::system::thread;
 
-void HapticAvatarEmulator::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
+void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
-    std::cout << "Haptics thread" << std::endl;
+    std::cout << "Haptics Emulator thread" << std::endl;
     HapticAvatarEmulator* _deviceCtrl = static_cast<HapticAvatarEmulator*>(p_this);
     HapticAvatarDriver* _driver = static_cast<HapticAvatarDriver*>(p_driver);
    
@@ -132,6 +113,8 @@ void HapticAvatarEmulator::Haptics(std::atomic<bool>& terminate, void * p_this, 
     std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
     int cptLoop = 0;
 
+    bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+
     // Haptics Loop
     while (!terminate)
     {
@@ -141,7 +124,6 @@ void HapticAvatarEmulator::Haptics(std::atomic<bool>& terminate, void * p_this, 
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-        _deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
 
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
@@ -159,16 +141,13 @@ void HapticAvatarEmulator::Haptics(std::atomic<bool>& terminate, void * p_this, 
         // timer dump
         cptLoop++;
 
-        if (cptLoop % 100 == 0)
+        if (debugThread && cptLoop % 100 == 0)
         {
             ctime_t stepTime = CTime::getRefTime();
             ctime_t diffLoop = stepTime - lastTime;
             lastTime = stepTime;
-            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-            _deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
 
             auto t2 = std::chrono::high_resolution_clock::now();
-
             auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
             t1 = t2;
             std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
@@ -178,118 +157,71 @@ void HapticAvatarEmulator::Haptics(std::atomic<bool>& terminate, void * p_this, 
 
     // ensure no force
     _driver->releaseForce();
-    std::cout << "Haptics thread END!!" << std::endl;
-
-    for (unsigned int i = 0; i < _deviceCtrl->m_times.size(); i++)
-    {
-        std::cout << _deviceCtrl->m_times[i] << std::endl;
-    }
+    std::cout << "Haptics Emulator thread END!!" << std::endl;
 }
 
-
-void HapticAvatarEmulator::CopyData(std::atomic<bool>& terminate, void * p_this)
-{
-    HapticAvatarEmulator* _deviceCtrl = static_cast<HapticAvatarEmulator*>(p_this);
-
-    // Use computer tick for timer
-    double targetSpeedLoop = 0.5; // Target loop speed: 0.5ms
-    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
-
-    ctime_t lastTime = CTime::getRefTime();
-    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    int cptLoop = 0;
-    // Haptics Loop
-    while (!terminate)
-    {
-        ctime_t startTime = CTime::getRefTime();
-        _deviceCtrl->m_simuData = _deviceCtrl->m_hapticData;
-
-        ctime_t endTime = CTime::getRefTime();
-        ctime_t duration = endTime - startTime;
-
-        // If loop is quicker than the target loop speed. Wait here.
-        while (duration < targetTicksPerLoop)
-        {
-            endTime = CTime::getRefTime();
-            duration = endTime - startTime;
-        }
-
-
-        //if (cptLoop % 100 == 0)
-        //{
-        //    ctime_t stepTime = CTime::getRefTime();
-        //    ctime_t diffLoop = stepTime - lastTime;
-        //    lastTime = stepTime;
-        //    //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-        //    std::cout << "Copy nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;            
-        //}
-        cptLoop++;
-    }
-}
-
-void HapticAvatarEmulator::updatePosition()
-{
-    //_deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-
-    // Loop Timer
-    HANDLE h_timer;
-    long targetSpeedLoop = 0.5; // Target loop speed: 1ms
-
-                                // Use computer tick for timer
-    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
-
-    ctime_t lastTime = CTime::getRefTime();
-    std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
-    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    int cptLoop = 0;
-
-    // Haptics Loop
-    for (int i=0; i<1000; i++)
-    {
-        auto t1 = std::chrono::high_resolution_clock::now();
-        ctime_t startTime = CTime::getRefTime();
-
-        // Get all info from devices
-        m_hapticData.anglesAndLength = m_HA_driver->getAngles_AndLength();
-        m_hapticData.motorValues = m_HA_driver->getLastPWM();
-        m_hapticData.collisionForces = m_HA_driver->getLastCollisionForce();
-
-        ctime_t endTime = CTime::getRefTime();
-        ctime_t duration = endTime - startTime;
-
-
-        // If loop is quicker than the target loop speed. Wait here.
-        //if (duration < targetTicksPerLoop)
-        //    std::cout << "Need to Wait!!!" << std::endl;
-        /*while (duration < targetTicksPerLoop)
-        {
-        endTime = CTime::getRefTime();
-        duration = endTime - startTime;
-        }*/
-
-        // timer dump
-        cptLoop++;
-
-        if (cptLoop % 100 == 0)
-        {
-            ctime_t stepTime = CTime::getRefTime();
-            ctime_t diffLoop = stepTime - lastTime;
-            lastTime = stepTime;
-            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-            m_times.push_back(diffLoop* speedTimerMs);
-
-            auto t2 = std::chrono::high_resolution_clock::now();
-
-            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
-            t1 = t2;
-            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
-        }
-    }
-}
+//
+//void HapticAvatarEmulator::updatePosition()
+//{
+//    //_deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
+//
+//    // Loop Timer
+//    HANDLE h_timer;
+//    long targetSpeedLoop = 0.5; // Target loop speed: 1ms
+//
+//                                // Use computer tick for timer
+//    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
+//    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
+//    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
+//
+//    ctime_t lastTime = CTime::getRefTime();
+//    std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
+//    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
+//    int cptLoop = 0;
+//
+//    // Haptics Loop
+//    for (int i=0; i<1000; i++)
+//    {
+//        auto t1 = std::chrono::high_resolution_clock::now();
+//        ctime_t startTime = CTime::getRefTime();
+//
+//        // Get all info from devices
+//        m_hapticData.anglesAndLength = m_HA_driver->getAngles_AndLength();
+//        m_hapticData.motorValues = m_HA_driver->getLastPWM();
+//        m_hapticData.collisionForces = m_HA_driver->getLastCollisionForce();
+//
+//        ctime_t endTime = CTime::getRefTime();
+//        ctime_t duration = endTime - startTime;
+//
+//
+//        // If loop is quicker than the target loop speed. Wait here.
+//        //if (duration < targetTicksPerLoop)
+//        //    std::cout << "Need to Wait!!!" << std::endl;
+//        /*while (duration < targetTicksPerLoop)
+//        {
+//        endTime = CTime::getRefTime();
+//        duration = endTime - startTime;
+//        }*/
+//
+//        // timer dump
+//        cptLoop++;
+//
+//        if (cptLoop % 100 == 0)
+//        {
+//            ctime_t stepTime = CTime::getRefTime();
+//            ctime_t diffLoop = stepTime - lastTime;
+//            lastTime = stepTime;
+//            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
+//            m_times.push_back(diffLoop* speedTimerMs);
+//
+//            auto t2 = std::chrono::high_resolution_clock::now();
+//
+//            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
+//            t1 = t2;
+//            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
+//        }
+//    }
+//}
 
 
 
@@ -297,28 +229,6 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!m_deviceReady)
         return;
-
-    // vparams->drawTool()->disableLighting();
-
-    //if (d_drawDeviceAxis.getValue())
-    //{
-    //    //    const HapticAvatarEmulator::Coord & posDevice = d_posDevice.getValue();
-    //    //    float glRadius = float(d_scale.getValue());
-    //    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-    //    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-    //    //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-
-    //    const HapticAvatarEmulator::VecCoord & testPosition = d_testPosition.getValue();
-    //    float glRadius = float(d_scale.getValue());
-    //    for (unsigned int i = 0; i < testPosition.size(); ++i)
-    //    {
-    //        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-    //        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-    //        vparams->drawTool()->drawArrow(testPosition[i].getCenter(), testPosition[i].getCenter() + testPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-    //    }
-    //}
-        
-
 }
 
 

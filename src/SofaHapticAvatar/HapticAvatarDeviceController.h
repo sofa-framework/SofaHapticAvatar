@@ -145,10 +145,10 @@ public:
     DeviceData m_hapticData;
     DeviceData m_simuData;
 
-private:
+protected:
     void clearDevice();
 
-private:
+protected:
     HapticAvatarDriver * m_HA_driver;
     HapticAvatarPortalManager * m_portalMgr;
     HapticAvatarIBoxController * m_iboxCtrl;
