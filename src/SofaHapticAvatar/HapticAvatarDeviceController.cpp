@@ -82,6 +82,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
 
     , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
     , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
+    , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "draw device"))
+    
     , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
     , m_terminate(true)
@@ -262,6 +264,9 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
     std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
     int cptLoop = 0;    
+
+    bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+
     // Haptics Loop
     while (!terminate)
     {
@@ -361,13 +366,13 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         // timer dump
         cptLoop++;
 
-        if (cptLoop % 100 == 0)
+        if (debugThread && cptLoop % 100 == 0)
         {
             ctime_t stepTime = CTime::getRefTime();
             ctime_t diffLoop = stepTime - lastTime;
             lastTime = stepTime;
-            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-            _deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
+            
+            //_deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
 
             auto t2 = std::chrono::high_resolution_clock::now();
             
@@ -381,9 +386,12 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     _driver->releaseForce();
     std::cout << "Haptics thread END!!" << std::endl;
 
-    //for (unsigned int i = 0; i < _deviceCtrl->m_times.size(); i++)
+    //if (debugThread)
     //{
-    //    std::cout << _deviceCtrl->m_times[i] << std::endl;
+    //    for (unsigned int i = 0; i < _deviceCtrl->m_times.size(); i++)
+    //    {
+    //        std::cout << _deviceCtrl->m_times[i] << std::endl;
+    //    }
     //}
 }
 

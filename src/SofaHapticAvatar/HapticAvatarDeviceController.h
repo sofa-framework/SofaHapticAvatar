@@ -106,6 +106,7 @@ public:
 
     Data<bool> d_drawDeviceAxis;
     Data<bool> d_drawDebugForce;
+    Data<bool> d_dumpThreadInfo;
 
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
