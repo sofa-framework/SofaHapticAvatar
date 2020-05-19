@@ -253,7 +253,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
     // Loop Timer
     HANDLE h_timer;
-    long targetSpeedLoop = 0.5; // Target loop speed: 1ms
+    long targetSpeedLoop = 1; // Target loop speed: 1ms
     
     // Use computer tick for timer
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
@@ -263,7 +263,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     ctime_t lastTime = CTime::getRefTime();
     std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
     std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    int cptLoop = 0;    
+    int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
 
@@ -276,15 +276,14 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-        _deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
+        //_deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
 
         // get info regarding jaws
         //float jtorq = _driver->getJawTorque();
         if (_deviceCtrl->m_iboxCtrl)
         {
             float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
-            _deviceCtrl->m_hapticData.jawOpening;
-        //    //_deviceCtrl->d_jawOpening.setValue(angle);
+            _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
 
@@ -309,10 +308,10 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             }            
 
             //// Check jaws force feedback
-            //Vector3 jawUpForce, jawDownForce;
-            //Vector3 jawUpPosition = testPosition[3].getCenter();
-            //Vector3 jawDownPosition = testPosition[5].getCenter();
-            //
+            Vector3 jawUpForce, jawDownForce;
+            Vector3 jawUpPosition = testPosition[3].getCenter();
+            Vector3 jawDownPosition = testPosition[5].getCenter();
+            
             //_deviceCtrl->m_forceFeedback->computeForce(jawUpPosition[0], jawUpPosition[1], jawUpPosition[2], 0, 0, 0, 0, jawUpForce[0], jawUpForce[1], jawUpForce[2]);
             //_deviceCtrl->m_forceFeedback->computeForce(jawDownPosition[0], jawDownPosition[1], jawDownPosition[2], 0, 0, 0, 0, jawDownForce[0], jawDownForce[1], jawDownForce[2]);
 
@@ -333,11 +332,12 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
                 //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
                 //std::cout << "haptic shaftForce: " << shaftForce << std::endl;
 
-                _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
+                //_driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
             }
             else
                 _driver->releaseForce();
 
+            _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
             
             //bool contact = false;
             //for (int i = 0; i < 3; i++)
@@ -453,6 +453,7 @@ void HapticAvatarDeviceController::updatePosition()
     updateAnglesAndLength(m_simuData.anglesAndLength);
     d_motorOutput.setValue(m_simuData.motorValues);
     d_collisionForce.setValue(m_simuData.collisionForces);
+    d_jawOpening.setValue(m_simuData.jawOpening);
 
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
     m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
