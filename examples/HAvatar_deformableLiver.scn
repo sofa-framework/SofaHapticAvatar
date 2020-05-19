@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<Node name="root" gravity="0 -9 0" dt="0.03" bbox="-200 -200 -200 200 200 200">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <RequiredPlugin name="SofaHapticAvatar"/>
+    <RequiredPlugin name='SofaHaptics' />
+    <RequiredPlugin name='SofaSparseSolver'/>
+	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
+  
+    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceDetection name="detection" />
+    <DefaultContactManager name="response" response="FrictionContact" />
+    <LocalMinDistance name="proximity" alarmDistance="0.15" contactDistance="0.05" angleCone="0.0" />
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
+
+    
+    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    drawDevice="1" forceScale="1"/>
+    
+    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
+    <Node name="Portal_1">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition1"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_2">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition2"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_3">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition3"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_4">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition4"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="Portal_5">
+        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition5"/>
+        <Node name="VisuPortal">
+            <OglModel name="Visual" src="@../../ProtalMesh" />
+            <RigidMapping input="@.." output="@Visual" index="0"/>
+        </Node>
+    </Node>
+    
+    <Node name="tool">
+        <MechanicalObject template="Rigid3d" name="DOFs" position="@../HADevice.positionDevice"/>
+        
+        <Node name="Instrument" >     
+            <EulerImplicitSolver name="cg_odesolver"  />
+            <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
+            
+            <MechanicalObject name="instrumentState" template="Rigid3d" />
+            <UniformMass name="mass" totalMass="1000.0" />
+            
+            <LCPForceFeedback activate="true" forceCoef="0.001"/>            
+            <RestShapeSpringsForceField stiffness='1000000000000' angularStiffness='1000000000000' external_rest_shape='@../DOFs' points='0' external_points='0' />
+            <UncoupledConstraintCorrection/>
+            
+            <Node name="CollisionModel" tags="toolCollision">
+                <MeshObjLoader filename="./mesh/Grasper.obj"  name="loader"/>
+                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dz="0" tags="toolPosition"/> 
+                <SphereCollisionModel name="instrumentPoint" radius="0.2" contactStiffness="10" tags="CarvingTool" /> 
+                <LineCollisionModel />
+                <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState" />
+            </Node>
+            
+            <Node name="VisualModel" >
+                <MeshObjLoader name="meshLoader_1" filename="./mesh/Grasper.obj" handleSeams="1" />
+                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
+                <RigidMapping name="MM->VM mapping" input="@instrumentState" output="@InstrumentVisualModel" />
+            </Node>
+        </Node>
+    </Node>
+
+    
+    
+    
+    <Node name="Liver" gravity="0 -9.81 0">
+        <EulerImplicitSolver name="cg_odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linear solver" tolerance="1.0e-9" threshold="1.0e-9" />        <MeshGmshLoader name="meshLoader" filename="mesh/liver2.msh" scale3d="50 50 50" rotation="160 -60 0" translation="120 100 80"/>
+        <TetrahedronSetTopologyContainer name="Container" src="@meshLoader" />
+        <TetrahedronSetTopologyModifier   name="Modifier" />
+		<TetrahedronSetTopologyAlgorithms name="TopoAlgo"  template="Vec3d" />
+		<TetrahedronSetGeometryAlgorithms name="GeomAlgo"  template="Vec3d" />
+        
+        <MechanicalObject name="dofs" src="@meshLoader" />
+        <DiagonalMass  name="mass" massDensity="1" />
+        
+        <TetrahedronFEMForceField name="FEM" youngModulus="6000" poissonRatio="0.3" computeGlobalMatrix="false" method="large" />
+        <UncoupledConstraintCorrection/><!--<PrecomputedConstraintCorrection recompute="true" printLog="1"/>-->
+
+        <BoxROI name="FixedROI" template="Vec3d" box="100 80 60 120 100 80" drawBoxes="1" position="@dofs.position" />
+        <FixedConstraint indices="@FixedROI.indices" />
+        <Node name="T">
+            <TriangleSetTopologyContainer  name="Container" fileTopology="" tags=" " />
+			<TriangleSetTopologyModifier   name="Modifier" />
+			<TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+			<TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" />
+			
+            <Tetra2TriangleTopologicalMapping input="@../Container" output="@Container" />
+			
+			<TriangleCollisionModel />
+            
+            <Node name="Visu">
+                <OglModel name="Visual" color="red" />
+                <IdentityMapping input="@../../dofs" output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+    
+    <!-- 
+    <Node name="TT">
+        <EulerImplicitSolver name="cg_odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linear solver" tolerance="1.0e-9" threshold="1.0e-9" />
+        <MeshGmshLoader name="loader" filename="./mesh/liver.msh" />
+        <MechanicalObject src="@loader" name="Volume" scale3d="50 50 50" rotation="160 -60 0" translation="120 100 80"/>
+
+		<TetrahedronSetTopologyContainer  name="Container" position="@Volume.position" src="@loader"/>
+		<TetrahedronSetTopologyModifier   name="Modifier" />
+		<TetrahedronSetTopologyAlgorithms name="TopoAlgo"  template="Vec3d" />
+		<TetrahedronSetGeometryAlgorithms name="GeomAlgo"  template="Vec3d" />
+
+        <DiagonalMass massDensity="1.0" />
+
+       <BoxROI template="Vec3d" box="4 -4 -3 10 2 3" drawBoxes="1" position="@Volume.rest_position" name="FixedROI"/>
+        <FixedConstraint indices="@FixedROI.indices" />
+        
+
+		<TetrahedralCorotationalFEMForceField template="Vec3d" name="FEM" method="large" poissonRatio="0.3" youngModulus="6000" computeGlobalMatrix="0" />
+        
+      <PrecomputedConstraintCorrection recompute="true"/>        -->
+<!--      
+        <Node name="T">
+            <TriangleSetTopologyContainer  name="Container" fileTopology="" tags=" " />
+			<TriangleSetTopologyModifier   name="Modifier" />
+			<TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+			<TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" />
+			
+            <Tetra2TriangleTopologicalMapping input="@../Container" output="@Container" />
+			
+			<TriangleCollisionModel />
+            
+            <Node name="Visu">
+                <OglModel name="Visual" color="red" />
+                <IdentityMapping input="@../../Volume" output="@Visual" />
+            </Node>
+        </Node>
+
+    </Node>
+    -->
+    
+    <!--
+    <Node name="Cube">
+        <EulerImplicitSolver name="cg_odesolver" rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="25" name="linear solver" />
+        <MeshGmshLoader name="loader" filename="mesh/cube_low_res.msh" scale3d="10 10 10" translation="140 40 40"/>
+        <MechanicalObject src="@loader" name="Volume" />
+        
+        <TetrahedronSetTopologyContainer name="Tetra_topo" src="@loader" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawTetrahedra="0" drawScaleTetrahedra="0.8"/>
+    
+        <BoxROI name="boxRoi" box="100 -1 -10 180 10 80" drawBoxes="1"/>
+        <FixedConstraint name="FixedConstraint" indices="@boxRoi.indices" />
+        <UniformMass totalMass="1" />
+
+        <TetrahedronFEMForceField youngModulus="600" poissonRatio="0.45" topology="@ContainerTetra"/>
+
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+            <TriangleCollisionModel />
+            <LineCollisionModel />
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="1.000 1.000 1.000 0.6" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+        
+        <PrecomputedConstraintCorrection recompute="0" fileCompliance="./Cube-78-0.01.comp" printLog="0"/>
+    </Node>
+    -->
+</Node>
