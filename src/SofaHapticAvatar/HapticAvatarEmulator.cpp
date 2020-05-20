@@ -205,6 +205,7 @@ void HapticAvatarEmulator::handleEvent(core::objectmodel::Event *event)
        if (!m_deviceReady)
             return;
 
+        m_simulationStarted = true;
         updatePosition();
     }
 }

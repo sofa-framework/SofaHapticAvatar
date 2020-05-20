@@ -92,6 +92,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , m_portalMgr(nullptr)
     , m_iboxCtrl(nullptr)
     , m_forceFeedback(nullptr)
+    , m_simulationStarted(false)
 {
     this->f_listening.setValue(true);
     
@@ -288,7 +289,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
 
         // Force feedback computation
-        if (_deviceCtrl->m_forceFeedback)
+        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
         {
             const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_testPosition.getValue();
 
@@ -633,9 +634,10 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
 
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
-       if (!m_deviceReady)
+        if (!m_deviceReady)
             return;
-
+        
+        m_simulationStarted = true;
         updatePosition();
     }
 }

@@ -132,7 +132,7 @@ public:
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
     SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
-
+    bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:
     struct DeviceData
     {

@@ -41,7 +41,7 @@ public:
 
     /// General Haptic thread methods
     static void HapticsEmulated(std::atomic<bool>& terminate, void * p_this, void * p_driver);
-
+    
     Data<SReal> m_floorHeight;
     Data<SReal> m_damping;
 };
