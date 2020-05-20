@@ -26,7 +26,7 @@ class SOFA_HAPTICAVATAR_API HapticAvatarEmulator : public HapticAvatarDeviceCont
 {
 
 public:
-    SOFA_CLASS(HapticAvatarEmulator, Controller);
+    SOFA_CLASS(HapticAvatarEmulator, HapticAvatarDeviceController);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
@@ -37,12 +37,13 @@ public:
     virtual void bwdInit() override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
-    //void updatePosition();
     void handleEvent(core::objectmodel::Event *) override;
 
     /// General Haptic thread methods
     static void HapticsEmulated(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
+    Data<SReal> m_floorHeight;
+    Data<SReal> m_damping;
 };
 
 } // namespace sofa::component::controller

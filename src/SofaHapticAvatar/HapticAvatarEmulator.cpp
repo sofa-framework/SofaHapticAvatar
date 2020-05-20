@@ -26,10 +26,14 @@ int HapticAvatarEmulatorClass = core::RegisterObject("Driver allowing interfacin
     .add< HapticAvatarEmulator >()
     ;
 
+using namespace sofa::defaulttype;
 
 //constructeur
 HapticAvatarEmulator::HapticAvatarEmulator()
     : HapticAvatarDeviceController()
+    , m_floorHeight(initData(&m_floorHeight, SReal(0.0), "floorHeight", "jaws opening angle"))
+    , m_damping(initData(&m_damping, SReal(1.0), "damping", "jaws opening angle"))
+    
 {
     this->f_listening.setValue(true);
 }
@@ -101,7 +105,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 
     // Loop Timer
     HANDLE h_timer;
-    long targetSpeedLoop = 0.5; // Target loop speed: 1ms
+    long targetSpeedLoop = 1; // Target loop speed: 1ms
 
                                 // Use computer tick for timer
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
@@ -114,7 +118,9 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
-
+    
+    float damping = _deviceCtrl->m_damping.getValue();
+    bool contact = false;
     // Haptics Loop
     while (!terminate)
     {
@@ -130,13 +136,37 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 
 
         // If loop is quicker than the target loop speed. Wait here.
-        //if (duration < targetTicksPerLoop)
-        //    std::cout << "Need to Wait!!!" << std::endl;
-        /*while (duration < targetTicksPerLoop)
+        while (duration < targetTicksPerLoop)
         {
             endTime = CTime::getRefTime();
             duration = endTime - startTime;
-        }*/
+        }
+
+        const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_testPosition.getValue();
+        // Check main force feedback
+        Vector3 tipPosition = testPosition[1].getCenter();
+        float height = _deviceCtrl->m_floorHeight.getValue();
+        Vector3 floorPosition = tipPosition;
+
+        if (tipPosition.y() < height)
+        {
+            if (!contact)
+            {
+                std::cout << "First contact!" << std::endl;
+            }
+            floorPosition[1] = height;
+            Vector3 force = damping * (floorPosition - tipPosition);
+            _driver->setForceVector(_deviceCtrl->m_toolRot *force);
+            contact = true;
+        }
+        else if (contact) // was in contact
+        {
+            _driver->releaseForce();
+           // Vector3 force = Vector3(0.0, 0.0, 0.0);
+           // _driver->setForceVector(force);
+            contact = false;
+        }
+        
 
         // timer dump
         cptLoop++;
@@ -159,70 +189,6 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
     _driver->releaseForce();
     std::cout << "Haptics Emulator thread END!!" << std::endl;
 }
-
-//
-//void HapticAvatarEmulator::updatePosition()
-//{
-//    //_deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-//
-//    // Loop Timer
-//    HANDLE h_timer;
-//    long targetSpeedLoop = 0.5; // Target loop speed: 1ms
-//
-//                                // Use computer tick for timer
-//    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-//    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-//    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
-//
-//    ctime_t lastTime = CTime::getRefTime();
-//    std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
-//    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-//    int cptLoop = 0;
-//
-//    // Haptics Loop
-//    for (int i=0; i<1000; i++)
-//    {
-//        auto t1 = std::chrono::high_resolution_clock::now();
-//        ctime_t startTime = CTime::getRefTime();
-//
-//        // Get all info from devices
-//        m_hapticData.anglesAndLength = m_HA_driver->getAngles_AndLength();
-//        m_hapticData.motorValues = m_HA_driver->getLastPWM();
-//        m_hapticData.collisionForces = m_HA_driver->getLastCollisionForce();
-//
-//        ctime_t endTime = CTime::getRefTime();
-//        ctime_t duration = endTime - startTime;
-//
-//
-//        // If loop is quicker than the target loop speed. Wait here.
-//        //if (duration < targetTicksPerLoop)
-//        //    std::cout << "Need to Wait!!!" << std::endl;
-//        /*while (duration < targetTicksPerLoop)
-//        {
-//        endTime = CTime::getRefTime();
-//        duration = endTime - startTime;
-//        }*/
-//
-//        // timer dump
-//        cptLoop++;
-//
-//        if (cptLoop % 100 == 0)
-//        {
-//            ctime_t stepTime = CTime::getRefTime();
-//            ctime_t diffLoop = stepTime - lastTime;
-//            lastTime = stepTime;
-//            //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-//            m_times.push_back(diffLoop* speedTimerMs);
-//
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//
-//            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
-//            t1 = t2;
-//            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
-//        }
-//    }
-//}
-
 
 
 void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
