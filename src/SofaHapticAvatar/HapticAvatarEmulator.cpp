@@ -39,6 +39,8 @@ HapticAvatarEmulator::HapticAvatarEmulator()
 {
     this->f_listening.setValue(true);
     m_targetPosition = Vector3(0.0, 0.0, 0.0);
+    m_roughForce = sofa::helper::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
+    m_roughIntensity = 1.0;
 }
 
 
@@ -187,6 +189,12 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
                 contact = true;
                 hasContact = true;
             }
+            else if (testMode == 3)
+            {
+                _driver->writeRoughForce(_deviceCtrl->m_roughForce[0], _deviceCtrl->m_roughForce[1], _deviceCtrl->m_roughForce[2], _deviceCtrl->m_roughForce[3]);
+                contact = true;
+                hasContact = true;
+            }
         }
 
 
@@ -271,6 +279,70 @@ void HapticAvatarEmulator::handleEvent(core::objectmodel::Event *event)
         sofa::core::objectmodel::KeypressedEvent* ke = static_cast<sofa::core::objectmodel::KeypressedEvent*>(event);
         if (ke->getKey() == '0')
             m_activeTest = !m_activeTest;
+
+
+
+        // rotTorque    
+        if (ke->getKey() == '4')
+        {
+            m_roughForce[0] += m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        else if (ke->getKey() == '6')
+        {
+            m_roughForce[0] -= m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        // pitch torque
+        else if (ke->getKey() == '7')
+        {
+            m_roughForce[1] += m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        else if (ke->getKey() == '9')
+        {
+            m_roughForce[1] -= m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        // zforce
+        else if (ke->getKey() == '8')
+        {
+            m_roughForce[2] += m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        else if (ke->getKey() == '2')
+        {
+            m_roughForce[2] -= m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        // yaw torque
+        else if (ke->getKey() == '1')
+        {
+            m_roughForce[3] += m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        else if (ke->getKey() == '3')
+        {
+            m_roughForce[3] -= m_roughIntensity;
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        else if (ke->getKey() == '5')
+        {
+            m_roughForce = sofa::helper::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
+            std::cout << "m_roughForce: " << m_roughForce << std::endl;
+        }
+        // force value
+        else if (ke->getKey() == '+')
+        {
+            m_roughIntensity += 0.1;
+            std::cout << "m_roughIntensity: " << m_roughIntensity << std::endl;
+        }
+        else if (ke->getKey() == '-')
+        {
+            m_roughIntensity -= 0.1;
+            std::cout << "m_roughIntensity: " << m_roughIntensity << std::endl;
+        }
+
     }
 }
 

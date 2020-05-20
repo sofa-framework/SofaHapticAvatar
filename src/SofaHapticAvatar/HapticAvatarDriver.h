@@ -130,6 +130,8 @@ public:
     // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
     void releaseForce();
 
+    // Will call SET_MANUAL_PWM: Set the force output manually per motor with raw PWM-values. 
+    void writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque);
 
     /** Generic method which will format the command and send it to the device using HapticAvatar::Cmd and list of arguments given as input. Result will be stored in input char* result if not null.
     * @param {HapticAvatar::Cmd} command: the command enum to be sent.
@@ -162,10 +164,7 @@ protected:
     * @param {char *} buffer: full command as an array.
     * @param {uint} nbChar: size of the command array
     */
-    bool WriteDataImpl(char *buffer, unsigned int nbChar);
-
-    // Will call SET_MANUAL_PWM: Set the force output manually per motor with raw PWM-values. 
-    void writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque);
+    bool WriteDataImpl(char *buffer, unsigned int nbChar);    
 
 private:
     //Connection status

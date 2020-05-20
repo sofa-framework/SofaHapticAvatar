@@ -502,7 +502,7 @@ void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, flo
     //        << " | zforce: " << zforce
     //        << " | yawTorque: " << yawTorque
     //        << std::endl;
-    //    sendForce = true;
+    //    //sendForce = true;
     //}
 
     sofa::helper::fixed_array<int, 4> values;     
