@@ -17,7 +17,7 @@
 
 namespace sofa::component::controller
 {
-
+    using namespace sofa::defaulttype;
 
 /**
 * Haptic Avatar driver
@@ -44,6 +44,11 @@ public:
     
     Data<SReal> m_floorHeight;
     Data<SReal> m_damping;
+    Data<int> m_testMode;
+
+    Vector3 m_targetPosition;
+
+    bool m_activeTest;
 };
 
 } // namespace sofa::component::controller

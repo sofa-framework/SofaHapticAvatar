@@ -12,6 +12,7 @@
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
+#include <sofa/core/objectmodel/KeypressedEvent.h>
 
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
@@ -33,9 +34,11 @@ HapticAvatarEmulator::HapticAvatarEmulator()
     : HapticAvatarDeviceController()
     , m_floorHeight(initData(&m_floorHeight, SReal(0.0), "floorHeight", "jaws opening angle"))
     , m_damping(initData(&m_damping, SReal(1.0), "damping", "jaws opening angle"))
-    
+    , m_testMode(initData(&m_testMode, 0, "testMode", "jaws opening angle"))
+    , m_activeTest(false)
 {
     this->f_listening.setValue(true);
+    m_targetPosition = Vector3(0.0, 0.0, 0.0);
 }
 
 
@@ -121,6 +124,8 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
     
     float damping = _deviceCtrl->m_damping.getValue();
     bool contact = false;
+    bool firstTimeTest = true;
+    Vector3 _targetPosition;
     // Haptics Loop
     while (!terminate)
     {
@@ -145,27 +150,61 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
         const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_testPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[1].getCenter();
-        float height = _deviceCtrl->m_floorHeight.getValue();
-        Vector3 floorPosition = tipPosition;
+        int testMode = _deviceCtrl->m_testMode.getValue();
 
-        if (tipPosition.y() < height)
+        bool hasContact = false;
+        if (_deviceCtrl->m_activeTest)
         {
-            if (!contact)
+            if (testMode == 1) // floor test
             {
-                std::cout << "First contact!" << std::endl;
+                float height = _deviceCtrl->m_floorHeight.getValue();
+                Vector3 floorPosition = tipPosition;
+                if (tipPosition.y() < height)
+                {
+                    if (!contact)
+                    {
+                        std::cout << "First contact!" << std::endl;
+                    }
+                    floorPosition[1] = height;
+                    Vector3 force = damping * (floorPosition - tipPosition);
+                    _driver->setForceVector(_deviceCtrl->m_toolRot *force);
+                    contact = true;
+                    hasContact = true;
+                }
             }
-            floorPosition[1] = height;
-            Vector3 force = damping * (floorPosition - tipPosition);
-            _driver->setForceVector(_deviceCtrl->m_toolRot *force);
-            contact = true;
+            else if (testMode == 2)
+            {
+                if (firstTimeTest)
+                {
+                    _targetPosition = tipPosition;
+                    firstTimeTest = false;
+                }
+
+                Vector3 force = damping * (_targetPosition - tipPosition);
+                _driver->setForceVector(_deviceCtrl->m_toolRot *force);
+                contact = true;
+                hasContact = true;
+            }
         }
-        else if (contact) // was in contact
+
+
+        if (!hasContact && contact) // was in contact
         {
             _driver->releaseForce();
-           // Vector3 force = Vector3(0.0, 0.0, 0.0);
-           // _driver->setForceVector(force);
+            // Vector3 force = Vector3(0.0, 0.0, 0.0);
+            // _driver->setForceVector(force);
             contact = false;
+            firstTimeTest = true;
         }
+
+
+
+        
+
+        
+
+
+        
         
 
         // timer dump
@@ -207,6 +246,12 @@ void HapticAvatarEmulator::handleEvent(core::objectmodel::Event *event)
 
         m_simulationStarted = true;
         updatePosition();
+    }
+    else if (sofa::core::objectmodel::KeypressedEvent::checkEventType(event))
+    {
+        sofa::core::objectmodel::KeypressedEvent* ke = static_cast<sofa::core::objectmodel::KeypressedEvent*>(event);
+        if (ke->getKey() == '0')
+            m_activeTest = !m_activeTest;
     }
 }
 
