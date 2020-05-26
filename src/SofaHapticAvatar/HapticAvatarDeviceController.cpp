@@ -72,7 +72,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_jawDown(initData(&d_jawDown, "jawDown", "jaws opening position"))
     , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
     , d_testPosition(initData(&d_testPosition, "testPosition", "jaws opening position"))
-    
+    , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
 
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
@@ -297,7 +297,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             Vector3 tipPosition = testPosition[1].getCenter();
             Vector3 shaftForce;
             _deviceCtrl->m_forceFeedback->computeForce(tipPosition[0], tipPosition[1], tipPosition[2], 0, 0, 0, 0, shaftForce[0], shaftForce[1], shaftForce[2]);
-
+            
             bool contactShaft = false;
             for (int i = 0; i < 3; i++)
             {
@@ -328,17 +328,19 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             //std::cout << "jawUpPosition: " << jawUpPosition << " | jawUpForce: " << jawUpForce << std::endl;
             //std::cout << "jawDownPosition: " << jawDownPosition << " | jawDownForce: " << jawDownForce << std::endl;
 
+            
+            float damping = _deviceCtrl->m_forceScale.getValue();
             if (contactShaft)
             {
                 //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;
-
-                //_driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
+                
+                std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
+                _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce* damping);
             }
             else
                 _driver->releaseForce();
 
-            _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce);
+           // _driver->setForceVector(_deviceCtrl->m_toolRot * shaftForce * damping);
             
             //bool contact = false;
             //for (int i = 0; i < 3; i++)
@@ -537,8 +539,8 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
         return;
 
     // vparams->drawTool()->disableLighting();
-
-    if (d_drawDeviceAxis.getValue())
+    
+    if (vparams->displayFlags().getShowBehaviorModels())
     {
         //    const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
         //    float glRadius = float(d_scale.getValue());
