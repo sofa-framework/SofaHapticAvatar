@@ -15,8 +15,8 @@
 
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatarEmulator name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="1" scale="0.5" dumpThreadInfo="1" floorHeight="30.0" testMode="1" damping="5"/>
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    drawDevice="1" forceScale="1" drawDeviceAxis="1" scale="0.5"/>
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
     <Node name="Portal_1">
@@ -68,7 +68,7 @@
             <SparseLUSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />    
             
             <MechanicalObject name="instrumentState" template="Rigid3d" />
-            <UniformMass name="mass" totalMass="50" />
+            <UniformMass name="mass" totalMass="10" />
             
             <LCPForceFeedback activate="true" forceCoef="0.00005"/>
             <RestShapeSpringsForceField stiffness='1000000000000' angularStiffness='1000000000000' external_rest_shape='@../DOFs' points='0' external_points='0' />
@@ -90,6 +90,39 @@
             </Node>
         </Node>
     </Node>
+
+    
+    
   
+        
+    <RegularGridTopology name="grid_1" n="10 2 10" min="-200 -20 -200" max="200 20 200" />
+    <Node name="Cube">
+        <MechanicalObject src="@../grid_1" name="Volume" />
+        
+        <TetrahedronSetTopologyContainer name="Tetra_topo" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
+        
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
+        
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+    
     
 </Node>

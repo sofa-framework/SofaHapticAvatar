@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<Node dt="0.01" gravity="0 -9.81 0" name="root">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <BruteForceDetection />
+    <DefaultContactManager />
+    <DefaultPipeline />
+    <MinProximityIntersection alarmDistance="1" contactDistance="0.2"/>
+    <VisualStyle displayFlags="showVisualModels showBehaviorModels showCollisionModels" />
+    
+    <Node>
+        <EulerImplicitSolver name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="100" name="linear solver" threshold="1e-20" tolerance="1e-20" />
+
+        <Node name="articulation">
+            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" />
+            <Node>
+                <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1    
+                0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1" />
+                
+                <MeshTopology name="lines" />
+                <UniformMass template="Rigid3d" name="mass" totalMass="1" />
+                <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
+
+                <Node name="Shaft_collision" tags="toolCollision">
+                    <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj" name="loader" />
+                    <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+                    <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="10" dz="0" tags="toolPosition"/> 
+                    <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+                    <LineCollisionModel group="0"/>
+                    <TriangleCollisionModel group="0"/>
+                    <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="1"/>
+                </Node>
+                
+                <Node name="JawUp_collision" tags="toolCollision">
+                    <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
+                    <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+                    <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="10" dz="0" tags="toolPosition"/> 
+                    <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+                    <LineCollisionModel group="0"/>
+                    <TriangleCollisionModel group="0"/>
+                    <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
+                </Node>
+                
+                <Node name="JawDown_collision" tags="toolCollision">
+                    <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
+                    <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+                    <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="10" dz="0" tags="toolPosition"/> 
+                    <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" /> 
+                    <LineCollisionModel group="0"/>
+                    <TriangleCollisionModel group="0"/>
+                    <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
+                </Node>
+            </Node>
+
+            <ArticulatedHierarchyContainer />
+            <Node name="articulationCenters">
+                <Node name="articulationCenter1">
+                    <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0" />
+                    <Node name="articulations">
+                        <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="0" />
+                    </Node>
+                </Node>
+                
+                <Node name="articulationCenter1_1">
+                    <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="0 0 0" posOnChild="0 0 0"/>
+                    <Node name="articulations">
+                        <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="1"/>
+                    </Node>
+                </Node>
+
+                <Node name="articulationCenter1_2">
+                    <ArticulationCenter parentIndex="1" childIndex="4" posOnParent="0 0 0" posOnChild="0 0 0"/>
+                    <Node name="articulations">
+                        <Articulation translation="0" rotation="1" rotationAxis="0 0 -1" articulationIndex="1"/>
+                    </Node>
+                </Node>
+            </Node>
+            
+        </Node>
+        
+        <!--
+        <StiffSpringForceField name="Spring" object1="@articulation" object2="@restarticulation" spring=" 1 1 100.0 1.0 0.0  2 2 100.0 1.0 0.0  3 3 100.0 1.0 0.0" />
+        -->
+    </Node>
+    
+    
+    <RegularGridTopology name="grid_1" n="10 2 10" min="-100 -60 -100" max="100 -40 100" />
+    <Node name="Cube">
+        <MechanicalObject src="@../grid_1" name="Volume" />
+        
+        <TetrahedronSetTopologyContainer name="Tetra_topo" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
+        
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
+        
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+</Node>

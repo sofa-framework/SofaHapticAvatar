@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<Node name="root" gravity="0 0 0" dt="0.01" bbox="-200 -200 -200 200 200 200">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <RequiredPlugin name="SofaHapticAvatar"/>
+    <RequiredPlugin name='SofaHaptics' />
+    <RequiredPlugin name='SofaSparseSolver'/>
+	<VisualStyle displayFlags="hideVisualModels showBehaviorModels showCollisionModels showForceFields" />
+  
+    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <BruteForceDetection name="detection" />
+    <DefaultContactManager name="response" response="FrictionContact" />
+    <LocalMinDistance name="proximity" alarmDistance="0.5" contactDistance="0.1" angleCone="0.0" />
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
+
+    
+    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    drawDeviceAxis="0" drawDebugForce="0" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1"/> 
+    <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
+    
+        
+    <Node name="Instrument" >
+        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/>
+    </Node>
+    
+        
+    <Node name="model">
+        <EulerImplicitSolver name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver iterations="100" name="linear solver" threshold="1e-20" tolerance="1e-20" />
+        
+        <MechanicalObject name="instrumentState" template="Rigid3d" position="0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1    
+            0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1"/>
+        <!--<MechanicalObject name="instrumentState" template="Rigid3d" position="@../HADevice.testPosition"/>-->
+
+        <RestShapeSpringsForceField points='0 1 2 3 4 5' external_points='0 1 2 3 4 5'
+            stiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
+            angularStiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
+            external_rest_shape='@../Instrument/GrasperDOFs'  
+            drawSpring="1"
+            />
+        <RestShapeSpringsForceField stiffness='1000000000000' angularStiffness='1000000000000' external_rest_shape='@../Instrument/GrasperDOFs' points='0 1 2 3 4 5' />
+            
+        
+        <LCPForceFeedback activate="true" forceCoef="0.001"/>
+        <UncoupledConstraintCorrection />
+        <UniformMass name="mass" totalMass="100" />
+        
+        <Node name="Shaft_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
+            index="1" />
+        </Node>
+
+        <Node name="JawUp_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
+        </Node>
+
+        <Node name="JawDown_collision" tags="toolCollision">
+            <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" />
+            <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+            <LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>
+            <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
+        </Node>        
+    </Node>
+  
+       
+       
+       
+    <RegularGridTopology name="grid_1" n="10 2 10" min="-200 -40 -200" max="200 -20 200" />
+    <Node name="Cube">
+        <MechanicalObject src="@../grid_1" name="Volume" />
+        
+        <TetrahedronSetTopologyContainer name="Tetra_topo" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
+        
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
+        
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
+
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+
+    
+</Node>

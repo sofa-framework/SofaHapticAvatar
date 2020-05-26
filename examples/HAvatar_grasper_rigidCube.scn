@@ -134,7 +134,7 @@
   
   
     
-    <RegularGridTopology name="grid_1" n="6 6 6" min="100 0 0" max="200 100 100" />
+    <RegularGridTopology name="grid_1" n="6 2 6" min="-100 -10 -100" max="100 10 100" />
     <Node name="Cube">
         <MechanicalObject src="@../grid_1" name="Volume" />
         
@@ -152,8 +152,9 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel simulated="0" moving="0" />
-            <LineCollisionModel simulated="0" moving="0" />
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
             
             <Node name="VisuSurface">
                 <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
