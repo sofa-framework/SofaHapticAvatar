@@ -20,7 +20,7 @@
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0" />
             <Node>
                 <!--<MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1    1 0 0  0 0 0 1    3 0 0  0 0 0 1    5 0 0  0 0 0 1    7 0 0  0 0 0 1" />-->
-                <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1    1 0 0  0 0 0 1    3 0 0  0 0 0 1    5 0 0  0 0 0 1    7 0 0  0 0 0 1" />
+                <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1    1 0 0  0 0 0 1    3 0 0  0 0 0 1    5 0 0  0 0 0 1    9 0 0  0 0 0 1" />
                 
                 <!--<MeshTopology name="lines" lines="0 1 1 2 2 3 3 4 " />-->
                 <MeshTopology name="lines" lines="0 1 1 2 2 3 3 4 " />
@@ -58,20 +58,20 @@
                 <Node name="articulationCenter1">
                     <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="-1 0 0" articulationProcess="2" />
                     <Node name="articulations">
-                        <Articulation translation="1" rotation="0" rotationAxis="1 0 0" articulationIndex="0" />
+                        <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="0" />
                     </Node>
                 </Node>
                 <Node name="articulationCenter2">
                     <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="1 0 0" posOnChild="-1 0 0" articulationProcess="2" />
                     <Node name="articulations">
-                        <Articulation translation="1" rotation="0" rotationAxis="1 0 0" articulationIndex="1" />
+                        <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="1" />
                     </Node>
                 </Node>
 
                 <Node name="articulationCenter3">
                     <ArticulationCenter parentIndex="2" childIndex="3" posOnParent="1 0 0" posOnChild="-1 0 0" articulationProcess="2" />
                     <Node name="articulations">
-                        <Articulation translation="1" rotation="0" rotationAxis="1 0 0" articulationIndex="2" />
+                        <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="2" />
                     </Node>
                 </Node>
                 <Node name="articulationCenter4">

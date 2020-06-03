@@ -72,6 +72,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_jawDown(initData(&d_jawDown, "jawDown", "jaws opening position"))
     , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
     , d_testPosition(initData(&d_testPosition, "testPosition", "jaws opening position"))
+    , d_basePosition(initData(&d_basePosition, "basePosition", "jaws opening position"))
+    
     , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
 
     , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
@@ -93,6 +95,7 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , m_iboxCtrl(nullptr)
     , m_forceFeedback(nullptr)
     , m_simulationStarted(false)
+    , m_firstStep(true)
 {
     this->f_listening.setValue(true);
     
@@ -482,7 +485,7 @@ void HapticAvatarDeviceController::updatePosition()
     orien.fromMatrix(rotM);
 
     HapticAvatarDeviceController::VecCoord & testPosition = *d_testPosition.beginEdit();
-    testPosition.resize(6);
+    testPosition.resize(4);
 
     // compute bati position
     HapticAvatarDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
@@ -521,10 +524,13 @@ void HapticAvatarDeviceController::updatePosition()
     jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
     
     testPosition[2] = jawUp;
-    testPosition[3] = jawUpExtrem;
+    //testPosition[3] = jawUpExtrem;
 
-    testPosition[4] = jawDown;
-    testPosition[5] = jawDownExtrem;
+    testPosition[3] = jawDown;
+    //testPosition[5] = jawDownExtrem;
+
+    for (unsigned int i = 0; i < testPosition.size(); i++)
+        std::cout << i << ": " << testPosition[i] << std::endl;
     
     d_jawUp.endEdit();
     d_jawDown.endEdit();
@@ -641,6 +647,12 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
         
         m_simulationStarted = true;
         updatePosition();
+
+        if (m_firstStep)
+        {
+            m_firstStep = false;
+            d_basePosition.setValue(d_testPosition.getValue());
+        }
     }
 }
 

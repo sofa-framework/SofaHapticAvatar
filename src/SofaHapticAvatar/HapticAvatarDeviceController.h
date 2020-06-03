@@ -115,7 +115,9 @@ public:
     Data<Coord> d_jawDown;
 
     Data<VecCoord> d_testPosition;
+    Data<VecCoord> d_basePosition;
     Data<SReal> m_forceScale;
+    bool m_firstStep;
 
     sofa::helper::vector<Vector3> m_debugForces;
 
