@@ -70,11 +70,12 @@
         <EulerImplicitSolver name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
         <CGLinearSolver iterations="100" name="linear solver" threshold="1e-20" tolerance="1e-20" />
         
-        <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0" />        
+        <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0" />        
         <UncoupledConstraintCorrection />
         <Node name="model">
             <MechanicalObject name="instrumentState" template="Rigid3d" showIndices="1" 
             position="
+51.7359 193.17 50 0.0425064 0.914367 -0.0531996 0.39912
 51.7359 193.17 50 0.0425064 0.914367 -0.0531996 0.39912
 25.8622 -20.0915 63.6382 0.0425064 0.914367 -0.0531996 0.39912
 25.8622 -20.0915 63.6382 0.0425064 0.914367 -0.0531996 0.39912
@@ -83,9 +84,9 @@
             />
             <!--<MechanicalObject name="instrumentState" template="Rigid3d" position="@../../HADevice.testPosition"/>-->
 
-                        <RestShapeSpringsForceField points="0 1 2 3" external_points="0 1 2 3"
-                stiffness='1000000000000 1000000000000 1000000000000 1000000000000' 
-                angularStiffness='1000000000000 1000000000000 1000000000000 1000000000000' 
+                        <RestShapeSpringsForceField points="0 1" external_points="0 1"
+                stiffness='1000000000000' 
+                angularStiffness='1000000000000' 
                 external_rest_shape='@../../Instrument/GrasperDOFs'
                 drawSpring="1"
             />
@@ -95,7 +96,7 @@
             <ArticulatedSystemMapping input1="@../Articulations" output="@instrumentState" />
             
             <Node name="Shaft_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
+                <MeshObjLoader filename="./mesh/grasper_shaft_collision_centered.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
                 <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
@@ -103,7 +104,7 @@
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
                 index="1" />
             </Node>
-
+<!--
             <Node name="JawUp_collision" tags="toolCollision">
                 <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
@@ -111,7 +112,7 @@
                 <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
                 <LineCollisionModel group="0"/>
                 <TriangleCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="2"/>
+                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="3"/>
             </Node>
 
             <Node name="JawDown_collision" tags="toolCollision">
@@ -121,39 +122,46 @@
                 <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
                 <LineCollisionModel group="0"/>
                 <TriangleCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="3"/>
+                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
             </Node>
-            
+           --> 
         </Node>
         
 
         <ArticulatedHierarchyContainer />
         <Node name="articulationCenters">
             <Node name="articulationCenter1">
-                <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 100 0"/>
+                <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0"/>
                 <Node name="articulations">
-                    <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="0"/>
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="1"/>
-                    <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="2"/>                 
-                    <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="3"/>
+                    <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="1" articulationProcess="2"/>
+
+                    <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="1" articulationProcess="2"/>
+                </Node>
+            </Node>
+<!--            
+                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="1" articulationProcess="1"/>
+            <Node name="articulationCenter2">
+                <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="0 0 0" posOnChild="0 0 0"/>
+                <Node name="articulations">
+                    <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="0"/>
                 </Node>
             </Node>
 
             <Node name="articulationCenter1_1">
-                <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="0 0 0" posOnChild="0 0 0"/>
+                <ArticulationCenter parentIndex="2" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0"/>
                 <Node name="articulations">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="4"/>
+                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="3"/>
                 </Node>
             </Node>
 
             <Node name="articulationCenter1_2">
-                <ArticulationCenter parentIndex="1" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0"/>
+                <ArticulationCenter parentIndex="2" childIndex="4" posOnParent="0 0 0" posOnChild="0 0 0"/>
                 <Node name="articulations">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 -1" articulationIndex="5"/>
+                    <Articulation translation="0" rotation="1" rotationAxis="0 0 -1" articulationIndex="4"/>
                 </Node>
             </Node>
 
-            
+            -->
         </Node>
     </Node>
   

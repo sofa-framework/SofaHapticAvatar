@@ -26,9 +26,9 @@
         <Node name="Shaft_collision" tags="toolCollision">
             <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            <!--
+            
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+        <!--    <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
             <LineCollisionModel group="0"/>
             <TriangleCollisionModel group="0"/>
             -->
@@ -39,9 +39,9 @@
         <Node name="JawUp_collision" tags="toolCollision">
             <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>            
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            <!--
+           
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+       <!--      <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
             <LineCollisionModel group="0"/>
             <TriangleCollisionModel group="0"/>
             -->
@@ -51,9 +51,9 @@
         <Node name="JawDown_collision" tags="toolCollision">
             <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            <!--
+            
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
+       <!--     <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
             <LineCollisionModel group="0"/>
             <TriangleCollisionModel group="0"/>
             -->
@@ -77,10 +77,10 @@
             <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            
+            <!-- 
             <RestShapeSpringsForceField stiffness='1000000' angularStiffness='1000000' 
             external_rest_shape='@../../Instrument/Shaft_collision/instrumentCollisionState' points='0' external_points='0' />
-            
+            -->
             <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
             <LineCollisionModel group="0"/>
             <TriangleCollisionModel group="0"/>
@@ -91,6 +91,11 @@
             <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
+            
+            <!-- <RestShapeSpringsForceField stiffness='1000000' angularStiffness='1000000' 
+            external_rest_shape='@../../Instrument/toolCollision/instrumentCollisionState' points='0' external_points='0' />
+           -->
+            
             <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
             <LineCollisionModel group="0"/>
             <TriangleCollisionModel group="0"/>
@@ -107,15 +112,16 @@
             <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState"/>
         </Node>
         
-        <!--
+        
         <VectorSpringForceField  template="Vec3d" object1="@Instrument/Shaft_collision/instrumentCollisionState" 
-            object2="@model/Shaft_collision/instrumentCollisionState" stiffness="100" viscosity="0" />
+            object2="@model/Shaft_collision/instrumentCollisionState" stiffness="1000000" viscosity="0" />
         
         <VectorSpringForceField  template="Vec3d" 
-            object1="@Instrument/JawUp_collision/instrumentCollisionState" object2="@model/JawUp_collision/instrumentCollisionState" stiffness="100" viscosity="0" />
-        <VectorSpringForceField  template="Vec3d" 
-            object1="@Instrument/JawDown_collision/instrumentCollisionState" object2="@model/JawDown_collision/instrumentCollisionState" stiffness="100" viscosity="0" />
--->
+            object1="@Instrument/JawUp_collision/instrumentCollisionState" object2="@model/JawUp_collision/instrumentCollisionState" 
+            stiffness="1000000" viscosity="0" useTopology="0"/>
+       <VectorSpringForceField  template="Vec3d" 
+            object1="@Instrument/JawDown_collision/instrumentCollisionState" object2="@model/JawDown_collision/instrumentCollisionState" stiffness="1000000" viscosity="0" />
+
     </Node>    
     
        
