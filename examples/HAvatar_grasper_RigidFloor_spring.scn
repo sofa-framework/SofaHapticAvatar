@@ -81,9 +81,9 @@
             <RestShapeSpringsForceField stiffness='1000000' angularStiffness='1000000' 
             external_rest_shape='@../../Instrument/Shaft_collision/instrumentCollisionState' points='0' external_points='0' />
             -->
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
-            <LineCollisionModel group="0"/>
-            <TriangleCollisionModel group="0"/>
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" contactStiffness="1000"/> 
+            <!--<LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>-->
             <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState" />
         </Node>
 
@@ -96,9 +96,9 @@
             external_rest_shape='@../../Instrument/toolCollision/instrumentCollisionState' points='0' external_points='0' />
            -->
             
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
-            <LineCollisionModel group="0"/>
-            <TriangleCollisionModel group="0"/>
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" contactStiffness="1000"/> 
+            <!--<LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>-->
             <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState"/>
         </Node>
 
@@ -106,9 +106,9 @@
             <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
             <MeshTopology src="@loader" name="InstrumentCollisionModel" />
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" /> 
-            <LineCollisionModel group="0"/>
-            <TriangleCollisionModel group="0"/>
+            <SphereCollisionModel name="instrumentPoint" radius="0.5" group="0" contactStiffness="1000"/> 
+            <!--<LineCollisionModel group="0"/>
+            <TriangleCollisionModel group="0"/>-->
             <RigidMapping name="MM->CM mapping" input="@instrumentState" output="@instrumentCollisionState"/>
         </Node>
         
