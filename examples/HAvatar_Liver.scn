@@ -71,11 +71,10 @@
         <!-- <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/> -->
         <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/>
         
-        <Node name="Shaft_collision" tags="toolCollision">
+      <!--  <Node name="Shaft_collision">
             <MeshObjLoader filename="./mesh/grasper_shaft_collision.obj"  name="loader"/>
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-            
-            <MeshTopology src="@loader" name="InstrumentCollisionModel" drawEdges="1"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" position="@instrumentCollisionState.position" drawEdges="1"/>
             <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
             index="3" />
         </Node>
@@ -84,7 +83,7 @@
             <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>            
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
            
-            <MeshTopology src="@loader" name="InstrumentCollisionModel" drawEdges="1"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" position="@instrumentCollisionState.position" drawEdges="1"/>
             <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
         </Node>
 
@@ -92,16 +91,10 @@
             <MeshObjLoader filename="./mesh/grasper_jaws_down_collision.obj"  name="loader"/>
             <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
             
-            <MeshTopology src="@loader" name="InstrumentCollisionModel" drawEdges="1"/>
+            <MeshTopology src="@loader" name="InstrumentCollisionModel" position="@instrumentCollisionState.position" drawEdges="1"/>
             <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
-        </Node>
+        </Node>-->
     </Node>
-    
-    
-    
-    
-    
-    
     
     
     <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
@@ -111,22 +104,23 @@
         <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0  0 0 0" />
         
         <Node name="model">
-            <MechanicalObject template="Rigid3d" name="DOFs" rest_position="0 200 0  0 0 0 1   0 180 0  0 0 0 1  0 160 0  0 0 0 1  0 140 0  0 0 0 1
-            0 120 0  0 0 0 1     0 100 0  0 0 0 1" />
+            <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  0 0 0  0 0 0 1  0 0 0  0 0 0 1
+            0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="51.73 193.128 50"/>
             
             <UniformMass template="Rigid3d" name="mass" totalMass="100" />
             
-           
-            <RestShapeSpringsForceField stiffness='10000000000000' angularStiffness='10000000000000' 
-             points='0'  
-            drawSpring="1"
-            />
-             <!--
-            <UncoupledConstraintCorrection />
             <RestShapeSpringsForceField stiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
             angularStiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000' 
             external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5' external_points='0 1 2 3 4 5' drawSpring="1"
             />
+            <!--
+            <RestShapeSpringsForceField stiffness='10000000000000' angularStiffness='10000000000000' 
+             points='0'  
+            drawSpring="1"
+            />
+            
+            <UncoupledConstraintCorrection />
+            
             -->
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
@@ -137,16 +131,16 @@
                 <SphereCollisionModel name="instrumentPoint" radius="0.2" contactStiffness="10" group="0"/> 
                 <LineCollisionModel group="0"/>
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
-                index="2"/>
+                index="3"/>
             </Node>
-            <!--
+            
             <Node name="JawUp_collision" tags="toolCollision">
                 <MeshObjLoader filename="./mesh/grasper_jaws_up_collision.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
                 <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" contactStiffness="100000"/> 
                 <LineCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="3"/>
+                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
             </Node>
 
             <Node name="JawDown_collision" tags="toolCollision">
@@ -155,9 +149,8 @@
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
                 <SphereCollisionModel name="instrumentPoint" radius="0.2" group="0" contactStiffness="100000"/> 
                 <LineCollisionModel group="0"/>
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
+                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
             </Node>     
- -->            
         </Node>
         
         <ArticulatedHierarchyContainer />        
@@ -176,7 +169,7 @@
             </Node>
             
             <Node name="articulationCenter2">
-                <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="0 0 0" posOnChild="0 10 0" articulationProcess="0" />
+                <ArticulationCenter parentIndex="1" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
                 <Node name="articulations">
                     <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="3" />
                 </Node>
@@ -184,25 +177,29 @@
             
             
             <Node name="articulationCenter3">
-                <ArticulationCenter parentIndex="2" childIndex="3" posOnParent="0 0 0" posOnChild="0 20 0" articulationProcess="0" />
+                <ArticulationCenter parentIndex="3" childIndex="4" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
                 <Node name="articulations">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="4" />
                 </Node>
             </Node>
             
             <Node name="articulationCenter4">
-                <ArticulationCenter parentIndex="2" childIndex="4" posOnParent="0 0 0" posOnChild="0 30 0" articulationProcess="0" />
+                <ArticulationCenter parentIndex="3" childIndex="5" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
                 <Node name="articulations">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="5" />
                 </Node>
             </Node>
             
+
+            
         </Node>
         
     </Node>
-       
+  <!--  <VectorSpringForceField  template="Vec3d" object1="@Instrument/Shaft_collision/instrumentCollisionState" 
+            object2="@articulation/model/CollisionModel/instrumentCollisionState" stiffness="1000000" viscosity="0" />
+           
   
-  <!--
+  
     <Node name="Liver">
 
         <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
@@ -237,8 +234,8 @@
         </Node>
     </Node>
     
-    
-    <RegularGridTopology name="grid_1" n="10 2 10" min="-200 -80 -200" max="200 -40 200" />
+    -->
+    <RegularGridTopology name="grid_1" n="10 4 10" min="-200 -40 -200" max="200 40 200" />
     <Node name="Cube">
         <EulerImplicitSolver rayleighMass="0.1" rayleighStiffness="0.1" />
         <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />
@@ -272,6 +269,6 @@
             </Node>
         </Node>
     </Node>
--->
+
     
 </Node>
