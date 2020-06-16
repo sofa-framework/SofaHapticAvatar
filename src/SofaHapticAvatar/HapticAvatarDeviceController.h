@@ -115,7 +115,6 @@ public:
     Data<Coord> d_jawDown;
 
     Data<VecCoord> d_toolPosition;
-    Data<VecCoord> d_testPosition;
     Data<Coord> d_basePosition;
     
     Data<SReal> m_forceScale;

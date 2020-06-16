@@ -247,42 +247,7 @@
             </Node>
         </Node>
     </Node>
-    
-    <!--
-    <RegularGridTopology name="grid_1" n="10 4 10" min="-200 -40 -200" max="200 40 200" />
-    <Node name="Cube">
-        <EulerImplicitSolver rayleighMass="0.1" rayleighStiffness="0.1" />
-        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />
-        <MechanicalObject src="@../grid_1" name="Volume" />
-        
-        <TetrahedronSetTopologyContainer name="Tetra_topo" />
-        <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
-        <BoxROI name="boxRoi" box="-100 -50 -100 100 -30 100" drawBoxes="1"/>
-        <FixedConstraint name="FixedConstraint" indices="@boxRoi.indices" />
-        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
-        <TetrahedralCorotationalFEMForceField name="FEM" youngModulus="80" poissonRatio="0.3" method="large" topology="@Tetra_topo"/>
-        <UniformMass totalMass="1000" />
-        <UncoupledConstraintCorrection/>
-        
-        <Node name="Surface">
-            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
-            <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
-            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
-            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel bothSide="false" group="1" contactStiffness="100000"/>
-            <LineCollisionModel group="1" contactStiffness="100000"/>
-            <PointCollisionModel group="1" contactStiffness="100000"/>
-            
-            <Node name="VisuSurface">
-                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
-                <BarycentricMapping input="@.." output="@Visual" />
-            </Node>
-        </Node>
-    </Node>
--->
+
     
 </Node>

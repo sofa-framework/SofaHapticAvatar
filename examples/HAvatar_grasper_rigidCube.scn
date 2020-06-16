@@ -62,7 +62,7 @@
     
     
     <Node name="Instrument" >
-        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.testPosition"/>
+        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.toolPosition"/>
     </Node>
     
         
@@ -70,7 +70,7 @@
         <EulerImplicitSolver name="cg_odesolver"  />
         <SparseLUSolver name="linear solver" tolerance="1e-09" />    
         
-        <MechanicalObject name="instrumentState" template="Rigid3d" position="@../HADevice.testPosition"/>
+        <MechanicalObject name="instrumentState" template="Rigid3d" position="@../HADevice.toolPosition"/>
         <UniformMass name="mass" totalMass="1.0" />
         
         <LCPForceFeedback activate="true" forceCoef="0.000001" localHapticConstraintAllFrames="1"/>            

@@ -148,7 +148,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
             duration = endTime - startTime;
         }
 
-        const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_testPosition.getValue();
+        const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[1].getCenter();
         int testMode = _deviceCtrl->m_testMode.getValue();
@@ -254,7 +254,7 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
     else if (testMode == 2)
     {
         vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::helper::types::RGBAColor::green());
-        const HapticAvatarDeviceController::VecCoord& testPosition = d_testPosition.getValue();
+        const HapticAvatarDeviceController::VecCoord& testPosition = d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[1].getCenter();
 
