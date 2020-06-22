@@ -22,6 +22,7 @@
 #include <sofa/simulation/InitTasks.h>
 
 #include <SofaHaptics/ForceFeedback.h>
+#include <SofaHaptics/LCPForceFeedback.h>
 
 #include <atomic>
 
@@ -75,7 +76,9 @@ public:
     SOFA_CLASS(HapticAvatarDeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
+    typedef RigidTypes::VecDeriv VecDeriv;
     typedef SolidTypes<double>::Transform Transform;
+    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
 
     HapticAvatarDeviceController();
 
@@ -135,7 +138,7 @@ public:
     int m_portId;
     SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
     SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
-    sofa::component::controller::ForceFeedback::SPtr m_forceFeedback;
+    LCPForceFeedback::SPtr m_forceFeedback;
     bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:
     struct DeviceData
@@ -143,6 +146,7 @@ public:
         sofa::helper::fixed_array<float, 4> anglesAndLength;
         sofa::helper::fixed_array<float, 4> motorValues;
         sofa::helper::fixed_array<float, 3> collisionForces;
+        VecDeriv hapticForces;
         float jawOpening;
     };
 

@@ -77,7 +77,7 @@ void HapticAvatarEmulator::bwdInit()
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
 
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback = context->get<ForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
 
     if (m_forceFeedback != nullptr)
     {
