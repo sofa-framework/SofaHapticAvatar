@@ -68,12 +68,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     , d_motorOutput(initData(&d_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     
-    , d_jawUp(initData(&d_jawUp, "jawUp", "jaws opening position"))
-    , d_jawDown(initData(&d_jawDown, "jawDown", "jaws opening position"))
     , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
     , d_toolPosition(initData(&d_toolPosition, "toolPosition", "jaws opening position"))
-    
-    , d_basePosition(initData(&d_basePosition, "basePosition", "jaws opening position"))
     
     , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
 
@@ -369,14 +365,6 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     // ensure no force
     _driver->releaseForce();
     std::cout << "Haptics thread END!!" << std::endl;
-
-    //if (debugThread)
-    //{
-    //    for (unsigned int i = 0; i < _deviceCtrl->m_times.size(); i++)
-    //    {
-    //        std::cout << _deviceCtrl->m_times[i] << std::endl;
-    //    }
-    //}
 }
 
 
@@ -464,9 +452,6 @@ void HapticAvatarDeviceController::updatePosition()
     sofa::defaulttype::Quat orien;
     orien.fromMatrix(rotM);
 
-    HapticAvatarDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
-    //toolPosition.resize(6);
-
     // compute bati position
     HapticAvatarDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
     rootPos.getOrientation() = orien;
@@ -474,33 +459,29 @@ void HapticAvatarDeviceController::updatePosition()
     HapticAvatarDeviceController::Coord & posDevice = *d_posDevice.beginEdit();    
     posDevice.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
-    //std::cout << "posDevice: " << posDevice << std::endl;
-
-    //Vec3f test = Vec3f(0, 1, 0);
-    //Vec3f testT = rotM* test;
-    //std::cout << "testT: " << testT << std::endl;
     d_posDevice.endEdit();
 
-    d_basePosition.setValue(rootPos);
-    // update jaws
-    HapticAvatarDeviceController::Coord & jawUp = *d_jawUp.beginEdit();    
-    HapticAvatarDeviceController::Coord & jawDown = *d_jawDown.beginEdit();
+    // Update jaws rigid
     float _OpeningAngle = d_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
-
+    HapticAvatarDeviceController::Coord jawUp;
+    HapticAvatarDeviceController::Coord jawDown;
+    
     jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
     jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
     jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
     
+    // Update jaws exterimies
+    Vec3f posExtrem = Vec3f(0.0, -m_jawsData.m_jawLength, 0.0);
     HapticAvatarDeviceController::Coord jawUpExtrem = jawUp;
     HapticAvatarDeviceController::Coord jawDownExtrem = jawDown;
-
-
-    Vec3f posExtrem = Vec3f(0.0, -m_jawsData.m_jawLength, 0.0);
+        
     jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
     jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
 
+    // Udpate articulated device
+    HapticAvatarDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
     toolPosition[0] = rootPos;
     toolPosition[1] = rootPos;
     toolPosition[2] = rootPos;
@@ -510,6 +491,7 @@ void HapticAvatarDeviceController::updatePosition()
     toolPosition[5] = jawDown;
     toolPosition[6] = jawUpExtrem;
     toolPosition[7] = jawDownExtrem;
+    d_toolPosition.endEdit();
 
     if (cpt == 20)
     {
@@ -521,14 +503,6 @@ void HapticAvatarDeviceController::updatePosition()
         cpt = 0;
     }
     cpt++;
-    /*std::cout << "tipPosition: " << posDevice << " | shaftForce: " << m_simuData.shaftForce << std::endl;
-    std::cout << "jawUpPosition: " << jawUpExtrem << " | jawUpForce: " << m_simuData.jawsUpForce << std::endl;
-    std::cout << "jawDownPosition: " << jawDownExtrem << " | jawDownForce: " << m_simuData.jawsDownForce << std::endl;*/
-
-
-    d_jawUp.endEdit();
-    d_jawDown.endEdit();
-    d_toolPosition.endEdit();
 }
 
 
@@ -545,12 +519,6 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
     
     if (vparams->displayFlags().getShowBehaviorModels())
     {
-        //    const HapticAvatarDeviceController::Coord & posDevice = d_posDevice.getValue();
-        //    float glRadius = float(d_scale.getValue());
-        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-        //    vparams->drawTool()->drawArrow(posDevice.getCenter(), posDevice.getCenter() + posDevice.getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-
         const HapticAvatarDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         float glRadius = float(d_scale.getValue());
 
@@ -575,12 +543,6 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
         }
     }
     
-
-    /*for (unsigned int i = 0; i < m_debugForces.size()*0.5; ++i)
-    {
-        vparams->drawTool()->drawLine(m_debugForces[i * 2], m_debugForces[i * 2] + m_debugForces[(i * 2) + 1] * 5.0f, defaulttype::Vec4f(1.0, 0.0, 0.0f, 1.0));
-    }*/
-
     return;
 
     

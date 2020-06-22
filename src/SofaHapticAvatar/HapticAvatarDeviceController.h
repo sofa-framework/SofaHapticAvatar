@@ -114,11 +114,8 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
     Data<int> d_fontSize;
-    Data<Coord> d_jawUp;
-    Data<Coord> d_jawDown;
 
     Data<VecCoord> d_toolPosition;
-    Data<Coord> d_basePosition;
     
     Data<SReal> m_forceScale;
     bool m_firstStep;
