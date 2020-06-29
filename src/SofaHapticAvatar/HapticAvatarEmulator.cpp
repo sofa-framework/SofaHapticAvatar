@@ -137,6 +137,12 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
 
+        if (_deviceCtrl->m_iboxCtrl)
+        {
+            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            _deviceCtrl->m_hapticData.jawOpening = angle;
+        }
+
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
 
@@ -150,7 +156,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 
         const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
         // Check main force feedback
-        Vector3 tipPosition = testPosition[1].getCenter();
+        Vector3 tipPosition = testPosition[3].getCenter();
         int testMode = _deviceCtrl->m_testMode.getValue();
 
         bool hasContact = false;
@@ -238,6 +244,19 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 
     if (!m_activeTest)
         return;
+
+    if (d_drawDeviceAxis.getValue())
+    {
+        const HapticAvatarDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+        float glRadius = float(d_scale.getValue());
+
+        for (unsigned int i = 0; i < toolPosition.size(); ++i)
+        {
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+        }
+    }
 
     int testMode = m_testMode.getValue();
     if (testMode == 1) // floor test
