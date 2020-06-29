@@ -125,13 +125,16 @@ public:
     /** Will decompose a force vector in device coordinate system to compute torque and force to be sent to apply to the device. Using @sa writeRoughForce.
     * @param {vec3f} force: force vector to apply to the device in its coordinate space.
     */
-    void setForceVector(sofa::defaulttype::Vector3 force);
+    void setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM = false);
 
     // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
     void releaseForce();
 
     // Will call SET_MANUAL_PWM: Set the force output manually per motor with raw PWM-values. 
-    void writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque);
+    void setManual_PWM(float rotTorque, float pitchTorque, float zforce, float yawTorque);
+
+    void setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque);
+
 
     /** Generic method which will format the command and send it to the device using HapticAvatar::Cmd and list of arguments given as input. Result will be stored in input char* result if not null.
     * @param {HapticAvatar::Cmd} command: the command enum to be sent.

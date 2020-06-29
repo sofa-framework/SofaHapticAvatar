@@ -176,12 +176,12 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
                     }
                     floorPosition[1] = height;
                     Vector3 force = damping * (floorPosition - tipPosition);
-                    _driver->setForceVector(_deviceCtrl->m_toolRot *force);
+                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force);
                     contact = true;
                     hasContact = true;
                 }
             }
-            else if (testMode == 2)
+            else if (testMode == 2 || testMode == 3)
             {
                 if (firstTimeTest)
                 {
@@ -191,13 +191,17 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
                 }
 
                 Vector3 force = damping * (_targetPosition - tipPosition);
-                _driver->setForceVector(_deviceCtrl->m_toolRot *force);
+                if (testMode == 2)
+                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force, true);
+                if (testMode == 3)
+                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force, false);
+
                 contact = true;
                 hasContact = true;
             }
-            else if (testMode == 3)
+            else if (testMode == 4)
             {
-                _driver->writeRoughForce(_deviceCtrl->m_roughForce[0], _deviceCtrl->m_roughForce[1], _deviceCtrl->m_roughForce[2], _deviceCtrl->m_roughForce[3]);
+                _driver->setManual_PWM(_deviceCtrl->m_roughForce[0], _deviceCtrl->m_roughForce[1], _deviceCtrl->m_roughForce[2], _deviceCtrl->m_roughForce[3]);
                 contact = true;
                 hasContact = true;
             }
@@ -270,12 +274,12 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
             defaulttype::Vector3(quadL, floorH, -quadL),
             defaulttype::Vector3(0.0, 1.0, 0.0), sofa::helper::types::RGBAColor::green());
     }
-    else if (testMode == 2)
+    else if (testMode == 2 || testMode == 3)
     {
         vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::helper::types::RGBAColor::green());
         const HapticAvatarDeviceController::VecCoord& testPosition = d_toolPosition.getValue();
         // Check main force feedback
-        Vector3 tipPosition = testPosition[1].getCenter();
+        Vector3 tipPosition = testPosition[3].getCenter();
 
         vparams->drawTool()->drawSphere(tipPosition, 3, sofa::helper::types::RGBAColor::red());
         vparams->drawTool()->drawLine(m_targetPosition, tipPosition, sofa::helper::types::RGBAColor::green());

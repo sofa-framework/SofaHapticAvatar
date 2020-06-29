@@ -321,7 +321,7 @@ void HapticAvatarDriver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 for
 }
 
 
-void HapticAvatarDriver::setForceVector(sofa::defaulttype::Vector3 force)
+void HapticAvatarDriver::setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 
@@ -350,7 +350,11 @@ void HapticAvatarDriver::setForceVector(sofa::defaulttype::Vector3 force)
     else
         zForce = res;
         */
-    writeRoughForce(rotTorque, pitchTorque, zForce, yawTorque);
+    if (useManualPWM)
+        setManual_PWM(rotTorque, pitchTorque, zForce, yawTorque);
+    else
+        setManual_Force_and_Torques(rotTorque, pitchTorque, zForce, yawTorque);
+    //SET_TIP_FORCE_AND_ROT_TORQUE
 }
 
 
@@ -492,7 +496,7 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
         return true;
 }
 
-void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
     //bool sendForce = false;
     //if (pitchTorque != 0.0f || zforce != 0.0f || yawTorque != 0.0f)
@@ -526,19 +530,40 @@ void HapticAvatarDriver::writeRoughForce(float rotTorque, float pitchTorque, flo
         + " " + std::to_string(values[2])
         + " " + std::to_string(values[3]);
 
-    sendCommandToDevice(SET_MANUAL_PWM, args, nullptr);
-        
-
+    bool resB = sendCommandToDevice(SET_MANUAL_PWM, args, nullptr);
+    if (resB == false)
+    {
+        std::cerr << "Error failed to send command: '" << args << "'"<< std::endl;
+    }
     //std::cout << "force resB: " << resB << std::endl;
-    //
+
     //char incomingData[INCOMING_DATA_LEN];
     //int resMsg = getDataImpl(incomingData, false);
     //if (resMsg == 1)
     //    std::cout << "force return msg: " << incomingData << std::endl;
+}
 
-    /*char incomingData[INCOMING_DATA_LEN];
-    int res = m_HA_driver->getData(incomingData, false);
-    std::cout << "reset: " << incomingData << std::endl;*/
+
+void HapticAvatarDriver::setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+{
+    sofa::helper::fixed_array<int, 4> values;
+    values[0] = rotTorque; // RotPWM
+    values[1] = pitchTorque; // PitchPWM
+    values[2] = zforce; // ZPWM
+    values[3] = yawTorque; // YawPWM
+
+    std::string args;
+    args = std::to_string(values[0])
+        + " " + std::to_string(values[1])
+        + " " + std::to_string(values[2])
+        + " " + std::to_string(values[3]);
+
+    bool resB = sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, args, nullptr);
+    if (resB == false)
+    {
+        std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
+    }
+    //std::cout << "force resB: " << resB << std::endl;
 }
 
 
