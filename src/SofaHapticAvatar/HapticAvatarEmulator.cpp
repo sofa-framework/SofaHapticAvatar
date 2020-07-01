@@ -194,7 +194,8 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
                 if (testMode == 2)
                     _driver->setManualForceVector(_deviceCtrl->m_toolRot *force, true);
                 if (testMode == 3)
-                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force, false);
+                    //_driver->setManualForceVector(_deviceCtrl->m_toolRot *force, false);
+                    _driver->setTipForceVector(_deviceCtrl->m_toolRot *force);
 
                 contact = true;
                 hasContact = true;

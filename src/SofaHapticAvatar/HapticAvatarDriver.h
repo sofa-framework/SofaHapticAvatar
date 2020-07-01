@@ -127,6 +127,9 @@ public:
     */
     void setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM = false);
 
+
+    void setTipForceVector(sofa::defaulttype::Vector3 force);
+
     // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
     void releaseForce();
 

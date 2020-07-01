@@ -358,6 +358,30 @@ void HapticAvatarDriver::setManualForceVector(sofa::defaulttype::Vector3 force, 
 }
 
 
+void HapticAvatarDriver::setTipForceVector(sofa::defaulttype::Vector3 force)
+{
+    sofa::helper::fixed_array<int, 4> values;
+    values[0] = int(force[0] * 100);
+    values[1] = int(force[2] * 100);
+    values[2] = -int(force[1] * 100);
+    values[3] = 0;
+
+    std::string args;
+    args = std::to_string(values[0])
+        + " " + std::to_string(values[1])
+        + " " + std::to_string(values[2])
+        + " " + std::to_string(values[3]);
+
+    bool resB = sendCommandToDevice(SET_TIP_FORCE_AND_ROT_TORQUE, args, nullptr);
+    std::cout << "args: '" << args << "'" << std::endl;
+    if (resB == false)
+    {
+        std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
+    }
+    
+}
+
+
 void HapticAvatarDriver::releaseForce()
 {
     sendCommandToDevice(SET_MANUAL_PWM, "0 0 0 0", nullptr);
@@ -547,10 +571,10 @@ void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float
 void HapticAvatarDriver::setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
     sofa::helper::fixed_array<int, 4> values;
-    values[0] = rotTorque; // RotPWM
-    values[1] = pitchTorque; // PitchPWM
-    values[2] = zforce; // ZPWM
-    values[3] = yawTorque; // YawPWM
+    values[0] = int(rotTorque * 10000);
+    values[1] = int(pitchTorque * 10000);
+    values[2] = int(zforce * 10000);
+    values[3] = int(yawTorque * 10000);
 
     std::string args;
     args = std::to_string(values[0])
