@@ -176,7 +176,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
                     }
                     floorPosition[1] = height;
                     Vector3 force = damping * (floorPosition - tipPosition);
-                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force);
+                    _driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force);
                     contact = true;
                     hasContact = true;
                 }
@@ -192,10 +192,10 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 
                 Vector3 force = damping * (_targetPosition - tipPosition);
                 if (testMode == 2)
-                    _driver->setManualForceVector(_deviceCtrl->m_toolRot *force, true);
+                    _driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force, true);
                 if (testMode == 3)
-                    //_driver->setManualForceVector(_deviceCtrl->m_toolRot *force, false);
-                    _driver->setTipForceVector(_deviceCtrl->m_toolRot *force);
+                    //_driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force, false);
+                    _driver->setTipForceVector(_deviceCtrl->m_toolRotInv *force);
 
                 contact = true;
                 hasContact = true;

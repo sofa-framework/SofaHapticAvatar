@@ -126,6 +126,8 @@ public:
 
     Coord m_debugRootPosition;
     sofa::defaulttype::Mat3x3f m_toolRot;
+    sofa::defaulttype::Mat3x3f m_toolRotInv;
+    sofa::defaulttype::Mat3x3f m_PortalRot;
     /// General Haptic thread methods
     static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
