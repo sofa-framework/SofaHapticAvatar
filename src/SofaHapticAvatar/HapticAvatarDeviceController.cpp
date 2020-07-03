@@ -303,44 +303,100 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         }
 
 
-        // Force feedback computation
-        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-        {            
-            const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+        if (_deviceCtrl->m_simulationStarted && !_deviceCtrl->contactsHaptic.empty())
+        {
             sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
 
-            // Check main force feedback
-            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
-
-            bool contactShaft = false;
-            totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
-            
-
-            
-            for (int i = 0; i < 3; i++)
+            for (auto contact : _deviceCtrl->contactsHaptic)
             {
-                if (totalForce[i] > 0.0)
-                {
-                    contactShaft = true;
-                    break;
+                totalForce += contact.m_force*contact.distance;
+
+            }
+
+
+            totalForce = totalForce * damping;
+
+            Vec3 toolDir = Vec3(0, -1, 0);
+            toolDir = _deviceCtrl->m_toolRot * toolDir;
+
+            Vec3 h = cross(totalForce, toolDir);
+
+            Vec3 yawDir = Vec3(1, 0, 0);
+            yawDir = _deviceCtrl->m_PortalRot * yawDir;
+
+            SReal zforce = dot(-toolDir, totalForce);
+            SReal yawTorque = dot(yawDir, h);
+
+
+            sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
+            sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
+            sofa::defaulttype::Mat3x3f rotM;
+            for (unsigned int i = 0; i < 3; i++) {
+                for (unsigned int j = 0; j < 3; j++) {
+                    rotM[i][j] = R_rot[i][j];
                 }
             }
 
-            float damping = _deviceCtrl->m_forceScale.getValue();            
-            if (contactShaft)
+            Vec3 pitchDir = Vec3(0, 0, -1);
+            pitchDir = _deviceCtrl->m_PortalRot * rotM * pitchDir;
+            SReal pitchTorque = dot(pitchDir, h);
+
             {
                 //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
                 //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
                 //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
                 //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
                 //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
-                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
             }
-            else
-                _driver->releaseForce();
             
+            _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+            //_driver->setManual_PWM(zforce, pitchTorque * 100, 0.0, yawTorque * 100);
         }
+        else
+            _driver->releaseForce();
 
+    //    // Force feedback computation
+    //    if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
+    //    {            
+    //        const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+    //        sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
+
+    //        // Check main force feedback
+    //        _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
+
+    //        bool contactShaft = false;
+    //        totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
+    //        
+
+    //        
+    //        for (int i = 0; i < 3; i++)
+    //        {
+    //            if (totalForce[i] > 0.0)
+    //            {
+    //                contactShaft = true;
+    //                break;
+    //            }
+    //        }
+
+    //        float damping = _deviceCtrl->m_forceScale.getValue();            
+    //        if (contactShaft)
+    //        {
+    //            //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
+    //            //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
+    //            //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
+    //            //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
+    //            //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
+
+   
+    //////dir 
+    ////            _driver->setManual_PWM(zforce, pitchTorque*100, 0.0, yawTorque*100);
+
+    //            _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+    //        }
+    //        else
+    //            _driver->releaseForce();
+            
+        
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
 
