@@ -92,11 +92,11 @@
             
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
-            <Node name="CollisionModel" tags="toolCollision">
+            <Node name="CollisionModel" >
                 <MeshObjLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="2" contactStiffness="10" group="0"/> 
+                <SphereCollisionModel name="shaftSphere" radius="2" group="0" tags="toolCollision"/> 
 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
                 index="3"/>
@@ -108,11 +108,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="3"/>
             </Node>
             
-            <Node name="JawUp_collision" tags="toolCollision">
+            <Node name="JawUp_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
+                <SphereCollisionModel name="jawUpSphere" radius="1" group="0" tags="toolCollision" /> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
             </Node>
             
@@ -122,11 +122,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
             </Node>
 
-            <Node name="JawDown_collision" tags="toolCollision">
+            <Node name="JawDown_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
+                <SphereCollisionModel name="jawDownSphere" radius="1" group="0" tags="toolCollision"/> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
             </Node>     
             
