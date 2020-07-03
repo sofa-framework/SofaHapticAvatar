@@ -12,6 +12,8 @@
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
+#include <sofa/simulation/CollisionEndEvent.h>
+#include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
@@ -93,6 +95,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , m_forceFeedback(nullptr)
     , m_simulationStarted(false)
     , m_firstStep(true)
+    , m_distance(1.0f)
+    , m_detectionNP(nullptr)
 {
     this->f_listening.setValue(true);
     
@@ -158,6 +162,15 @@ void HapticAvatarDeviceController::init()
     m_HA_driver->releaseForce();
 
 
+    m_intersectionMethod = getContext()->get<core::collision::Intersection>();
+    m_detectionNP = getContext()->get<core::collision::NarrowPhaseDetection>();
+    if (m_intersectionMethod == nullptr) { msg_error() << "m_intersectionMethod not found. Add an Intersection method in your scene.";}
+    if (m_detectionNP == nullptr) { msg_error() << "NarrowPhaseDetection not found. Add a NarrowPhaseDetection method in your scene.";}
+
+
+    SReal alarmDist = m_intersectionMethod->getAlarmDistance();
+    SReal contactDist = m_intersectionMethod->getContactDistance();
+    m_distance = alarmDist - contactDist;
 
     // create task scheduler
     //unsigned int mNbThread = 2;
@@ -649,6 +662,80 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
 }
 
 
+void HapticAvatarDeviceController::retrieveCollisions()
+{
+    contactsSimu.clear();
+
+    // get the collision output
+    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = m_detectionNP->getDetectionOutputs();
+    if (detectionOutputs.size() == 0) {
+        contactsHaptic = contactsSimu;
+        return;
+    }
+
+    //std::cout << "detectionOutputs: " << detectionOutputs.size() << " count: " << m_detectionNP->getPrimitiveTestCount() << std::endl;    
+    const ContactVector* contacts = NULL;
+    for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
+    {
+        contacts = dynamic_cast<const ContactVector*>(it->second);
+        if (contacts == nullptr || contacts->size() == 0) {
+            continue;
+        }
+
+        size_t ncontacts = contacts->size();
+        if (ncontacts == 0) {
+            continue;
+        }
+        
+        sofa::core::CollisionModel* collMod1 = it->first.first;
+        sofa::core::CollisionModel* collMod2 = it->first.second;
+
+        //std::cout << " - collMod1: " << collMod1->getName() << " | collMod2: " << collMod2->getName() << std::endl;
+
+        int id = -1;
+        if (collMod1->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
+        {
+            id = 0;
+        }
+        else if (collMod2->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
+        {
+            id = 1;
+        }
+               
+        if (id == -1) { // others collision than with tool
+            continue;
+        }
+        
+        //std::cout << " - ncontacts: " << ncontacts << std::endl;
+        for (size_t j = 0; j < ncontacts; ++j)
+        {
+            const ContactVector::value_type& c = (*contacts)[j];
+            HapticContact contact;
+            if (id == 0)
+            {
+                contact.m_toolPosition = c.point[0];
+                contact.m_objectPosition = c.point[1];
+                contact.m_normal = c.normal * (-1); /// Normal of the contact, pointing outward from the first model                
+            }
+            else
+            {
+                contact.m_toolPosition = c.point[1];
+                contact.m_objectPosition = c.point[0];
+                contact.m_normal = c.normal ;
+            }
+            contact.m_force = (contact.m_toolPosition - contact.m_objectPosition).normalized();
+            contact.distance = (m_distance - c.value)*(m_distance - c.value);
+            //std::cout << "contact.distance: " << contact.distance << std::endl;
+
+            contactsSimu.push_back(contact);
+        }
+    }
+
+    contactsHaptic = contactsSimu;
+    //std::cout << " - contactsSimu: " << contactsSimu.size() << std::endl;
+}
+
+
 void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
 {
     //if(m_errorDevice != 0)
@@ -661,6 +748,10 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
         
         m_simulationStarted = true;
         updatePosition();
+    }
+    else if (simulation::CollisionEndEvent::checkEventType(event))
+    {
+        retrieveCollisions();
     }
 }
 
