@@ -282,7 +282,9 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+    float damping = _deviceCtrl->m_forceScale.getValue();
 
+    int cptF = 0;
     // Haptics Loop
     while (!terminate)
     {
@@ -341,13 +343,16 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
             pitchDir = _deviceCtrl->m_PortalRot * rotM * pitchDir;
             SReal pitchTorque = dot(pitchDir, h);
 
+            if (cptF == 100)
             {
-                //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
-                //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
-                //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
-                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
+                std::cout << "zforce: " << zforce
+                    << " | pitchTorque: " << pitchTorque
+                    << " | yawTorque: " << yawTorque
+                    << std::endl;
+
+                cptF = 0;
             }
+            //cptF++;
             
             _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
             //_driver->setManual_PWM(zforce, pitchTorque * 100, 0.0, yawTorque * 100);
@@ -610,46 +615,30 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
         const HapticAvatarDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         const HapticAvatarDeviceController::VecDeriv& force = m_simuData.hapticForces;
 
-        //if (force.size() > 6)
-        //{
-        //    Vec3 dir = force[3].getLinear();
-        //    Vec3 ang = force[3].getAngular();
-        //    //dir.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dir2 = force[4].getLinear();
-        //    Vec3 ang2 = force[4].getAngular();
-        //    //dir2.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[6].getCenter(), toolPosition[6].getCenter() + dir2 * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[6].getCenter(), toolPosition[6].getCenter() + ang2 * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dir3 = force[5].getLinear();
-        //    Vec3 ang3 = force[5].getAngular();
-        //    //dir3.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[7].getCenter(), toolPosition[7].getCenter() + dir3 * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[7].getCenter(), toolPosition[7].getCenter() + ang3 * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dirTotal = dir + dir2 + dir3;
-        //    Vec3 angTotal = ang + ang2 + ang3;
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
-
-        //}
         Vec3 dirTotal, angTotal;
-        for (int i = 0; i < force.size(); i++)
-        {
-            Vec3 dir = force[i].getLinear();
-            Vec3 ang = force[i].getAngular();
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
 
-            dirTotal += dir;
-            angTotal += ang;
+        for (auto contact : contactsHaptic)
+        {
+            dirTotal += contact.m_force*contact.distance;
         }
 
+
+        //for (int i = 0; i < force.size(); i++)
+        //{
+        //    Vec3 dir = force[i].getLinear();
+        //    Vec3 ang = force[i].getAngular();
+        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
+
+        //    dirTotal += dir;
+        //    angTotal += ang;
+        //}
+
+        //dirTotal *= m_forceScale.getValue();
+        //angTotal *= m_forceScale.getValue();
+
         vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
         vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
     }
     
