@@ -20,7 +20,8 @@
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
     <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" damping="3"/>
+    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" damping="3"
+    newMethod="1"/>
     <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
