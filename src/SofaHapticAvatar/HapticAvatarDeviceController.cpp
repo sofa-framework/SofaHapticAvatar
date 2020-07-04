@@ -84,6 +84,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
     , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
     , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "draw device"))
+    , d_newMethod(initData(&d_newMethod, false, "newMethod", "draw device"))
+    
     
     , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
@@ -282,6 +284,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+    bool newMethod = _deviceCtrl->d_newMethod.getValue();
     float damping = _deviceCtrl->m_forceScale.getValue();
 
     int cptF = 0;
@@ -311,51 +314,54 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
             for (auto contact : _deviceCtrl->contactsHaptic)
             {
-                totalForce += contact.m_force*contact.distance;
-
+                totalForce += contact.m_force * contact.distance;
             }
 
-
-            totalForce = totalForce * damping;
-
-            Vec3 toolDir = Vec3(0, -1, 0);
-            toolDir = _deviceCtrl->m_toolRot * toolDir;
-
-            Vec3 h = cross(totalForce, toolDir);
-
-            Vec3 yawDir = Vec3(1, 0, 0);
-            yawDir = _deviceCtrl->m_PortalRot * yawDir;
-
-            SReal zforce = dot(-toolDir, totalForce);
-            SReal yawTorque = dot(yawDir, h);
-
-
-            sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
-            sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
-            sofa::defaulttype::Mat3x3f rotM;
-            for (unsigned int i = 0; i < 3; i++) {
-                for (unsigned int j = 0; j < 3; j++) {
-                    rotM[i][j] = R_rot[i][j];
-                }
-            }
-
-            Vec3 pitchDir = Vec3(0, 0, -1);
-            pitchDir = _deviceCtrl->m_PortalRot * rotM * pitchDir;
-            SReal pitchTorque = dot(pitchDir, h);
-
-            if (cptF == 100)
+            if (newMethod)
             {
-                std::cout << "zforce: " << zforce
-                    << " | pitchTorque: " << pitchTorque
-                    << " | yawTorque: " << yawTorque
-                    << std::endl;
+                sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
+                sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
+                sofa::defaulttype::Mat3x3f rotM;
+                for (unsigned int i = 0; i < 3; i++) {
+                    for (unsigned int j = 0; j < 3; j++) {
+                        rotM[i][j] = R_rot[i][j];
+                    }
+                }
 
-                cptF = 0;
+                Vec3 toolDir = Vec3(0, -1, 0);
+                toolDir = _deviceCtrl->m_toolRot * toolDir;
+
+                Vec3 yawDir = Vec3(1, 0, 0);
+                yawDir = _deviceCtrl->m_PortalRot * yawDir;
+
+                Vec3 pitchDir = Vec3(0, 0, 1);
+                pitchDir = _deviceCtrl->m_PortalRot * rotM * pitchDir;
+
+                totalForce = totalForce * damping;
+                Vec3 h = cross(totalForce, toolDir);
+
+                SReal zforce = dot(-toolDir, totalForce);
+                SReal yawTorque = dot(yawDir, h);
+                SReal pitchTorque = dot(pitchDir, h);
+
+                //if (cptF == 100)
+                //{
+                //    std::cout << "zforce: " << zforce
+                //        << " | pitchTorque: " << pitchTorque
+                //        << " | yawTorque: " << yawTorque
+                //        << std::endl;
+
+                //    cptF = 0;
+                //}
+                //cptF++;
+
+                //zforce = 0.0;
+                _driver->setManual_PWM( 0.0, pitchTorque * 50, zforce, yawTorque * 50);
             }
-            //cptF++;
-            
-            _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
-            //_driver->setManual_PWM(zforce, pitchTorque * 100, 0.0, yawTorque * 100);
+            else
+            {
+                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+            }
         }
         else
             _driver->releaseForce();
