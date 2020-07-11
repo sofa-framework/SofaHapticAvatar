@@ -546,11 +546,12 @@ void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float
         std::cout << "zForce: " << values[2]
             << " | pitchTorque: " << values[1]
             << " | yawTorque: " << values[3]
+            << " | toolTorque: " << values[0]
             << std::endl;
 
         cptF = 0;
     }
-    cptF++;
+   // cptF++;
    
     int maxPWM = 1000;
     for (int i = 0; i < 4; i++)

@@ -72,7 +72,8 @@ struct SOFA_HAPTICAVATAR_API HapticContact
     Vector3 m_objectPosition;
     Vector3 m_normal;
     Vector3 m_force;
-    SReal distance;    
+    SReal distance;
+    int tool; //0 = shaft, 1 = upjaw, 2 = downJaw
 };
 
 
@@ -134,6 +135,12 @@ public:
     Data<SReal> m_forceScale;
     bool m_firstStep;
     SReal m_distance;
+
+
+    Vec3 m_toolDir;
+    Vec3 m_pitchDir;
+    Vec3 m_h;
+    Vec3 m_hTM;
 
     sofa::helper::vector<Vector3> m_debugForces;
 

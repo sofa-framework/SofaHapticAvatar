@@ -330,33 +330,89 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
                 Vec3 toolDir = Vec3(0, -1, 0);
                 toolDir = _deviceCtrl->m_toolRot * toolDir;
+                toolDir.normalize();
+                
 
                 Vec3 yawDir = Vec3(1, 0, 0);
                 yawDir = _deviceCtrl->m_PortalRot * yawDir;
+                yawDir.normalize();
 
                 Vec3 pitchDir = Vec3(0, 0, 1);
-                pitchDir = _deviceCtrl->m_PortalRot * rotM * pitchDir;
-
+                Vec3 pitchDirTool = Vec3(0, 0, 1);
+                pitchDir = _deviceCtrl->m_PortalRot * pitchDir;
+                pitchDirTool = _deviceCtrl->m_toolRot * pitchDirTool;
+                pitchDir.normalize();
+                
                 totalForce = totalForce * damping;
+                //Vec3 totalForceTM = _deviceCtrl->m_toolRotInv * totalForce;
                 Vec3 h = cross(totalForce, toolDir);
+                
 
                 SReal zforce = dot(-toolDir, totalForce);
                 SReal yawTorque = dot(yawDir, h);
-                SReal pitchTorque = dot(pitchDir, h);
+                SReal pitchTorque = dot(pitchDir, h);                
 
-                //if (cptF == 100)
-                //{
-                //    std::cout << "zforce: " << zforce
-                //        << " | pitchTorque: " << pitchTorque
-                //        << " | yawTorque: " << yawTorque
-                //        << std::endl;
+                
+                const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+                Vec3 centerTool = toolPosition[3].getCenter();
+                //Vec3 dirToolAccum = Vec3(0.0, 0.0, 0.0);
+                int cpt = 0;
+                float torqueAcc = 0;
+                for (auto contact : _deviceCtrl->contactsHaptic)
+                {
+                    Vec3 dirPoint = contact.m_toolPosition - centerTool;
+                    Vec3 cross1 = cross(-contact.m_normal, dirPoint);
+                    torqueAcc += dot(cross1, toolDir);
+                    //if (dot(dirPoint, toolDir) > 0)
+                    //{
+                    //    dirToolAccum += dirPoint;
+                    //    cpt++;
+                    //}
 
-                //    cptF = 0;
-                //}
+
+                }
+                //if (cpt != 0)
+                //    dirToolAccum = dirToolAccum/cpt;
+
+                //Vec3 hTM = cross(dirToolAccum, toolDir);
+                SReal toolTorque = torqueAcc;// dot(hTM, pitchDirTool);
+
+
+                //_deviceCtrl->m_toolDir = toolDir;
+                //_deviceCtrl->m_pitchDir = pitchDirTool;
+                //_deviceCtrl->m_h = h;
+                //_deviceCtrl->m_hTM = dirToolAccum;
+                //_deviceCtrl->m_hTM = cross(toolDir, toolDir);
+                
+
+
+                if (cptF == 100)
+                {
+                    Vector3 root = toolPosition[3].getCenter();
+                    
+
+                    for (auto contact : _deviceCtrl->contactsHaptic)
+                    {
+                        SReal res = dot(contact.m_toolPosition - root, root + toolDir);
+                        std::cout << res << std::endl;
+                    }
+
+                    std::cout << "zforce: " << zforce
+                        << " | pitchTorque: " << pitchTorque
+                        << " | yawTorque: " << yawTorque
+                        << " | toolTorque: " << toolTorque
+                        << std::endl;
+
+                    cptF = 0;
+                }
                 //cptF++;
 
                 //zforce = 0.0;
-                _driver->setManual_PWM( 0.0, pitchTorque * 50, zforce, yawTorque * 50);
+                //toolTorque = 0.0;
+                //pitchTorque = 0.0;
+                
+                //yawTorque = 0.0;
+                _driver->setManual_PWM(toolTorque , pitchTorque * 50, zforce, yawTorque * 50);
             }
             else
             {
@@ -645,7 +701,13 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
 
         vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
         //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 1.0f, 1.0f, 1.0));
+
+
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolDir * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_pitchDir * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_h * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_hTM * 50, defaulttype::Vec4f(0.5f, 0.0f, 0.0f, 1.0));
     }
     
     return;
@@ -743,19 +805,25 @@ void HapticAvatarDeviceController::retrieveCollisions()
 
         //std::cout << " - collMod1: " << collMod1->getName() << " | collMod2: " << collMod2->getName() << std::endl;
 
-        int id = -1;
+        int id = -1;        
+        sofa::core::CollisionModel* toolMod = nullptr;
+
         if (collMod1->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
         {
             id = 0;
+            toolMod = collMod1;
         }
         else if (collMod2->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
         {
             id = 1;
+            toolMod = collMod2;
         }
                
         if (id == -1) { // others collision than with tool
             continue;
         }
+
+        int toolId = 0;
         
         //std::cout << " - ncontacts: " << ncontacts << std::endl;
         for (size_t j = 0; j < ncontacts; ++j)
