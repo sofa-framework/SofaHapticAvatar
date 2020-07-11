@@ -68,33 +68,34 @@
     
    
     <Node name="articulation">
-        <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.01" rayleighMass="0.1" />
-        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-10" threshold="10e-10" />
-    
         <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0  0 0 0" />
         <UncoupledConstraintCorrection />
-
+       
         <Node name="model">
             <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  0 0 0  0 0 0 1  0 0 0  0 0 0 1
             0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
             
-            <UniformMass name="mass" totalMass="10" />
-            <LCPForceFeedback activate="true" forceCoef="0.001" />   
+            <UniformMass name="mass" totalMass="150" />
+            <LCPForceFeedback activate="true" forceCoef="0.001" localHapticConstraintAllFrames="0"/>   
             <RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
             angularStiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
             external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5' external_points='0 1 2 3 4 5' drawSpring="1"
             />
-            <UncoupledConstraintCorrection />
+            <!--
+            <UniformMass template="Rigid3d" name="mass" totalMass="100" />
             
+            -->
+            <UncoupledConstraintCorrection />
+     
             
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
-            <Node name="CollisionModel" tags="toolCollision">
+            <Node name="CollisionModel" >
                 <MeshObjLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="2" contactStiffness="10" group="0"/> 
-                <LineCollisionModel group="0"/>
+                <SphereCollisionModel name="shaftSphere" radius="2" group="0" tags="toolCollision shaft"/> 
+
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
                 index="3"/>
             </Node>
@@ -105,12 +106,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="3"/>
             </Node>
             
-            <Node name="JawUp_collision" tags="toolCollision">
+            <Node name="JawUp_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
-                <LineCollisionModel group="0"/>
+                <SphereCollisionModel name="jawUpSphere" radius="1" group="0" tags="toolCollision jaws" /> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
             </Node>
             
@@ -120,12 +120,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
             </Node>
 
-            <Node name="JawDown_collision" tags="toolCollision">
+            <Node name="JawDown_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
-                <LineCollisionModel group="0"/>
+                <SphereCollisionModel name="jawDownSphere" radius="1" group="0" tags="toolCollision jaws"/> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
             </Node>     
             
@@ -140,20 +139,20 @@
         <Node name="articulationCenters">
             <Node name="articulationCenter1">
                 <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations11">
+                <Node name="articulations">
                     <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="0" />
                 </Node>
-                <Node name="articulations12">
+                <Node name="articulations">
                     <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="1" />
                 </Node>
-                <Node name="articulations13">
+                <Node name="articulations">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="2" />
                 </Node>
             </Node>
             
             <Node name="articulationCenter2">
                 <ArticulationCenter parentIndex="1" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations21">
+                <Node name="articulations">
                     <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="3" />
                 </Node>
             </Node>
