@@ -34,19 +34,19 @@ using namespace sofa::defaulttype;
 using namespace sofa::simulation;
 
 
-class HapticAvatarDeviceController;
+class HapticAvatar_DeviceController;
 
 class SOFA_HAPTICAVATAR_API HapticEmulatorTask : public CpuTask
 {
 public:
-    HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus);
+    HapticEmulatorTask(HapticAvatar_DeviceController* ptr, CpuTask::Status* pStatus);
 
     virtual ~HapticEmulatorTask() {}
 
     virtual MemoryAlloc run() override final;
 
 private:
-    HapticAvatarDeviceController * m_controller;
+    HapticAvatar_DeviceController * m_controller;
 };
 
 
@@ -80,11 +80,11 @@ struct SOFA_HAPTICAVATAR_API HapticContact
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarDeviceController : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceController : public Controller
 {
 
 public:
-    SOFA_CLASS(HapticAvatarDeviceController, Controller);
+    SOFA_CLASS(HapticAvatar_DeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef RigidTypes::VecDeriv VecDeriv;
@@ -92,9 +92,9 @@ public:
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
     typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
-    HapticAvatarDeviceController();
+    HapticAvatar_DeviceController();
 
-	virtual ~HapticAvatarDeviceController();
+	virtual ~HapticAvatar_DeviceController();
 
     virtual void init() override;
     virtual void bwdInit() override;
@@ -157,8 +157,8 @@ public:
 
     std::atomic<bool> m_terminate;
     int m_portId;
-    SingleLink<HapticAvatarDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
-    SingleLink<HapticAvatarDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+    SingleLink<HapticAvatar_DeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatar_DeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     LCPForceFeedback::SPtr m_forceFeedback;
     bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:

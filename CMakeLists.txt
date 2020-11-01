@@ -13,8 +13,8 @@ set(HEADER_FILES
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceController.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceEmulator.h
     
 )
 
@@ -23,9 +23,9 @@ set(SOURCE_FILES
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.cpp
-    ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp    
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceController.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceEmulator.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp        
 )
 
 set(README_FILES Readme.txt)
