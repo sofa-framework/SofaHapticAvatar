@@ -6,7 +6,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarEmulator.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -94,7 +94,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 { 
     std::cout << "Haptics Emulator thread" << std::endl;
     HapticAvatarEmulator* _deviceCtrl = static_cast<HapticAvatarEmulator*>(p_this);
-    HapticAvatarDriver* _driver = static_cast<HapticAvatarDriver*>(p_driver);
+    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
    
     if (_deviceCtrl == nullptr)
     {

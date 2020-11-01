@@ -6,7 +6,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarDeviceController.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -129,7 +129,7 @@ HapticAvatarDeviceController::~HapticAvatarDeviceController()
 void HapticAvatarDeviceController::init()
 {
     msg_info() << "HapticAvatarDeviceController::init()";
-    m_HA_driver = new HapticAvatarDriver(d_portName.getValue());
+    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected())
         return;
@@ -255,7 +255,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     std::cout << "Haptics thread" << std::endl;
 
     HapticAvatarDeviceController* _deviceCtrl = static_cast<HapticAvatarDeviceController*>(p_this);
-    HapticAvatarDriver* _driver = static_cast<HapticAvatarDriver*>(p_driver);
+    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
 
     if (_deviceCtrl == nullptr)
     {
@@ -265,7 +265,7 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
 
     if (_driver == nullptr)
     {
-        msg_error("Haptics Thread: HapticAvatarDriver cast failed");
+        msg_error("Haptics Thread: HapticAvatar_Driver cast failed");
         return;
     }
 

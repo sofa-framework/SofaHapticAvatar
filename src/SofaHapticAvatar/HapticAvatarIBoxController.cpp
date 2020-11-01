@@ -6,7 +6,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatarIBoxController.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -55,7 +55,7 @@ HapticAvatarIBoxController::~HapticAvatarIBoxController()
 void HapticAvatarIBoxController::init()
 {
     msg_info() << "HapticAvatarIBoxController::init()";
-    m_HA_driver = new HapticAvatarDriver(d_portName.getValue());
+    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected()) {
         msg_error() << "HapticAvatarIBoxController driver creation failed";

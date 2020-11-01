@@ -22,7 +22,7 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 #include <sofa/defaulttype/Vec.h>
 #include <string>
 
@@ -32,12 +32,12 @@ namespace sofa::component::controller
 /**
 * HapticAvatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarDriver
+class SOFA_HAPTICAVATAR_API HapticAvatar_Driver
 {
 public:
-    HapticAvatarDriver(const std::string& portName);
+    HapticAvatar_Driver(const std::string& portName);
 
-    virtual ~HapticAvatarDriver();
+    virtual ~HapticAvatar_Driver();
 
     bool IsConnected() { return m_connected; }
 

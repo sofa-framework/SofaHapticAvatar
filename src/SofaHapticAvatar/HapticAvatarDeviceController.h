@@ -14,7 +14,7 @@
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatar_Driver.h>
 #include <SofaHapticAvatar/HapticAvatarPortalManager.h>
 #include <SofaHapticAvatar/HapticAvatarIBoxController.h>
 
@@ -178,7 +178,7 @@ protected:
     void clearDevice();
 
 protected:
-    HapticAvatarDriver * m_HA_driver;
+    HapticAvatar_Driver * m_HA_driver;
     HapticAvatarPortalManager * m_portalMgr;
     HapticAvatarIBoxController * m_iboxCtrl;
     bool m_deviceReady;

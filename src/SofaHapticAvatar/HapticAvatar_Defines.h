@@ -4,8 +4,8 @@
 * Authors:                                                                    *
 * Contact information:                                                        *
 ******************************************************************************/
-#ifndef SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
-#define SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
+#ifndef SOFA_HAPTICAVATAR_HapticAvatar_Defines_H
+#define SOFA_HAPTICAVATAR_HapticAvatar_Defines_H
 
 
 namespace HapticAvatar
@@ -83,4 +83,4 @@ enum Dof
 
 } // namespace HapticAvatar
 
-#endif // SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
+#endif // SOFA_HAPTICAVATAR_HapticAvatar_Defines_H

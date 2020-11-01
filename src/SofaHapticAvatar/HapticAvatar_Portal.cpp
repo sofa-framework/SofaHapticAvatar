@@ -20,7 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 #include <SofaHapticAvatar/HapticAvatar_Portal.h>
 #include <sofa/helper/Quater.h>
 #include <iostream>

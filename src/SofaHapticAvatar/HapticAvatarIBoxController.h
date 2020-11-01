@@ -14,7 +14,7 @@
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatar_Driver.h>
 #include <SofaHapticAvatar/HapticAvatarPortalManager.h>
 
 #include <sofa/simulation/TaskScheduler.h>
@@ -60,7 +60,7 @@ private:
     void clearDevice();
 
 private:
-    HapticAvatarDriver * m_HA_driver;
+    HapticAvatar_Driver * m_HA_driver;
     bool m_deviceReady;
 };
 
