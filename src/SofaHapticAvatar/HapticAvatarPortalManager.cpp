@@ -285,7 +285,7 @@ bool HapticAvatarPortalManager::parseConfigFile()
         getFloatAttribute(portalSettings, "FlipAngle", &flipAngle);
         getFloatAttribute(portalSettings, "TiltAngle", &tiltAngle);
 
-        HapticAvatarPortalController* pController = new HapticAvatarPortalController(idP, rail, railPos, flipAngle, tiltAngle, std::string(portalSettings->Attribute("ComPort")));
+        HapticAvatar_Portal* pController = new HapticAvatar_Portal(idP, rail, railPos, flipAngle, tiltAngle, std::string(portalSettings->Attribute("ComPort")));
         m_portals.push_back(pController);
     }
     

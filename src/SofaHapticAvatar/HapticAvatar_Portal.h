@@ -29,18 +29,18 @@ namespace sofa::component::controller
 {
 
 /**
-* HapticAvatarPortalController 
+* HapticAvatar_Portal 
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarPortalController
+class SOFA_HAPTICAVATAR_API HapticAvatar_Portal
 {
 public:
     typedef sofa::defaulttype::RigidTypes::Coord Coord;
     typedef sofa::defaulttype::Vec3f Vec3f;
     typedef sofa::defaulttype::Vec4f Vec4f;
 
-    HapticAvatarPortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
+    HapticAvatar_Portal(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
-    virtual ~HapticAvatarPortalController() {}
+    virtual ~HapticAvatar_Portal() {}
 
 
     void portalSetup();
