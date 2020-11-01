@@ -33,23 +33,6 @@ namespace sofa::component::controller
 using namespace sofa::defaulttype;
 using namespace sofa::simulation;
 
-
-class HapticAvatar_DeviceController;
-
-class SOFA_HAPTICAVATAR_API HapticEmulatorTask : public CpuTask
-{
-public:
-    HapticEmulatorTask(HapticAvatar_DeviceController* ptr, CpuTask::Status* pStatus);
-
-    virtual ~HapticEmulatorTask() {}
-
-    virtual MemoryAlloc run() override final;
-
-private:
-    HapticAvatar_DeviceController * m_controller;
-};
-
-
 // Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
 class SOFA_HAPTICAVATAR_API HapticAvatarJaws
 {
@@ -183,7 +166,6 @@ protected:
     HapticAvatar_IBoxController * m_iboxCtrl;
     bool m_deviceReady;
 
-    sofa::simulation::TaskScheduler* m_taskScheduler;
     sofa::simulation::CpuTask::Status m_simStepStatus;
     std::mutex lockPosition;
 

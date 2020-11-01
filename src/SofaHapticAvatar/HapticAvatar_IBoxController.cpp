@@ -83,18 +83,4 @@ void HapticAvatar_IBoxController::clearDevice()
 }
 
 
-void HapticAvatar_IBoxController::bwdInit()
-{   
-    msg_info() << "HapticAvatar_IBoxController::bwdInit()";
-    
-}
-
-
-void HapticAvatar_IBoxController::reinit()
-{
-    msg_info() << "HapticAvatar_IBoxController::reinit()";
-}
-
-
-
 } // namespace sofa::component::controller

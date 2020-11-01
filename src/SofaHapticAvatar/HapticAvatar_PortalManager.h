@@ -27,9 +27,6 @@
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
 
-#include <sofa/defaulttype/SolidTypes.h>
-#include <sofa/defaulttype/RigidTypes.h>
-
 class TiXmlElement;
 
 namespace sofa::component::controller
@@ -46,10 +43,6 @@ public:
     SOFA_CLASS(HapticAvatar_PortalManager, sofa::core::objectmodel::BaseObject);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
-    typedef SolidTypes<double>::Transform Transform;
-
-    typedef defaulttype::Vec4f Vec4f;
-    typedef defaulttype::Vector3 Vector3;
 
     HapticAvatar_PortalManager();
 
@@ -62,7 +55,6 @@ public:
 
     virtual void reinit() override;
     virtual void handleEvent(core::objectmodel::Event *) override;
-    virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
     void updatePostion(int portId, float yawAngle, float pitchAngle);
 
@@ -85,6 +77,7 @@ protected:
     bool getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value);
 
     void portalsSetup();
+
 private:
     sofa::helper::vector<HapticAvatar_Portal* > m_portals;
 };

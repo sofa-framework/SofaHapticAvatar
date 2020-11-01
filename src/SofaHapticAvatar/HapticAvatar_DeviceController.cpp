@@ -29,26 +29,6 @@ int HapticAvatar_DeviceControllerClass = core::RegisterObject("Driver allowing i
     ;
 
 
-HapticEmulatorTask::HapticEmulatorTask(HapticAvatar_DeviceController* ptr, CpuTask::Status* pStatus)
-    : CpuTask(pStatus)
-    , m_controller(ptr)
-{
-
-}
-
-HapticEmulatorTask::MemoryAlloc HapticEmulatorTask::run()
-{
-    std::cout << "haptic run task" << std::endl;
-
-   /* if (m_driver->m_terminate == false)
-    {
-        TaskScheduler::getInstance()->addTask(new HapticEmulatorTask(m_driver, &m_driver->_simStepStatus));
-        Sleep(100);
-    }*/
-    return MemoryAlloc::Dynamic;
-}
-
-
 HapticAvatarJaws::HapticAvatarJaws()
     : m_MaxOpeningAngle(60.0f)
     , m_jawLength(20.0f)
@@ -173,13 +153,6 @@ void HapticAvatar_DeviceController::init()
     SReal alarmDist = m_intersectionMethod->getAlarmDistance();
     SReal contactDist = m_intersectionMethod->getContactDistance();
     m_distance = alarmDist - contactDist;
-
-    // create task scheduler
-    //unsigned int mNbThread = 2;
-    //m_taskScheduler = sofa::simulation::TaskScheduler::getInstance();
-    //m_taskScheduler->init(mNbThread);
-    //m_taskScheduler->addTask(new HapticEmulatorTask(this, &m_simStepStatus));
-   
 
     return;
 }

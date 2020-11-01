@@ -161,11 +161,6 @@ void HapticAvatar_PortalManager::handleEvent(core::objectmodel::Event *event)
     }
 }
 
-void HapticAvatar_PortalManager::draw(const sofa::core::visual::VisualParams* vparams)
-{
-
-}
-
 
 void HapticAvatar_PortalManager::setFilename(std::string f)
 {

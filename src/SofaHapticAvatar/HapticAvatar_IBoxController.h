@@ -48,8 +48,6 @@ public:
 	virtual ~HapticAvatar_IBoxController();
 
     virtual void init() override;
-    virtual void bwdInit() override;
-    virtual void reinit() override;
 
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
