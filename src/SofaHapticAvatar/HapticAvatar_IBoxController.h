@@ -15,7 +15,7 @@
 #include <SofaUserInteraction/Controller.h>
 
 #include <SofaHapticAvatar/HapticAvatar_Driver.h>
-#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
+#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
@@ -34,18 +34,18 @@ using namespace sofa::simulation;
 /**
 * Haptic Avatar IBox controller
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarIBoxController : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatar_IBoxController : public Controller
 {
 
 public:
-    SOFA_CLASS(HapticAvatarIBoxController, Controller);
+    SOFA_CLASS(HapticAvatar_IBoxController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
 
-    HapticAvatarIBoxController();
+    HapticAvatar_IBoxController();
 
-	virtual ~HapticAvatarIBoxController();
+	virtual ~HapticAvatar_IBoxController();
 
     virtual void init() override;
     virtual void bwdInit() override;

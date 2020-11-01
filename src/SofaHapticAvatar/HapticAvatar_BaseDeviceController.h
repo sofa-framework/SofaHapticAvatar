@@ -14,16 +14,15 @@
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatar_Driver.h>
-#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
-#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
+#include <SofaHapticAvatar/HapticAvatarDriver.h>
+#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
+#include <SofaHapticAvatar/HapticAvatarIBoxController.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
 
 #include <SofaHaptics/ForceFeedback.h>
 #include <SofaHaptics/LCPForceFeedback.h>
-#include <sofa/core/collision/NarrowPhaseDetection.h>
 
 #include <atomic>
 
@@ -66,16 +65,6 @@ public:
 };
 
 
-struct SOFA_HAPTICAVATAR_API HapticContact
-{
-    Vector3 m_toolPosition;
-    Vector3 m_objectPosition;
-    Vector3 m_normal;
-    Vector3 m_force;
-    SReal distance;
-    int tool; //0 = shaft, 1 = upjaw, 2 = downJaw
-};
-
 
 /**
 * Haptic Avatar driver
@@ -90,7 +79,6 @@ public:
     typedef RigidTypes::VecDeriv VecDeriv;
     typedef SolidTypes<double>::Transform Transform;
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
-    typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
     HapticAvatarDeviceController();
 
@@ -105,8 +93,6 @@ public:
     void handleEvent(core::objectmodel::Event *) override;
 
     void updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
-
-    void retrieveCollisions();
 
     //Data<Vec3d> d_positionBase; ///< Position of the interface base in the scene world coordinates
     //Data<Quat> d_orientationBase; ///< Orientation of the interface base in the scene world coordinates
@@ -124,7 +110,6 @@ public:
     Data<bool> d_drawDeviceAxis;
     Data<bool> d_drawDebugForce;
     Data<bool> d_dumpThreadInfo;
-    Data<bool> d_newMethod;
 
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
@@ -134,13 +119,6 @@ public:
     
     Data<SReal> m_forceScale;
     bool m_firstStep;
-    SReal m_distance;
-
-
-    Vec3 m_toolDir;
-    Vec3 m_pitchDir;
-    Vec3 m_h;
-    Vec3 m_hTM;
 
     sofa::helper::vector<Vector3> m_debugForces;
 
@@ -157,8 +135,8 @@ public:
 
     std::atomic<bool> m_terminate;
     int m_portId;
-    SingleLink<HapticAvatarDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
-    SingleLink<HapticAvatarDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+    SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     LCPForceFeedback::SPtr m_forceFeedback;
     bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:
@@ -178,9 +156,9 @@ protected:
     void clearDevice();
 
 protected:
-    HapticAvatar_Driver * m_HA_driver;
-    HapticAvatar_PortalManager * m_portalMgr;
-    HapticAvatar_IBoxController * m_iboxCtrl;
+    HapticAvatarDriver * m_HA_driver;
+    HapticAvatarPortalManager * m_portalMgr;
+    HapticAvatarIBoxController * m_iboxCtrl;
     bool m_deviceReady;
 
     sofa::simulation::TaskScheduler* m_taskScheduler;
@@ -191,14 +169,6 @@ protected:
     std::thread copy_thread;
 
     HapticAvatarJaws m_jawsData;
-
-    // Pointer to the scene detection Method component (Narrow phase only)
-    sofa::core::collision::NarrowPhaseDetection* m_detectionNP;
-
-    // Pointer to the scene intersection Method component
-    sofa::core::collision::Intersection* m_intersectionMethod;
-
-    std::vector<HapticContact> contactsSimu, contactsHaptic;
 };
 
 } // namespace sofa::component::controller

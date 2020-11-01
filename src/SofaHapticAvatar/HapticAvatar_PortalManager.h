@@ -38,12 +38,12 @@ namespace sofa::component::controller
 using namespace sofa::defaulttype;
 
 /**
-* HapticAvatarPortalManager 
+* HapticAvatar_PortalManager 
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarPortalManager : public sofa::core::objectmodel::BaseObject
+class SOFA_HAPTICAVATAR_API HapticAvatar_PortalManager : public sofa::core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(HapticAvatarPortalManager, sofa::core::objectmodel::BaseObject);
+    SOFA_CLASS(HapticAvatar_PortalManager, sofa::core::objectmodel::BaseObject);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
@@ -51,9 +51,9 @@ public:
     typedef defaulttype::Vec4f Vec4f;
     typedef defaulttype::Vector3 Vector3;
 
-    HapticAvatarPortalManager();
+    HapticAvatar_PortalManager();
 
-    virtual ~HapticAvatarPortalManager() {}
+    virtual ~HapticAvatar_PortalManager() {}
 
     void setFilename(std::string f);
     const std::string &getFilename();

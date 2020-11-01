@@ -21,7 +21,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_Defines.h>
-#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
+#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
@@ -36,12 +36,12 @@
 namespace sofa::component::controller
 {
 
-int HapticAvatarPortalManagerClass = core::RegisterObject("TODO detail")
-    .add< HapticAvatarPortalManager >()
+int HapticAvatar_PortalManagerClass = core::RegisterObject("TODO detail")
+    .add< HapticAvatar_PortalManager >()
     ;
 
 
-HapticAvatarPortalManager::HapticAvatarPortalManager()
+HapticAvatar_PortalManager::HapticAvatar_PortalManager()
     : m_configFilename(initData(&m_configFilename, "configFilename", "Config Filename of the object"))    
     , m_portalPosition1(initData(&m_portalPosition1, "portalPosition1", "portal rigid position test"))
     , m_portalPosition2(initData(&m_portalPosition2, "portalPosition2", "portal rigid position test"))
@@ -53,19 +53,19 @@ HapticAvatarPortalManager::HapticAvatarPortalManager()
 }
 
 
-void HapticAvatarPortalManager::init()
+void HapticAvatar_PortalManager::init()
 {
-    msg_info() << "HapticAvatarPortalManager::init()";
+    msg_info() << "HapticAvatar_PortalManager::init()";
     parseConfigFile();
     portalsSetup();
-  /*  HapticAvatarPortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
+  /*  HapticAvatar_PortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
     pos.resize(m_portals.size());
     m_portalsPosition.endEdit();*/
     printInfo();
 }
 
 
-void HapticAvatarPortalManager::portalsSetup()
+void HapticAvatar_PortalManager::portalsSetup()
 {
     for (auto pController : m_portals)
     {
@@ -75,13 +75,13 @@ void HapticAvatarPortalManager::portalsSetup()
 }
 
 
-void HapticAvatarPortalManager::reinit()
+void HapticAvatar_PortalManager::reinit()
 {
-    msg_info() << "HapticAvatarPortalManager::reinit()";
+    msg_info() << "HapticAvatar_PortalManager::reinit()";
 }
 
 
-int HapticAvatarPortalManager::getPortalId(std::string comStr)
+int HapticAvatar_PortalManager::getPortalId(std::string comStr)
 {
     int res = -1;
     int cpt = 0;
@@ -96,7 +96,7 @@ int HapticAvatarPortalManager::getPortalId(std::string comStr)
 }
 
 
-void HapticAvatarPortalManager::updatePostion(int portId, float yawAngle, float pitchAngle)
+void HapticAvatar_PortalManager::updatePostion(int portId, float yawAngle, float pitchAngle)
 {
     if (portId >= m_portals.size())
     {
@@ -107,7 +107,7 @@ void HapticAvatarPortalManager::updatePostion(int portId, float yawAngle, float 
     m_portals[portId]->updatePostion(yawAngle, pitchAngle);
 }
 
-const sofa::defaulttype::Mat4x4f& HapticAvatarPortalManager::getPortalTransform(int portId)
+const sofa::defaulttype::Mat4x4f& HapticAvatar_PortalManager::getPortalTransform(int portId)
 {
     if (portId >= m_portals.size())
     {
@@ -119,19 +119,19 @@ const sofa::defaulttype::Mat4x4f& HapticAvatarPortalManager::getPortalTransform(
 }
 
 
-const HapticAvatarPortalManager::Coord& HapticAvatarPortalManager::getPortalPosition(int portId)
+const HapticAvatar_PortalManager::Coord& HapticAvatar_PortalManager::getPortalPosition(int portId)
 {
     if (portId >= m_portals.size())
     {
         msg_error() << "getPortalTransform: Port id out of bounds: " << portId;
-        return HapticAvatarPortalManager::Coord();
+        return HapticAvatar_PortalManager::Coord();
     }
 
     return m_portals[portId]->getPortalPosition();
 }
 
 
-void HapticAvatarPortalManager::updatePositionData()
+void HapticAvatar_PortalManager::updatePositionData()
 {
     int cpt = 0;
     for (auto pController : m_portals)
@@ -152,33 +152,33 @@ void HapticAvatarPortalManager::updatePositionData()
     }
 }
 
-void HapticAvatarPortalManager::handleEvent(core::objectmodel::Event *event)
+void HapticAvatar_PortalManager::handleEvent(core::objectmodel::Event *event)
 {
-    //msg_info() << "HapticAvatarPortalManager::handleEvent()";
+    //msg_info() << "HapticAvatar_PortalManager::handleEvent()";
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
         updatePositionData();
     }
 }
 
-void HapticAvatarPortalManager::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatar_PortalManager::draw(const sofa::core::visual::VisualParams* vparams)
 {
 
 }
 
 
-void HapticAvatarPortalManager::setFilename(std::string f)
+void HapticAvatar_PortalManager::setFilename(std::string f)
 {
     m_configFilename.setValue(f);
 }
 
-const std::string& HapticAvatarPortalManager::getFilename()
+const std::string& HapticAvatar_PortalManager::getFilename()
 {
     return m_configFilename.getValue();
 }
 
 
-bool HapticAvatarPortalManager::getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value)
+bool HapticAvatar_PortalManager::getIntAttribute(const TiXmlElement* elem, const char* attributeN, int* value)
 {
     int res = elem->QueryIntAttribute(attributeN, value);
     if (res == TIXML_WRONG_TYPE)
@@ -195,7 +195,7 @@ bool HapticAvatarPortalManager::getIntAttribute(const TiXmlElement* elem, const 
     return true;
 }
 
-bool HapticAvatarPortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value)
+bool HapticAvatar_PortalManager::getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value)
 {
     int res = elem->QueryFloatAttribute(attributeN, value);
     if (res == TIXML_WRONG_TYPE)
@@ -213,7 +213,7 @@ bool HapticAvatarPortalManager::getFloatAttribute(const TiXmlElement* elem, cons
 }
 
 
-bool HapticAvatarPortalManager::parseConfigFile()
+bool HapticAvatar_PortalManager::parseConfigFile()
 {
     d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
 
@@ -294,7 +294,7 @@ bool HapticAvatarPortalManager::parseConfigFile()
 }
 
 
-void HapticAvatarPortalManager::printInfo()
+void HapticAvatar_PortalManager::printInfo()
 {
     for (auto pController : m_portals)
     {

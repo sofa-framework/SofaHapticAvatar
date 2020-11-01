@@ -10,21 +10,21 @@ set(HEADER_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/config.h.in
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Defines.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Driver.h
-	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalManager.h
+	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.h    
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarIBoxController.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.h
     
 )
 
 set(SOURCE_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Driver.cpp
-	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarPortalManager.cpp
-	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp
+	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.cpp
+	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp    
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarDeviceController.cpp
-    ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarIBoxController.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatarEmulator.cpp
 )
 
