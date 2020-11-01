@@ -12,6 +12,8 @@
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
+#include <sofa/simulation/CollisionEndEvent.h>
+#include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
@@ -82,6 +84,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
     , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
     , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "draw device"))
+    , d_newMethod(initData(&d_newMethod, false, "newMethod", "draw device"))
+    
     
     , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
     , m_deviceReady(false)
@@ -93,6 +97,8 @@ HapticAvatarDeviceController::HapticAvatarDeviceController()
     , m_forceFeedback(nullptr)
     , m_simulationStarted(false)
     , m_firstStep(true)
+    , m_distance(1.0f)
+    , m_detectionNP(nullptr)
 {
     this->f_listening.setValue(true);
     
@@ -158,6 +164,15 @@ void HapticAvatarDeviceController::init()
     m_HA_driver->releaseForce();
 
 
+    m_intersectionMethod = getContext()->get<core::collision::Intersection>();
+    m_detectionNP = getContext()->get<core::collision::NarrowPhaseDetection>();
+    if (m_intersectionMethod == nullptr) { msg_error() << "m_intersectionMethod not found. Add an Intersection method in your scene.";}
+    if (m_detectionNP == nullptr) { msg_error() << "NarrowPhaseDetection not found. Add a NarrowPhaseDetection method in your scene.";}
+
+
+    SReal alarmDist = m_intersectionMethod->getAlarmDistance();
+    SReal contactDist = m_intersectionMethod->getContactDistance();
+    m_distance = alarmDist - contactDist;
 
     // create task scheduler
     //unsigned int mNbThread = 2;
@@ -269,7 +284,10 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+    bool newMethod = _deviceCtrl->d_newMethod.getValue();
+    float damping = _deviceCtrl->m_forceScale.getValue();
 
+    int cptF = 0;
     // Haptics Loop
     while (!terminate)
     {
@@ -290,44 +308,162 @@ void HapticAvatarDeviceController::Haptics(std::atomic<bool>& terminate, void * 
         }
 
 
-        // Force feedback computation
-        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-        {            
-            const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+        if (_deviceCtrl->m_simulationStarted && !_deviceCtrl->contactsHaptic.empty())
+        {
             sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
 
-            // Check main force feedback
-            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
-
-            bool contactShaft = false;
-            totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
-            
-
-            
-            for (int i = 0; i < 3; i++)
+            for (auto contact : _deviceCtrl->contactsHaptic)
             {
-                if (totalForce[i] > 0.0)
-                {
-                    contactShaft = true;
-                    break;
-                }
+                totalForce += contact.m_force * contact.distance;
             }
 
-            float damping = _deviceCtrl->m_forceScale.getValue();            
-            if (contactShaft)
+            if (newMethod)
             {
-                //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
-                //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
-                //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
-                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
-                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+                sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
+                sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
+                sofa::defaulttype::Mat3x3f rotM;
+                for (unsigned int i = 0; i < 3; i++) {
+                    for (unsigned int j = 0; j < 3; j++) {
+                        rotM[i][j] = R_rot[i][j];
+                    }
+                }
+
+                Vec3 toolDir = Vec3(0, -1, 0);
+                toolDir = _deviceCtrl->m_toolRot * toolDir;
+                toolDir.normalize();
+                
+
+                Vec3 yawDir = Vec3(1, 0, 0);
+                yawDir = _deviceCtrl->m_PortalRot * yawDir;
+                yawDir.normalize();
+
+                Vec3 pitchDir = Vec3(0, 0, 1);
+                Vec3 pitchDirTool = Vec3(0, 0, 1);
+                pitchDir = _deviceCtrl->m_PortalRot * pitchDir;
+                pitchDirTool = _deviceCtrl->m_toolRot * pitchDirTool;
+                pitchDir.normalize();
+                
+                totalForce = totalForce * damping;
+                //Vec3 totalForceTM = _deviceCtrl->m_toolRotInv * totalForce;
+                Vec3 h = cross(totalForce, toolDir);
+                
+
+                SReal zforce = dot(-toolDir, totalForce);
+                SReal yawTorque = dot(yawDir, h);
+                SReal pitchTorque = dot(pitchDir, h);                
+
+                
+                const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+                Vec3 centerTool = toolPosition[3].getCenter();
+                //Vec3 dirToolAccum = Vec3(0.0, 0.0, 0.0);
+                int cpt = 0;
+                float torqueAcc = 0;
+                for (auto contact : _deviceCtrl->contactsHaptic)
+                {
+                    Vec3 dirPoint = contact.m_toolPosition - centerTool;
+                    Vec3 cross1 = cross(-contact.m_normal, dirPoint);
+                    torqueAcc += dot(cross1, toolDir);
+                    //if (dot(dirPoint, toolDir) > 0)
+                    //{
+                    //    dirToolAccum += dirPoint;
+                    //    cpt++;
+                    //}
+
+
+                }
+                //if (cpt != 0)
+                //    dirToolAccum = dirToolAccum/cpt;
+
+                //Vec3 hTM = cross(dirToolAccum, toolDir);
+                SReal toolTorque = torqueAcc;// dot(hTM, pitchDirTool);
+
+
+                //_deviceCtrl->m_toolDir = toolDir;
+                //_deviceCtrl->m_pitchDir = pitchDirTool;
+                //_deviceCtrl->m_h = h;
+                //_deviceCtrl->m_hTM = dirToolAccum;
+                //_deviceCtrl->m_hTM = cross(toolDir, toolDir);
+                
+
+
+                if (cptF == 100)
+                {
+                    Vector3 root = toolPosition[3].getCenter();
+                    
+
+                    for (auto contact : _deviceCtrl->contactsHaptic)
+                    {
+                        SReal res = dot(contact.m_toolPosition - root, root + toolDir);
+                        std::cout << res << std::endl;
+                    }
+
+                    std::cout << "zforce: " << zforce
+                        << " | pitchTorque: " << pitchTorque
+                        << " | yawTorque: " << yawTorque
+                        << " | toolTorque: " << toolTorque
+                        << std::endl;
+
+                    cptF = 0;
+                }
+                //cptF++;
+
+                //zforce = 0.0;
+                //toolTorque = 0.0;
+                //pitchTorque = 0.0;
+                
+                //yawTorque = 0.0;
+                _driver->setManual_PWM(toolTorque , pitchTorque * 50, zforce, yawTorque * 50);
             }
             else
-                _driver->releaseForce();
-            
+            {
+                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+            }
         }
+        else
+            _driver->releaseForce();
 
+    //    // Force feedback computation
+    //    if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
+    //    {            
+    //        const HapticAvatarDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+    //        sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
+
+    //        // Check main force feedback
+    //        _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
+
+    //        bool contactShaft = false;
+    //        totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
+    //        
+
+    //        
+    //        for (int i = 0; i < 3; i++)
+    //        {
+    //            if (totalForce[i] > 0.0)
+    //            {
+    //                contactShaft = true;
+    //                break;
+    //            }
+    //        }
+
+    //        float damping = _deviceCtrl->m_forceScale.getValue();            
+    //        if (contactShaft)
+    //        {
+    //            //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
+    //            //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
+    //            //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
+    //            //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
+    //            //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
+
+   
+    //////dir 
+    ////            _driver->setManual_PWM(zforce, pitchTorque*100, 0.0, yawTorque*100);
+
+    //            _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
+    //        }
+    //        else
+    //            _driver->releaseForce();
+            
+        
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
 
@@ -541,47 +677,37 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
         const HapticAvatarDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         const HapticAvatarDeviceController::VecDeriv& force = m_simuData.hapticForces;
 
-        //if (force.size() > 6)
-        //{
-        //    Vec3 dir = force[3].getLinear();
-        //    Vec3 ang = force[3].getAngular();
-        //    //dir.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dir2 = force[4].getLinear();
-        //    Vec3 ang2 = force[4].getAngular();
-        //    //dir2.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[6].getCenter(), toolPosition[6].getCenter() + dir2 * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[6].getCenter(), toolPosition[6].getCenter() + ang2 * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dir3 = force[5].getLinear();
-        //    Vec3 ang3 = force[5].getAngular();
-        //    //dir3.normalize();
-        //    vparams->drawTool()->drawLine(toolPosition[7].getCenter(), toolPosition[7].getCenter() + dir3 * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[7].getCenter(), toolPosition[7].getCenter() + ang3 * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    Vec3 dirTotal = dir + dir2 + dir3;
-        //    Vec3 angTotal = ang + ang2 + ang3;
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        //    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
-
-        //}
         Vec3 dirTotal, angTotal;
-        for (int i = 0; i < force.size(); i++)
-        {
-            Vec3 dir = force[i].getLinear();
-            Vec3 ang = force[i].getAngular();
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
 
-            dirTotal += dir;
-            angTotal += ang;
+        for (auto contact : contactsHaptic)
+        {
+            dirTotal += contact.m_force*contact.distance;
         }
 
+
+        //for (int i = 0; i < force.size(); i++)
+        //{
+        //    Vec3 dir = force[i].getLinear();
+        //    Vec3 ang = force[i].getAngular();
+        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
+
+        //    dirTotal += dir;
+        //    angTotal += ang;
+        //}
+
+        //dirTotal *= m_forceScale.getValue();
+        //angTotal *= m_forceScale.getValue();
+
         vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 1.0f, 1.0f, 1.0));
+
+
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolDir * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_pitchDir * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_h * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_hTM * 50, defaulttype::Vec4f(0.5f, 0.0f, 0.0f, 1.0));
     }
     
     return;
@@ -649,6 +775,86 @@ void HapticAvatarDeviceController::draw(const sofa::core::visual::VisualParams* 
 }
 
 
+void HapticAvatarDeviceController::retrieveCollisions()
+{
+    contactsSimu.clear();
+
+    // get the collision output
+    const core::collision::NarrowPhaseDetection::DetectionOutputMap& detectionOutputs = m_detectionNP->getDetectionOutputs();
+    if (detectionOutputs.size() == 0) {
+        contactsHaptic = contactsSimu;
+        return;
+    }
+
+    //std::cout << "detectionOutputs: " << detectionOutputs.size() << " count: " << m_detectionNP->getPrimitiveTestCount() << std::endl;    
+    const ContactVector* contacts = NULL;
+    for (core::collision::NarrowPhaseDetection::DetectionOutputMap::const_iterator it = detectionOutputs.begin(); it != detectionOutputs.end(); ++it)
+    {
+        contacts = dynamic_cast<const ContactVector*>(it->second);
+        if (contacts == nullptr || contacts->size() == 0) {
+            continue;
+        }
+
+        size_t ncontacts = contacts->size();
+        if (ncontacts == 0) {
+            continue;
+        }
+        
+        sofa::core::CollisionModel* collMod1 = it->first.first;
+        sofa::core::CollisionModel* collMod2 = it->first.second;
+
+        //std::cout << " - collMod1: " << collMod1->getName() << " | collMod2: " << collMod2->getName() << std::endl;
+
+        int id = -1;        
+        sofa::core::CollisionModel* toolMod = nullptr;
+
+        if (collMod1->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
+        {
+            id = 0;
+            toolMod = collMod1;
+        }
+        else if (collMod2->hasTag(sofa::core::objectmodel::Tag("toolCollision")))
+        {
+            id = 1;
+            toolMod = collMod2;
+        }
+               
+        if (id == -1) { // others collision than with tool
+            continue;
+        }
+
+        int toolId = 0;
+        
+        //std::cout << " - ncontacts: " << ncontacts << std::endl;
+        for (size_t j = 0; j < ncontacts; ++j)
+        {
+            const ContactVector::value_type& c = (*contacts)[j];
+            HapticContact contact;
+            if (id == 0)
+            {
+                contact.m_toolPosition = c.point[0];
+                contact.m_objectPosition = c.point[1];
+                contact.m_normal = c.normal * (-1); /// Normal of the contact, pointing outward from the first model                
+            }
+            else
+            {
+                contact.m_toolPosition = c.point[1];
+                contact.m_objectPosition = c.point[0];
+                contact.m_normal = c.normal ;
+            }
+            contact.m_force = (contact.m_toolPosition - contact.m_objectPosition).normalized();
+            contact.distance = (m_distance - c.value)*(m_distance - c.value);
+            //std::cout << "contact.distance: " << contact.distance << std::endl;
+
+            contactsSimu.push_back(contact);
+        }
+    }
+
+    contactsHaptic = contactsSimu;
+    //std::cout << " - contactsSimu: " << contactsSimu.size() << std::endl;
+}
+
+
 void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
 {
     //if(m_errorDevice != 0)
@@ -661,6 +867,10 @@ void HapticAvatarDeviceController::handleEvent(core::objectmodel::Event *event)
         
         m_simulationStarted = true;
         updatePosition();
+    }
+    else if (simulation::CollisionEndEvent::checkEventType(event))
+    {
+        retrieveCollisions();
     }
 }
 

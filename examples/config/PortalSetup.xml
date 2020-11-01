@@ -11,7 +11,7 @@
     <PortalSettings Rail ="0" RailPos ="0" FlipAngle ="0" TiltAngle ="20" ComPort ="COM5"/>
   </Portal>
   <Portal Number ="4" >
-    <PortalSettings Rail ="1" RailPos ="43" FlipAngle ="0" TiltAngle ="20" ComPort ="COM3"/>
+    <PortalSettings Rail ="0" RailPos ="0" FlipAngle ="0" TiltAngle ="0" ComPort ="COM3"/>
   </Portal>
   <Portal Number ="5" >
     <PortalSettings Rail ="0" RailPos ="100" FlipAngle ="180" TiltAngle ="20" ComPort ="COM6"/>

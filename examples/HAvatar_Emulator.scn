@@ -16,7 +16,7 @@
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
     <HapticAvatarEmulator name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="1" scale="0.5" dumpThreadInfo="1" floorHeight="30.0" testMode="2" damping="5" iboxController="@HAIBox"/>
+    drawDeviceAxis="1" scale="0.5" dumpThreadInfo="0" floorHeight="30.0" testMode="2" damping="3" iboxController="@HAIBox"/>
     <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
@@ -75,7 +75,7 @@
         <UniformMass name="mass" totalMass="100" />
         <Node name="model">
             <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  0 0 0  0 0 0 1  0 0 0  0 0 0 1
-            0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="51.73 193.128 50"/>
+            0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
             
             <UniformMass template="Rigid3d" name="mass" totalMass="100" />
             <LCPForceFeedback activate="true" forceCoef="0.001" localHapticConstraintAllFrames="0"/>   

@@ -321,6 +321,8 @@ void HapticAvatarDriver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 for
 }
 
 
+int cptF = 0;
+
 void HapticAvatarDriver::setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
@@ -538,6 +540,18 @@ void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float
     values[1] = int(2.34 * pitchTorque); // PitchPWM
     values[2] = int(-82.93 * zforce); // ZPWM
     values[3] = int(3.41 * yawTorque); // YawPWM
+
+    if (cptF == 100)
+    {
+        std::cout << "zForce: " << values[2]
+            << " | pitchTorque: " << values[1]
+            << " | yawTorque: " << values[3]
+            << " | toolTorque: " << values[0]
+            << std::endl;
+
+        cptF = 0;
+    }
+   // cptF++;
    
     int maxPWM = 1000;
     for (int i = 0; i < 4; i++)

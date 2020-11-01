@@ -9,7 +9,9 @@
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceDetection name="detection" />
     <DefaultContactManager name="response" response="FrictionContact" />
-    <LocalMinDistance name="proximity" alarmDistance="1.5" contactDistance="0.5" angleCone="0.0" />
+    <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.1" angleCone="0.0" />
+    <!--<MinProximityIntersection />-->
+    
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
 
@@ -18,7 +20,8 @@
     
     <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
     <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" damping="3"/>
+    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" damping="3"
+    newMethod="1"/>
     <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
@@ -94,11 +97,11 @@
             
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
-            <Node name="CollisionModel" tags="toolCollision">
+            <Node name="CollisionModel" >
                 <MeshObjLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="instrumentPoint" radius="2" contactStiffness="10" group="0"/> 
+                <SphereCollisionModel name="shaftSphere" radius="2" group="0" tags="toolCollision shaft"/> 
 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
                 index="3"/>
@@ -110,11 +113,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="3"/>
             </Node>
             
-            <Node name="JawUp_collision" tags="toolCollision">
+            <Node name="JawUp_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
+                <SphereCollisionModel name="jawUpSphere" radius="1" group="0" tags="toolCollision jaws" /> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
             </Node>
             
@@ -124,11 +127,11 @@
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
             </Node>
 
-            <Node name="JawDown_collision" tags="toolCollision">
+            <Node name="JawDown_collision" >
                 <MeshObjLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
+                <SphereCollisionModel name="jawDownSphere" radius="1" group="0" tags="toolCollision jaws"/> 
                 <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
             </Node>     
             
@@ -200,7 +203,7 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel group="4"/>
+            <TriangleCollisionModel name="Surface1" group="4"/>
             
             
             <Node name="VisuSurface1">
@@ -212,7 +215,7 @@
     
     
     
-    <RegularGridTopology name="grid_2" n="6 6 6" min="80 50 -10" max="150 150 10" />
+    <RegularGridTopology name="grid_2" n="6 6 6" min="80 50 -10" max="150 120 10" />
     <Node name="Cube2">
         <MechanicalObject src="@../grid_2" name="Volume" />
         
@@ -230,7 +233,7 @@
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel group="4"/>
+            <TriangleCollisionModel name="Surface2"  group="4"/>
             
             
             <Node name="VisuSurface2">
