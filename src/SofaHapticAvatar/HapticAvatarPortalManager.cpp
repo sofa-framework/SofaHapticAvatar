@@ -215,7 +215,7 @@ bool HapticAvatarPortalManager::getFloatAttribute(const TiXmlElement* elem, cons
 
 bool HapticAvatarPortalManager::parseConfigFile()
 {
-    m_componentstate = sofa::core::objectmodel::ComponentState::Invalid;
+    d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
 
     // -- Check filename field:
     if (m_configFilename.getValue() == "")
@@ -289,7 +289,7 @@ bool HapticAvatarPortalManager::parseConfigFile()
         m_portals.push_back(pController);
     }
     
-    m_componentstate = sofa::core::objectmodel::ComponentState::Valid;
+    d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
     return true;
 }
 
