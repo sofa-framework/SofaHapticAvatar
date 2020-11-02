@@ -39,7 +39,6 @@ using namespace sofa::component::controller;
 */
 class SOFA_HAPTICAVATAR_API HapticAvatar_BaseDeviceController : public Controller
 {
-
 public:
     SOFA_CLASS(HapticAvatar_BaseDeviceController, Controller);
     typedef RigidTypes::Coord Coord;
@@ -48,67 +47,78 @@ public:
     typedef SolidTypes<double>::Transform Transform;
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
 
+    /// default constructor
     HapticAvatar_BaseDeviceController();
 
+    /// default destructor
 	virtual ~HapticAvatar_BaseDeviceController();
 
-    virtual void init() override;
-    virtual void bwdInit() override;    
+    /// Component API 
+    ///{
+    void init() override;
+    void bwdInit() override;    
     void handleEvent(core::objectmodel::Event *) override;
-    virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
+    void draw(const sofa::core::visual::VisualParams* vparams) override;
+    ///}
 
+protected:
+    /// Main method to start haptic threads
+    virtual void createHapticThreads() = 0;
+    
+    /// Main method to clear the device
+    void clearDevice();
 
+    /// Main method to update the tool device from haptic information. 
+    /// Will call @sa updatePortalAnglesAndLength and @sa updatePositionImpl
     void updatePosition();
-    
 
-    void updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
+    /// Method to propage
+    void updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
 
-    Data<SReal> d_scale; ///< Default scale applied to the Phantom Coordinates
-    Data< Coord > d_posDevice; ///< position of the base of the part of the device    
+    /// Internal method to bo overriden by child class to propagate specific position. Called by @sa updatePosition
+    virtual void updatePositionImpl() {};
+
+    /// Internal method to bo overriden by child class to draw specific information. Called by @sa draw
+    virtual void drawImpl(const sofa::core::visual::VisualParams*) {};
+
+    /// Internal method to bo overriden by child class to draw debug information. Called by @sa draw if d_drawDebug is true
+    virtual void drawDebug(const sofa::core::visual::VisualParams* vparams);
 
 
-    Data<bool> d_logOutputs;
-    /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
-    Data<sofa::helper::fixed_array<float, 4> > d_info_toolValues;
-    Data<sofa::helper::fixed_array<float, 4> > d_info_motorOutput;
-    Data<sofa::helper::fixed_array<float, 3> > d_info_collisionForce;
-    Data<float> d_info_jawOpening;
-
-    Data<bool> d_dumpThreadInfo;
-    Data<bool> d_drawDeviceAxis;
-    Data<bool> d_drawDebugForce;
-    
-
-    Data<std::string> d_portName;
+public:
+    /// Name of the port for this device
+    Data<std::string> d_portName; 
+    /// Data to store Information received by HW device
     Data<std::string> d_hapticIdentity;
-    Data<int> d_fontSize;
 
-    Data<VecCoord> d_toolPosition;
-    
+    /// Default scale applied to the Phantom Coordinates
+    Data<SReal> d_scale; 
+    /// Scale to apply to the forcefeedback. //TODO: check if this is still needed
     Data<SReal> m_forceScale;
-    bool m_firstStep;
 
-    sofa::helper::vector<Vector3> m_debugForces;
+    /// position of the base of the device
+    Data< Coord > d_posDevice;
+    /// output data position of the tool
+    Data<VecCoord> d_toolPosition;
 
-    sofa::helper::vector<float> m_times;
-
-    Coord m_debugRootPosition;
-    sofa::defaulttype::Mat3x3f m_toolRot;
-    sofa::defaulttype::Mat3x3f m_toolRotInv;
-    sofa::defaulttype::Mat3x3f m_PortalRot;
+    /// Parameter to dump thread info. //TODO: check if this should not be removed...
+    Data<bool> d_dumpThreadInfo;
     
-    /// General Haptic thread methods
-    //static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
+    /// Data parameter to draw dof axis
+    Data<bool> d_drawDeviceAxis;
+    /// Data parameter to draw debug information
+    Data<bool> d_drawDebug;
+    /// Data parameter to draw output logs
+    Data<bool> d_drawLogOutputs;
 
-    //static void CopyData(std::atomic<bool>& terminate, void * p_this);
-
-    std::atomic<bool> m_terminate;
-    int m_portId;
+    
+    /// Link to the portalManager component
     SingleLink<HapticAvatar_BaseDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 
-    LCPForceFeedback::SPtr m_forceFeedback;
-    bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
-public:
+public: 
+    /// Data public for haptic thread
+
+    /// Structure used to transfer data fromt he haptic thread to the simulation thread.
     struct DeviceData
     {
         sofa::helper::fixed_array<float, 4> anglesAndLength;
@@ -118,24 +128,42 @@ public:
         float jawOpening;
     };
 
+    /// Data belonging to the haptic thread only
     DeviceData m_hapticData;
+    /// Data used in the copy thread to copy @sa m_hapticData into this data that can be used by simulation thread.
     DeviceData m_simuData;
 
-protected:
-    void clearDevice();
+    /// Pointer to the ForceFeedback component
+    LCPForceFeedback::SPtr m_forceFeedback;
 
-    virtual void createHapticThreads() = 0;
-
-protected:
-    HapticAvatar_Driver * m_HA_driver;
-    HapticAvatar_PortalManager * m_portalMgr;
-    bool m_deviceReady;
+    /// Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
+    bool m_simulationStarted; 
     
-    std::mutex lockPosition;
+    /// Bool to notify thread to stop work
+    std::atomic<bool> m_terminate;
 
+
+protected:
+    /// Pointer to the internal Driver for device API communication
+    HapticAvatar_Driver * m_HA_driver;
+    /// Pointer to the portal manager to get information from the current portal
+    HapticAvatar_PortalManager * m_portalMgr;
+    
+    /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
+    DeviceData m_debugData;
+
+    /// Parameter to know if device is ready or not.
+    bool m_deviceReady;
+    /// Id of the port returned by portalManager
+    int m_portId;
+    
     std::thread haptic_thread;
     std::thread copy_thread;
 
+
+    sofa::defaulttype::Mat3x3f m_toolRot;
+    sofa::defaulttype::Mat3x3f m_toolRotInv;
+    sofa::defaulttype::Mat3x3f m_PortalRot;
 };
 
 } // namespace sofa::HapticAvatar

@@ -38,8 +38,6 @@ HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
     
     d_hapticIdentity.setReadOnly(true);
 
-    m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
-    m_debugForces.resize(6);
     m_toolRot.identity();
 
     HapticAvatar_TipDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
@@ -101,7 +99,6 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-        //_deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
 
         // Force feedback computation
         if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
@@ -162,8 +159,6 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
             ctime_t diffLoop = stepTime - lastTime;
             lastTime = stepTime;
             
-            //_deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
-
             auto t2 = std::chrono::high_resolution_clock::now();
             
             auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
@@ -189,8 +184,9 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
     double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
 
     ctime_t lastTime = CTime::getRefTime();
-    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    int cptLoop = 0;
+    //std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
+    //int cptLoop = 0;
+
     // Haptics Loop
     while (!terminate)
     {
@@ -207,7 +203,6 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
             duration = endTime - startTime;
         }
 
-
         //if (cptLoop % 100 == 0)
         //{
         //    ctime_t stepTime = CTime::getRefTime();
@@ -216,7 +211,7 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
         //    //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
         //    std::cout << "Copy nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;            
         //}
-        cptLoop++;
+        //cptLoop++;
     }
 }
 

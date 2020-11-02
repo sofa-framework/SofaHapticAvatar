@@ -25,41 +25,29 @@ using namespace sofa::helper::system::thread;
 
 //constructeur
 HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
-    : d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
-    , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))        
-    , d_info_toolValues(initData(&d_info_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
-    , d_info_motorOutput(initData(&d_info_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
-    
-    , d_info_jawOpening(initData(&d_info_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
-    , d_toolPosition(initData(&d_toolPosition, "toolPosition", "jaws opening position"))
-    
+    : d_portName(initData(&d_portName, std::string("//./COM3"), "portName", "Name of the port used by this device"))
+    , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "Data to store Information received by HW device"))
+    , d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the tool Coordinates"))
     , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
-
-    , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
-    , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
-    , m_portId(-1)
+    , d_posDevice(initData(&d_posDevice, "positionDevice", "Position of the base of the device"))
+    , d_toolPosition(initData(&d_toolPosition, "toolPosition", "Output data position of the tool"))
+    , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "Parameter to dump thread info"))
+    , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "Parameter to draw dof axis"))
+    , d_drawDebug(initData(&d_drawDebug, false, "drawDebugForce", "Parameter to draw debug information"))
+    , d_drawLogOutputs(initData(&d_drawLogOutputs, false, "drawLogOutputs", "Parameter to draw output logs"))
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
-
-    , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
-    , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
-    , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "draw device"))
-    
-    , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
-    , m_deviceReady(false)
-    , m_terminate(true)
-
-    , m_HA_driver(nullptr)
-    , m_portalMgr(nullptr)
     , m_forceFeedback(nullptr)
     , m_simulationStarted(false)
-    , m_firstStep(true)
+    , m_terminate(true)
+    , m_HA_driver(nullptr)
+    , m_portalMgr(nullptr)
+    , m_deviceReady(false)
+    , m_portId(-1)
 {
     this->f_listening.setValue(true);
     
     d_hapticIdentity.setReadOnly(true);
 
-    m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
-    m_debugForces.resize(6);
     m_toolRot.identity();
 
     HapticAvatar_BaseDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
@@ -142,7 +130,6 @@ void HapticAvatar_BaseDeviceController::bwdInit()
 
     msg_info() << "Portal Id found: " << m_portId;
 
-
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
     m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
 
@@ -150,7 +137,6 @@ void HapticAvatar_BaseDeviceController::bwdInit()
     {
         msg_info() << "ForceFeedback found";
     }
-
     
     m_terminate = false;
     createHapticThreads();
@@ -160,7 +146,7 @@ void HapticAvatar_BaseDeviceController::bwdInit()
 
 
 
-void HapticAvatar_BaseDeviceController::updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
+void HapticAvatar_BaseDeviceController::updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
 {
     m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
 }
@@ -172,20 +158,20 @@ void HapticAvatar_BaseDeviceController::updatePosition()
     if (!m_HA_driver)
         return;
 
+    // get info from simuData
     sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    updateAnglesAndLength(dofV);
+    // propagate info to portal
+    updatePortalAnglesAndLength(dofV);
 
-    if (d_logOutputs.getValue())
+    // copy data for debug draw
+    if (d_drawLogOutputs.getValue())
     {
-        d_info_toolValues.setValue(m_simuData.anglesAndLength);
-        d_info_motorOutput.setValue(m_simuData.motorValues);
-        d_info_collisionForce.setValue(m_simuData.collisionForces);
-        d_info_jawOpening.setValue(m_simuData.jawOpening);
+        m_debugData = m_simuData;
     }
     
+
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
-    m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
     //std::cout << "portalMtx: " << portalMtx << std::endl;    
 
     sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
@@ -259,6 +245,7 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
     if (!m_deviceReady)
         return;
 
+    // draw tool rigid dof arrows
     if (d_drawDeviceAxis.getValue())
     {
         const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
@@ -272,30 +259,35 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
         }
     }
     
-    if (d_drawDebugForce.getValue())
+    if (d_drawDebug.getValue())
     {
-        const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
-        const HapticAvatar_BaseDeviceController::VecDeriv& force = m_simuData.hapticForces;
-
-        
-        //}
-        Vec3 dirTotal, angTotal;
-        for (int i = 0; i < force.size(); i++)
-        {
-            Vec3 dir = force[i].getLinear();
-            Vec3 ang = force[i].getAngular();
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-            //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-            dirTotal += dir;
-            angTotal += ang;
-        }
-
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+        drawDebug(vparams);
     }
     
+}
+
+void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::VisualParams* vparams)
+{
+    const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+    const HapticAvatar_BaseDeviceController::VecDeriv& force = m_debugData.hapticForces;
+
+
+    //}
+    Vec3 dirTotal, angTotal;
+    for (int i = 0; i < force.size(); i++)
+    {
+        Vec3 dir = force[i].getLinear();
+        Vec3 ang = force[i].getAngular();
+        //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+        //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
+
+        dirTotal += dir;
+        angTotal += ang;
+    }
+
+    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
+    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
+    vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
 }
 
 
