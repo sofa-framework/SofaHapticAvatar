@@ -6,26 +6,9 @@
 ******************************************************************************/
 #pragma once
 
-#include <SofaHapticAvatar/config.h>
-#include <sofa/defaulttype/SolidTypes.h>
-#include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/helper/Quater.h>
-
 #include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
-
-#include <SofaHapticAvatar/HapticAvatar_Driver.h>
-#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
-
-#include <sofa/simulation/TaskScheduler.h>
-#include <sofa/simulation/InitTasks.h>
-
-#include <SofaHaptics/ForceFeedback.h>
-#include <SofaHaptics/LCPForceFeedback.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
-
-#include <atomic>
 
 namespace sofa::HapticAvatar
 {
@@ -63,55 +46,53 @@ struct SOFA_HAPTICAVATAR_API HapticContact
 */
 class SOFA_HAPTICAVATAR_API HapticAvatar_GrasperDeviceController : public HapticAvatar_BaseDeviceController
 {
-
 public:
     SOFA_CLASS(HapticAvatar_GrasperDeviceController, Controller);
-    typedef RigidTypes::Coord Coord;
-    typedef RigidTypes::VecCoord VecCoord;
-    typedef RigidTypes::VecDeriv VecDeriv;
-    typedef SolidTypes<double>::Transform Transform;
-    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
     typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
+    /// Default constructor
     HapticAvatar_GrasperDeviceController();
-        
+
+    /// handleEvent component method to catch collision info
     void handleEvent(core::objectmodel::Event *) override;
-
-    void retrieveCollisions();
-
     
-    Data<float> d_jawTorq;
-
-    Data<bool> d_newMethod;
-
-    SReal m_distance;
-
-    Vec3 m_toolDir;
-    Vec3 m_pitchDir;
-    Vec3 m_h;
-    Vec3 m_hTM;
-
-    sofa::helper::vector<float> m_times;
-
     /// General Haptic thread methods
     static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
+    /// Thread methods to cpy data from m_hapticData to m_simuData
     static void CopyData(std::atomic<bool>& terminate, void * p_this);
 
-    SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
-
 protected:
+    /// Internal method to init specific collision components
     void initImpl() override;
 
-    void updatePositionImpl() override;
-
+    /// override method to create the different threads
     bool createHapticThreads() override;
 
-    void drawImpl(const sofa::core::visual::VisualParams*) override;
+    /// override method to update specific tool position
+    void updatePositionImpl() override;
+
+    /// Internal method to retrieve the collision information per simulation step
+    void retrieveCollisions();
+
+    /// Internal method to draw specific informations
+    void drawImpl(const sofa::core::visual::VisualParams*) override {}
+
+public:
+    /// Parameter to choose old/new method
+    Data<bool> d_newMethod;
+
+    /// link to the IBox controller component 
+    SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+
+    /// collision distance value, need public to be accessed by haptic thread
+    SReal m_distance;
 
 protected:
+    /// Pointer to the IBoxController component
     HapticAvatar_IBoxController * m_iboxCtrl;
 
+    /// Jaws specific informations
     HapticAvatarJaws m_jawsData;
 
     // Pointer to the scene detection Method component (Narrow phase only)

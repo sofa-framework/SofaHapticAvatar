@@ -6,7 +6,6 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_GrasperDeviceController.h>
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -16,8 +15,6 @@
 #include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
-#include <chrono>
-#include <iomanip>
 
 namespace sofa::HapticAvatar
 {
@@ -43,11 +40,10 @@ HapticAvatarJaws::HapticAvatarJaws()
 //constructeur
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     : HapticAvatar_BaseDeviceController()
-    , l_iboxCtrl(initLink("iboxController", "link to portalManager"))    
-    , d_newMethod(initData(&d_newMethod, false, "newMethod", "draw device"))
-
-    , m_iboxCtrl(nullptr)
+    , d_newMethod(initData(&d_newMethod, false, "newMethod", "Parameter to choose old/new method"))
+    , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , m_distance(1.0f)
+    , m_iboxCtrl(nullptr)    
     , m_detectionNP(nullptr)
 {
     this->f_listening.setValue(true);
@@ -213,14 +209,11 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
                 //Vec3 hTM = cross(dirToolAccum, toolDir);
                 SReal toolTorque = torqueAcc;// dot(hTM, pitchDirTool);
-
-
                 //_deviceCtrl->m_toolDir = toolDir;
                 //_deviceCtrl->m_pitchDir = pitchDirTool;
                 //_deviceCtrl->m_h = h;
                 //_deviceCtrl->m_hTM = dirToolAccum;
                 //_deviceCtrl->m_hTM = cross(toolDir, toolDir);
-                
 
 
                 if (cptF == 100)
@@ -321,8 +314,6 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             ctime_t stepTime = CTime::getRefTime();
             ctime_t diffLoop = stepTime - lastTime;
             lastTime = stepTime;
-            
-            //_deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
 
             auto t2 = std::chrono::high_resolution_clock::now();
             
@@ -454,12 +445,6 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
 }
 
 
-void HapticAvatar_GrasperDeviceController::drawImpl(const sofa::core::visual::VisualParams*)
-{
-
-}
-
-
 void HapticAvatar_GrasperDeviceController::retrieveCollisions()
 {
     contactsSimu.clear();
@@ -542,14 +527,11 @@ void HapticAvatar_GrasperDeviceController::retrieveCollisions()
 
 void HapticAvatar_GrasperDeviceController::handleEvent(core::objectmodel::Event *event)
 {
-    //if(m_errorDevice != 0)
-    //    return;
+    if (!m_deviceReady)
+        return;
 
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
-        if (!m_deviceReady)
-            return;
-        
         m_simulationStarted = true;
         updatePosition();
     }
