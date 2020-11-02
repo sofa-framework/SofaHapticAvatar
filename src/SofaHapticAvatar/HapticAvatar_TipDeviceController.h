@@ -62,7 +62,7 @@ public:
     static void CopyData(std::atomic<bool>& terminate, void * p_this);
 
 protected:
-    void createHapticThreads() override;
+    bool createHapticThreads() override;
 };
 
 } // namespace sofa::HapticAvatar

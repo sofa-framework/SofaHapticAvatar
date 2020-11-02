@@ -105,7 +105,7 @@ void HapticAvatar_BaseDeviceController::init()
 void HapticAvatar_BaseDeviceController::clearDevice()
 {
     msg_info() << "HapticAvatar_BaseDeviceController::clearDevice()";
-    if (m_terminate == false)
+    if (m_terminate == false && m_deviceReady)
     {
         m_terminate = true;
         haptic_thread.join();
@@ -139,9 +139,7 @@ void HapticAvatar_BaseDeviceController::bwdInit()
     }
     
     m_terminate = false;
-    createHapticThreads();
-    
-    m_deviceReady = true;
+    m_deviceReady = createHapticThreads();
 }
 
 

@@ -46,12 +46,14 @@ HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
 }
 
 
-void HapticAvatar_TipDeviceController::createHapticThreads()
+bool HapticAvatar_TipDeviceController::createHapticThreads()
 {
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
     m_hapticData.hapticForces.resize(5);
     m_simuData.hapticForces.resize(5);
+
+    return true;
 }
 
 

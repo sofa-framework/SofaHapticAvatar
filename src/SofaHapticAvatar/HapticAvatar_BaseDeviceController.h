@@ -63,7 +63,7 @@ public:
 
 protected:
     /// Main method to start haptic threads
-    virtual void createHapticThreads() = 0;
+    virtual bool createHapticThreads() = 0;
     
     /// Main method to clear the device
     void clearDevice();
