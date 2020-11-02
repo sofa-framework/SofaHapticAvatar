@@ -21,12 +21,8 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_Driver.h>
-#include <iostream>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
@@ -605,4 +601,4 @@ void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pit
 }
 
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

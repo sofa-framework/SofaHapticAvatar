@@ -19,7 +19,7 @@
 #include <chrono>
 #include <iomanip>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
@@ -847,4 +847,4 @@ void HapticAvatar_DeviceController::handleEvent(core::objectmodel::Event *event)
     }
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

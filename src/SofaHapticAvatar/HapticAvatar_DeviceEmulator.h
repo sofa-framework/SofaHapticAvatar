@@ -15,7 +15,7 @@
 
 #include <atomic>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
     using namespace sofa::defaulttype;
 
@@ -53,4 +53,4 @@ public:
     bool m_activeTest;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

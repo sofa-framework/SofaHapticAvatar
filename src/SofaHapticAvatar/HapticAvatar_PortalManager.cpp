@@ -20,20 +20,13 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 #include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <tinyxml.h>
 
-#include <iostream>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
-
-
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 int HapticAvatar_PortalManagerClass = core::RegisterObject("TODO detail")
@@ -297,4 +290,4 @@ void HapticAvatar_PortalManager::printInfo()
     }
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

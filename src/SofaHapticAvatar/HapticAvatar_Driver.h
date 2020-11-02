@@ -26,7 +26,7 @@
 #include <sofa/defaulttype/Vec.h>
 #include <string>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 /**
@@ -186,4 +186,4 @@ private:
     std::string m_portName;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

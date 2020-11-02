@@ -20,15 +20,10 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 #include <SofaHapticAvatar/HapticAvatar_Portal.h>
-#include <sofa/helper/Quater.h>
-#include <iostream>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 HapticAvatar_Portal::HapticAvatar_Portal(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
@@ -192,4 +187,4 @@ void HapticAvatar_Portal::printInfo()
     std::cout << "##################################" << std::endl;
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

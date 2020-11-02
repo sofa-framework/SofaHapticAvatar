@@ -6,18 +6,11 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
 
-#include <sofa/core/visual/VisualParams.h>
-#include <chrono>
-#include <iomanip>
-
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
@@ -83,4 +76,4 @@ void HapticAvatar_IBoxController::clearDevice()
 }
 
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

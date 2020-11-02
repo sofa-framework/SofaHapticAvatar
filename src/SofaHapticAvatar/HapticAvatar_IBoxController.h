@@ -7,28 +7,16 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <sofa/defaulttype/SolidTypes.h>
-#include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/helper/Quater.h>
+#include <SofaHapticAvatar/HapticAvatar_Driver.h>
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatar_Driver.h>
-#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
-
-#include <sofa/simulation/TaskScheduler.h>
-#include <sofa/simulation/InitTasks.h>
-
-#include <SofaHaptics/ForceFeedback.h>
-
-#include <atomic>
-
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
-using namespace sofa::defaulttype;
 using namespace sofa::simulation;
+using namespace sofa::defaulttype;
+using namespace sofa::component::controller;
 
 
 /**
@@ -39,9 +27,6 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_IBoxController : public Controller
 
 public:
     SOFA_CLASS(HapticAvatar_IBoxController, Controller);
-    typedef RigidTypes::Coord Coord;
-    typedef RigidTypes::VecCoord VecCoord;
-    typedef SolidTypes<double>::Transform Transform;
 
     HapticAvatar_IBoxController();
 
@@ -62,4 +47,4 @@ private:
     bool m_deviceReady;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

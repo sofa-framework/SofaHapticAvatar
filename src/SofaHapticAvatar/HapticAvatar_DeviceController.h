@@ -27,11 +27,12 @@
 
 #include <atomic>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace sofa::defaulttype;
 using namespace sofa::simulation;
+using namespace sofa::component::controller;
 
 // Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
 class SOFA_HAPTICAVATAR_API HapticAvatarJaws
@@ -183,4 +184,4 @@ protected:
     std::vector<HapticContact> contactsSimu, contactsHaptic;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

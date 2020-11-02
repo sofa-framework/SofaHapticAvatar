@@ -23,13 +23,14 @@
 
 #include <SofaHapticAvatar/config.h>
 #include <SofaHapticAvatar/HapticAvatar_Portal.h>
+
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
 
 class TiXmlElement;
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace sofa::defaulttype;
@@ -82,4 +83,4 @@ private:
     sofa::helper::vector<HapticAvatar_Portal* > m_portals;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

@@ -25,7 +25,7 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <string>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 /**
@@ -72,4 +72,4 @@ private:
     sofa::defaulttype::Mat4x4f m_portalMtx;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar
