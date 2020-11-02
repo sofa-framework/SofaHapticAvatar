@@ -27,10 +27,10 @@ using namespace sofa::helper::system::thread;
 HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
     : d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
     , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))        
-    , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
-    , d_motorOutput(initData(&d_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
+    , d_info_toolValues(initData(&d_info_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
+    , d_info_motorOutput(initData(&d_info_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
     
-    , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
+    , d_info_jawOpening(initData(&d_info_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
     , d_toolPosition(initData(&d_toolPosition, "toolPosition", "jaws opening position"))
     
     , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
@@ -151,11 +151,7 @@ void HapticAvatar_BaseDeviceController::bwdInit()
         msg_info() << "ForceFeedback found";
     }
 
-    //haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
-    //copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
-    //m_hapticData.hapticForces.resize(5);
-    //m_simuData.hapticForces.resize(5);
-
+    
     m_terminate = false;
     createHapticThreads();
     
@@ -163,174 +159,10 @@ void HapticAvatar_BaseDeviceController::bwdInit()
 }
 
 
-//void HapticAvatar_BaseDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
-//{ 
-//    std::cout << "Haptics thread" << std::endl;
-//
-//    HapticAvatar_BaseDeviceController* _deviceCtrl = static_cast<HapticAvatar_BaseDeviceController*>(p_this);
-//    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
-//
-//    if (_deviceCtrl == nullptr)
-//    {
-//        msg_error("Haptics Thread: HapticAvatar_BaseDeviceController cast failed");
-//        return;
-//    }
-//
-//    if (_driver == nullptr)
-//    {
-//        msg_error("Haptics Thread: HapticAvatar_Driver cast failed");
-//        return;
-//    }
-//
-//    // Loop Timer
-//    HANDLE h_timer;
-//    long targetSpeedLoop = 1; // Target loop speed: 1ms
-//    
-//    // Use computer tick for timer
-//    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-//    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-//    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
-//    
-//    ctime_t lastTime = CTime::getRefTime();
-//    std::cout << "start time: " << lastTime << " speed: " << speedTimerMs << std::endl;
-//    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-//    int cptLoop = 0;
-//
-//    bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
-//
-//    // Haptics Loop
-//    while (!terminate)
-//    {
-//        auto t1 = std::chrono::high_resolution_clock::now();
-//        ctime_t startTime = CTime::getRefTime();
-//
-//        // Get all info from devices
-//        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-//        _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-//        //_deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
-//
-//        // Force feedback computation
-//        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-//        {            
-//            const HapticAvatar_BaseDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
-//            sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
-//
-//            // Check main force feedback
-//            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
-//
-//            bool contactShaft = false;
-//            totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
-//            
-//
-//            
-//            for (int i = 0; i < 3; i++)
-//            {
-//                if (totalForce[i] > 0.0)
-//                {
-//                    contactShaft = true;
-//                    break;
-//                }
-//            }
-//
-//            float damping = _deviceCtrl->m_forceScale.getValue();            
-//            if (contactShaft)
-//            {
-//                //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-//                //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
-//                //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
-//                //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
-//                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
-//                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
-//            }
-//            else
-//                _driver->releaseForce();
-//            
-//        }
-//
-//        ctime_t endTime = CTime::getRefTime();
-//        ctime_t duration = endTime - startTime;
-//
-//        // If loop is quicker than the target loop speed. Wait here.
-//        //if (duration < targetTicksPerLoop)
-//        //    std::cout << "Need to Wait!!!" << std::endl;
-//        while (duration < targetTicksPerLoop)
-//        {
-//            endTime = CTime::getRefTime();
-//            duration = endTime - startTime;
-//        }
-//
-//        // timer dump
-//        cptLoop++;
-//
-//        if (debugThread && cptLoop % 100 == 0)
-//        {
-//            ctime_t stepTime = CTime::getRefTime();
-//            ctime_t diffLoop = stepTime - lastTime;
-//            lastTime = stepTime;
-//            
-//            //_deviceCtrl->m_times.push_back(diffLoop* speedTimerMs);
-//
-//            auto t2 = std::chrono::high_resolution_clock::now();
-//            
-//            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
-//            t1 = t2;
-//            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
-//        }
-//    }
-//
-//    // ensure no force
-//    _driver->releaseForce();
-//    std::cout << "Haptics thread END!!" << std::endl;
-//}
-
-
-//void HapticAvatar_BaseDeviceController::CopyData(std::atomic<bool>& terminate, void * p_this)
-//{
-//    HapticAvatar_BaseDeviceController* _deviceCtrl = static_cast<HapticAvatar_BaseDeviceController*>(p_this);
-//    
-//    // Use computer tick for timer
-//    double targetSpeedLoop = 0.5; // Target loop speed: 0.5ms
-//    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-//    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-//    double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
-//
-//    ctime_t lastTime = CTime::getRefTime();
-//    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-//    int cptLoop = 0;
-//    // Haptics Loop
-//    while (!terminate)
-//    {
-//        ctime_t startTime = CTime::getRefTime();
-//        _deviceCtrl->m_simuData = _deviceCtrl->m_hapticData;
-//
-//        ctime_t endTime = CTime::getRefTime();
-//        ctime_t duration = endTime - startTime;
-//
-//        // If loop is quicker than the target loop speed. Wait here.
-//        while (duration < targetTicksPerLoop)
-//        {
-//            endTime = CTime::getRefTime();
-//            duration = endTime - startTime;
-//        }
-//
-//
-//        //if (cptLoop % 100 == 0)
-//        //{
-//        //    ctime_t stepTime = CTime::getRefTime();
-//        //    ctime_t diffLoop = stepTime - lastTime;
-//        //    lastTime = stepTime;
-//        //    //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-//        //    std::cout << "Copy nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;            
-//        //}
-//        cptLoop++;
-//    }
-//}
-
 
 void HapticAvatar_BaseDeviceController::updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
 {
     m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
-    d_toolValues.setValue(values);
 }
 
 
@@ -340,16 +172,21 @@ void HapticAvatar_BaseDeviceController::updatePosition()
     if (!m_HA_driver)
         return;
 
-    updateAnglesAndLength(m_simuData.anglesAndLength);
-    d_motorOutput.setValue(m_simuData.motorValues);
-    d_collisionForce.setValue(m_simuData.collisionForces);
-    d_jawOpening.setValue(m_simuData.jawOpening);
+    sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
+    updateAnglesAndLength(dofV);
+
+    if (d_logOutputs.getValue())
+    {
+        d_info_toolValues.setValue(m_simuData.anglesAndLength);
+        d_info_motorOutput.setValue(m_simuData.motorValues);
+        d_info_collisionForce.setValue(m_simuData.collisionForces);
+        d_info_jawOpening.setValue(m_simuData.jawOpening);
+    }
+    
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
     m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
     //std::cout << "portalMtx: " << portalMtx << std::endl;    
-
-    const sofa::helper::fixed_array<float, 4>& dofV = d_toolValues.getValue();
 
     sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
     sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
@@ -382,7 +219,7 @@ void HapticAvatar_BaseDeviceController::updatePosition()
     d_posDevice.endEdit();
 
     // Update jaws rigid
-    float _OpeningAngle = 0.0f;// d_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
+    float _OpeningAngle = 0.0f;// d_info_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
     HapticAvatar_BaseDeviceController::Coord jawUp;
     HapticAvatar_BaseDeviceController::Coord jawDown;
     

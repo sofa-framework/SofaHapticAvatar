@@ -53,29 +53,31 @@ public:
 	virtual ~HapticAvatar_BaseDeviceController();
 
     virtual void init() override;
-    virtual void bwdInit() override;
+    virtual void bwdInit() override;    
+    void handleEvent(core::objectmodel::Event *) override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
 
-
     void updatePosition();
-    void handleEvent(core::objectmodel::Event *) override;
+    
 
     void updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
 
     Data<SReal> d_scale; ///< Default scale applied to the Phantom Coordinates
     Data< Coord > d_posDevice; ///< position of the base of the part of the device    
 
-    /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
-    Data<sofa::helper::fixed_array<float, 4> > d_toolValues;
-    Data<sofa::helper::fixed_array<float, 4> > d_motorOutput;
-    Data<sofa::helper::fixed_array<float, 3> > d_collisionForce;
-    Data<float> d_jawTorq;
-    Data<float> d_jawOpening;
 
+    Data<bool> d_logOutputs;
+    /// values returned by tool: Rot angle, Pitch angle, z Length, Yaw Angle
+    Data<sofa::helper::fixed_array<float, 4> > d_info_toolValues;
+    Data<sofa::helper::fixed_array<float, 4> > d_info_motorOutput;
+    Data<sofa::helper::fixed_array<float, 3> > d_info_collisionForce;
+    Data<float> d_info_jawOpening;
+
+    Data<bool> d_dumpThreadInfo;
     Data<bool> d_drawDeviceAxis;
     Data<bool> d_drawDebugForce;
-    Data<bool> d_dumpThreadInfo;
+    
 
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;

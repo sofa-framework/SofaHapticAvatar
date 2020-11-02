@@ -26,7 +26,8 @@ set(SOURCE_FILES
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_BaseDeviceController.cpp
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceController.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_GrasperDeviceController.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_TipDeviceController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceEmulator.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp        
 )
