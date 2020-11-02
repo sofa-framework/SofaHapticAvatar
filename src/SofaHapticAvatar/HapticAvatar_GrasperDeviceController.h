@@ -64,11 +64,11 @@ struct SOFA_HAPTICAVATAR_API HapticContact
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceController : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatar_GrasperDeviceController : public Controller
 {
 
 public:
-    SOFA_CLASS(HapticAvatar_DeviceController, Controller);
+    SOFA_CLASS(HapticAvatar_GrasperDeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef RigidTypes::VecDeriv VecDeriv;
@@ -76,9 +76,9 @@ public:
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
     typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
-    HapticAvatar_DeviceController();
+    HapticAvatar_GrasperDeviceController();
 
-	virtual ~HapticAvatar_DeviceController();
+	virtual ~HapticAvatar_GrasperDeviceController();
 
     virtual void init() override;
     virtual void bwdInit() override;
@@ -141,8 +141,8 @@ public:
 
     std::atomic<bool> m_terminate;
     int m_portId;
-    SingleLink<HapticAvatar_DeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
-    SingleLink<HapticAvatar_DeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+    SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     LCPForceFeedback::SPtr m_forceFeedback;
     bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:

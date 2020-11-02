@@ -14,7 +14,8 @@ set(HEADER_FILES
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_BaseDeviceController.h
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceController.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_GrasperDeviceController.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_TipDeviceController.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DeviceEmulator.h
     
 )

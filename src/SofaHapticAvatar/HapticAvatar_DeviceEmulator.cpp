@@ -31,7 +31,7 @@ using namespace sofa::defaulttype;
 
 //constructeur
 HapticAvatar_DeviceEmulator::HapticAvatar_DeviceEmulator()
-    : HapticAvatar_DeviceController()
+    : HapticAvatar_GrasperDeviceController()
     , m_floorHeight(initData(&m_floorHeight, SReal(0.0), "floorHeight", "jaws opening angle"))
     , m_damping(initData(&m_damping, SReal(1.0), "damping", "jaws opening angle"))
     , m_testMode(initData(&m_testMode, 0, "testMode", "jaws opening angle"))
@@ -52,7 +52,7 @@ void HapticAvatar_DeviceEmulator::bwdInit()
     m_portId = m_portalMgr->getPortalId(d_portName.getValue());
     if (m_portId == -1)
     {
-        msg_error("HapticAvatar_DeviceController no portal id found");
+        msg_error("HapticAvatar_GrasperDeviceController no portal id found");
         m_deviceReady = false;
         return;
     }
@@ -154,7 +154,7 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
             duration = endTime - startTime;
         }
 
-        const HapticAvatar_DeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
+        const HapticAvatar_GrasperDeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[3].getCenter();
         int testMode = _deviceCtrl->m_testMode.getValue();
@@ -252,7 +252,7 @@ void HapticAvatar_DeviceEmulator::draw(const sofa::core::visual::VisualParams* v
 
     if (d_drawDeviceAxis.getValue())
     {
-        const HapticAvatar_DeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+        const HapticAvatar_GrasperDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         float glRadius = float(d_scale.getValue());
 
         for (unsigned int i = 0; i < toolPosition.size(); ++i)
@@ -278,7 +278,7 @@ void HapticAvatar_DeviceEmulator::draw(const sofa::core::visual::VisualParams* v
     else if (testMode == 2 || testMode == 3)
     {
         vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::helper::types::RGBAColor::green());
-        const HapticAvatar_DeviceController::VecCoord& testPosition = d_toolPosition.getValue();
+        const HapticAvatar_GrasperDeviceController::VecCoord& testPosition = d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[3].getCenter();
 
