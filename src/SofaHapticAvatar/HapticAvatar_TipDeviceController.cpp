@@ -218,4 +218,54 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
 }
 
 
+void HapticAvatar_TipDeviceController::updatePositionImpl()
+{
+    // m_toolRot = rotM.inverted();
+    sofa::defaulttype::Quat orien;
+    orien.fromMatrix(m_toolRot);
+
+    // compute bati position
+    HapticAvatar_BaseDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
+    rootPos.getOrientation() = orien;
+
+    HapticAvatar_BaseDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
+    posDevice.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
+    posDevice.getOrientation() = orien;
+    d_posDevice.endEdit();
+
+    // Update jaws rigid
+    float _OpeningAngle = 0.0f;// d_info_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
+    HapticAvatar_BaseDeviceController::Coord jawUp;
+    HapticAvatar_BaseDeviceController::Coord jawDown;
+
+    jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
+    jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
+
+    jawUp.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
+    jawDown.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
+
+    // Update jaws exterimies
+    Vec3f posExtrem = Vec3f(0.0, /*-m_jawsData.m_jawLength*/-20.0, 0.0);
+    HapticAvatar_BaseDeviceController::Coord jawUpExtrem = jawUp;
+    HapticAvatar_BaseDeviceController::Coord jawDownExtrem = jawDown;
+
+    jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
+    jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
+
+    // Udpate articulated device
+    HapticAvatar_BaseDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
+    toolPosition[0] = rootPos;
+    toolPosition[1] = rootPos;
+    toolPosition[2] = rootPos;
+    toolPosition[3] = posDevice;
+
+    toolPosition[4] = jawUp;
+    toolPosition[5] = jawDown;
+    toolPosition[6] = jawUpExtrem;
+    toolPosition[7] = jawDownExtrem;
+    d_toolPosition.endEdit();
+
+}
+
+
 } // namespace sofa::HapticAvatar

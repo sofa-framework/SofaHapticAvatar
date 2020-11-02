@@ -7,32 +7,22 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <sofa/defaulttype/SolidTypes.h>
+
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/Vec.h>
-#include <sofa/helper/Quater.h>
 
 #include <SofaUserInteraction/Controller.h>
+#include <SofaHaptics/LCPForceFeedback.h>
 
 #include <SofaHapticAvatar/HapticAvatar_Driver.h>
 #include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
-#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
-#include <sofa/simulation/TaskScheduler.h>
-#include <sofa/simulation/InitTasks.h>
-
-#include <SofaHaptics/LCPForceFeedback.h>
-#include <SofaHaptics/ForceFeedback.h>
-
-#include <atomic>
 
 namespace sofa::HapticAvatar
 {
-
 using namespace sofa::defaulttype;
 using namespace sofa::simulation;
 using namespace sofa::component::controller;
-
 
 /**
 * Haptic Avatar driver
@@ -76,7 +66,7 @@ protected:
     void updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
 
     /// Internal method to bo overriden by child class to propagate specific position. Called by @sa updatePosition
-    virtual void updatePositionImpl() {};
+    virtual void updatePositionImpl() = 0;
 
     /// Internal method to bo overriden by child class to draw specific information. Called by @sa draw
     virtual void drawImpl(const sofa::core::visual::VisualParams*) {};
@@ -164,6 +154,7 @@ protected:
     sofa::defaulttype::Mat3x3f m_toolRot;
     sofa::defaulttype::Mat3x3f m_toolRotInv;
     sofa::defaulttype::Mat3x3f m_PortalRot;
+    sofa::defaulttype::Mat4x4f m_instrumentMtx;
 };
 
 } // namespace sofa::HapticAvatar

@@ -6,22 +6,14 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
-
-#include <sofa/core/ObjectFactory.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 
 #include <sofa/core/visual/VisualParams.h>
-#include <chrono>
-#include <iomanip>
 
 namespace sofa::HapticAvatar
 {
-
-using namespace HapticAvatar;
-using namespace sofa::helper::system::thread;
 
 //constructeur
 HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
@@ -168,74 +160,24 @@ void HapticAvatar_BaseDeviceController::updatePosition()
         m_debugData = m_simuData;
     }
     
-
+    // compute portal and tool rotation matrices
     const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
-    //std::cout << "portalMtx: " << portalMtx << std::endl;    
-
     sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
     sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
     sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
-    
-    sofa::defaulttype::Mat4x4f instrumentMtx = portalMtx * R_rot * T_insert;
+    m_instrumentMtx = portalMtx * R_rot * T_insert;
 
-    sofa::defaulttype::Mat3x3f rotM;
-    for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < 3; j++) {
-            rotM[i][j] = instrumentMtx[i][j];
-            m_toolRot[i][j] = instrumentMtx[i][j];
+            m_toolRot[i][j] = m_instrumentMtx[i][j];
             m_PortalRot[i][j] = portalMtx[i][j];
         }
-
+    }
     m_toolRotInv = m_toolRot.inverted();
 
-
-   // m_toolRot = rotM.inverted();
-    sofa::defaulttype::Quat orien;
-    orien.fromMatrix(rotM);
-
-    // compute bati position
-    HapticAvatar_BaseDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
-    rootPos.getOrientation() = orien;
-
-    HapticAvatar_BaseDeviceController::Coord & posDevice = *d_posDevice.beginEdit();    
-    posDevice.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
-    posDevice.getOrientation() = orien;
-    d_posDevice.endEdit();
-
-    // Update jaws rigid
-    float _OpeningAngle = 0.0f;// d_info_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
-    HapticAvatar_BaseDeviceController::Coord jawUp;
-    HapticAvatar_BaseDeviceController::Coord jawDown;
-    
-    jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
-    jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
-
-    jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
-    jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
-    
-    // Update jaws exterimies
-    Vec3f posExtrem = Vec3f(0.0, /*-m_jawsData.m_jawLength*/-20.0, 0.0);
-    HapticAvatar_BaseDeviceController::Coord jawUpExtrem = jawUp;
-    HapticAvatar_BaseDeviceController::Coord jawDownExtrem = jawDown;
-        
-    jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
-    jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
-
-    // Udpate articulated device
-    HapticAvatar_BaseDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
-    toolPosition[0] = rootPos;
-    toolPosition[1] = rootPos;
-    toolPosition[2] = rootPos;
-    toolPosition[3] = posDevice;
-
-    toolPosition[4] = jawUp;
-    toolPosition[5] = jawDown;
-    toolPosition[6] = jawUpExtrem;
-    toolPosition[7] = jawDownExtrem;
-    d_toolPosition.endEdit();
-
+    // update tool positions depending on the specialisation type
+    return updatePositionImpl();
 }
-
 
 
 void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
@@ -261,16 +203,14 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
     {
         drawDebug(vparams);
     }
-    
 }
+
 
 void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::VisualParams* vparams)
 {
     const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
     const HapticAvatar_BaseDeviceController::VecDeriv& force = m_debugData.hapticForces;
 
-
-    //}
     Vec3 dirTotal, angTotal;
     for (int i = 0; i < force.size(); i++)
     {
