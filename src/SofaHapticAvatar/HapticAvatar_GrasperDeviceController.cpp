@@ -22,7 +22,7 @@
 namespace sofa::HapticAvatar
 {
 
-using namespace HapticAvatar;
+using namespace sofa::helper::system::thread;
 
 int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
     .add< HapticAvatar_GrasperDeviceController >()
@@ -42,41 +42,11 @@ HapticAvatarJaws::HapticAvatarJaws()
 
 //constructeur
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
-    : d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the Phantom Coordinates"))
-    //, d_positionBase(initData(&d_positionBase, Vec3d(0, 0, 0), "positionBase", "Position of the interface base in the scene world coordinates"))
-    //, d_orientationBase(initData(&d_orientationBase, Quat(0, 0, 0, 1), "orientationBase", "Orientation of the interface base in the scene world coordinates"))
-    //, d_orientationTool(initData(&d_orientationTool, Quat(0, 0, 0, 1), "orientationTool", "Orientation of the tool"))
-    , d_posDevice(initData(&d_posDevice, "positionDevice", "position of the base of the part of the device"))        
-    , d_toolValues(initData(&d_toolValues, "toolValues (Rot angle, Pitch angle, z Length, Yaw Angle)", "Device values: Rot angle, Pitch angle, z Length, Yaw Angle"))
-    , d_motorOutput(initData(&d_motorOutput, "motorOutput (Rot, Pitch Z, Yaw)", "Motor values: Rot angle, Pitch angle, z Length, Yaw Angle"))
-    
-    , d_jawOpening(initData(&d_jawOpening, 0.0f, "jawOpening", "jaws opening angle"))
-    , d_toolPosition(initData(&d_toolPosition, "toolPosition", "jaws opening position"))
-    
-    , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
-
-    , d_portName(initData(&d_portName, std::string("//./COM3"),"portName", "position of the base of the part of the device"))
-    , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
-    , m_portId(-1)
-    , l_portalMgr(initLink("portalManager", "link to portalManager"))
+    : HapticAvatar_BaseDeviceController()
     , l_iboxCtrl(initLink("iboxController", "link to portalManager"))    
-
-    , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "draw device"))
-    , d_drawDebugForce(initData(&d_drawDebugForce, false, "drawDebugForce", "draw device"))
-    , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "draw device"))
     , d_newMethod(initData(&d_newMethod, false, "newMethod", "draw device"))
-    
-    
-    , d_fontSize(initData(&d_fontSize, 12, "fontSize", "font size of statistics to display"))
-    , m_deviceReady(false)
-    , m_terminate(true)
 
-    , m_HA_driver(nullptr)
-    , m_portalMgr(nullptr)
     , m_iboxCtrl(nullptr)
-    , m_forceFeedback(nullptr)
-    , m_simulationStarted(false)
-    , m_firstStep(true)
     , m_distance(1.0f)
     , m_detectionNP(nullptr)
 {
@@ -84,8 +54,6 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     
     d_hapticIdentity.setReadOnly(true);
 
-    m_debugRootPosition = Vector3(0.0, 0.0, 0.0);
-    m_debugForces.resize(6);
     m_toolRot.identity();
 
     HapticAvatar_GrasperDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
@@ -94,134 +62,30 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 }
 
 
-HapticAvatar_GrasperDeviceController::~HapticAvatar_GrasperDeviceController()
-{
-    clearDevice();
-    if (m_HA_driver)
-    {
-        delete m_HA_driver;
-        m_HA_driver = nullptr;
-    }
-}
-
 
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatar_GrasperDeviceController::init()
+void HapticAvatar_GrasperDeviceController::initImpl()
 {
-    msg_info() << "HapticAvatar_GrasperDeviceController::init()";
-    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
-
-    if (!m_HA_driver->IsConnected())
-        return;
-        
-    // get identity
-    std::string identity = m_HA_driver->getIdentity();
-    d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatar_GrasperDeviceController identity: '" << identity << "'" << std::endl;
-
-    // get access to portalMgr
-    if (l_portalMgr.empty())
-    {
-        msg_error() << "Link to HapticAvatar_PortalManager not set.";
-        return;
-    }
-
-    m_portalMgr = l_portalMgr.get();
-    if (m_portalMgr == nullptr)
-    {
-        msg_error() << "HapticAvatar_PortalManager access failed.";
-        return;
-    }
-
-    // reset all force
-    //int res = m_HA_driver->resetDevice(15);
-    //if (res == -1)
-    //    std::cerr << "## Error, Reset failed!" << std::endl;
-    //else
-    //    std::cout << "Reset succeed return value: '" << res << "'" << std::endl;
-
-    // release force
-    m_HA_driver->releaseForce();
-
-
     m_intersectionMethod = getContext()->get<core::collision::Intersection>();
     m_detectionNP = getContext()->get<core::collision::NarrowPhaseDetection>();
     if (m_intersectionMethod == nullptr) { msg_error() << "m_intersectionMethod not found. Add an Intersection method in your scene.";}
     if (m_detectionNP == nullptr) { msg_error() << "NarrowPhaseDetection not found. Add a NarrowPhaseDetection method in your scene.";}
-
-
+    
     SReal alarmDist = m_intersectionMethod->getAlarmDistance();
     SReal contactDist = m_intersectionMethod->getContactDistance();
     m_distance = alarmDist - contactDist;
-
-    return;
 }
 
 
-void HapticAvatar_GrasperDeviceController::clearDevice()
-{
-    msg_info() << "HapticAvatar_GrasperDeviceController::clearDevice()";
-    if (m_terminate == false)
-    {
-        m_terminate = true;
-        haptic_thread.join();
-        copy_thread.join();
-    }
-}
-
-
-void HapticAvatar_GrasperDeviceController::bwdInit()
+bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
-    msg_info() << "HapticAvatar_GrasperDeviceController::bwdInit()";
-    if (!m_portalMgr)
-        return;
-    
-    m_portId = m_portalMgr->getPortalId(d_portName.getValue());
-    if (m_portId == -1)
-    {
-        msg_error("HapticAvatar_GrasperDeviceController no portal id found");
-        m_deviceReady = false;
-        return;
-    }
-
-    msg_info() << "Portal Id found: " << m_portId;
-
-
-    // get ibox if one
-    if (!l_iboxCtrl.empty())
-    {
-        m_iboxCtrl = l_iboxCtrl.get();
-        if (m_iboxCtrl != nullptr)
-        {
-            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
-        }
-    }
-
-
     m_terminate = false;
-    m_deviceReady = true;
     m_hapticData.hapticForces.resize(5);
     m_simuData.hapticForces.resize(5);
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
-
-    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-
-    if (m_forceFeedback != nullptr)
-    {
-        msg_info() << "ForceFeedback found";
-    }
 }
 
-
-void HapticAvatar_GrasperDeviceController::reinit()
-{
-    msg_info() << "HapticAvatar_GrasperDeviceController::reinit()";
-}
-
-
-using namespace sofa::helper::system::thread;
 
 void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
@@ -516,71 +380,35 @@ void HapticAvatar_GrasperDeviceController::CopyData(std::atomic<bool>& terminate
     }
 }
 
-
-void HapticAvatar_GrasperDeviceController::updateAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
-{
-    m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
-    d_toolValues.setValue(values);
-}
-
 int cpt = 0;
 
-void HapticAvatar_GrasperDeviceController::updatePosition()
+void HapticAvatar_GrasperDeviceController::updatePositionImpl()
 {
     if (!m_HA_driver)
         return;
 
-    updateAnglesAndLength(m_simuData.anglesAndLength);
-    d_motorOutput.setValue(m_simuData.motorValues);
-    d_collisionForce.setValue(m_simuData.collisionForces);
-    d_jawOpening.setValue(m_simuData.jawOpening);
-
-    const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
-    m_debugRootPosition = m_portalMgr->getPortalPosition(m_portId);
-    //std::cout << "portalMtx: " << portalMtx << std::endl;    
-
-    const sofa::helper::fixed_array<float, 4>& dofV = d_toolValues.getValue();
-
-    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
-    sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
-    sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
-    
-    sofa::defaulttype::Mat4x4f instrumentMtx = portalMtx * R_rot * T_insert;
-
-    sofa::defaulttype::Mat3x3f rotM;
-    for (unsigned int i = 0; i < 3; i++)
-        for (unsigned int j = 0; j < 3; j++) {
-            rotM[i][j] = instrumentMtx[i][j];
-            m_toolRot[i][j] = instrumentMtx[i][j];
-            m_PortalRot[i][j] = portalMtx[i][j];
-        }
-
-    m_toolRotInv = m_toolRot.inverted();
-
-
-   // m_toolRot = rotM.inverted();
     sofa::defaulttype::Quat orien;
-    orien.fromMatrix(rotM);
+    orien.fromMatrix(m_toolRot);
 
     // compute bati position
     HapticAvatar_GrasperDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
     rootPos.getOrientation() = orien;
 
     HapticAvatar_GrasperDeviceController::Coord & posDevice = *d_posDevice.beginEdit();    
-    posDevice.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
+    posDevice.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
     d_posDevice.endEdit();
 
     // Update jaws rigid
-    float _OpeningAngle = d_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
+    float _OpeningAngle = m_simuData.jawOpening * m_jawsData.m_MaxOpeningAngle * 0.01f;
     HapticAvatar_GrasperDeviceController::Coord jawUp;
     HapticAvatar_GrasperDeviceController::Coord jawDown;
     
     jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
     jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
-    jawUp.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
-    jawDown.getCenter() = Vec3f(instrumentMtx[0][3], instrumentMtx[1][3], instrumentMtx[2][3]);
+    jawUp.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
+    jawDown.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     
     // Update jaws exterimies
     Vec3f posExtrem = Vec3f(0.0, -m_jawsData.m_jawLength, 0.0);
@@ -626,124 +454,8 @@ void HapticAvatar_GrasperDeviceController::updatePosition()
 }
 
 
-
-void HapticAvatar_GrasperDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatar_GrasperDeviceController::drawImpl(const sofa::core::visual::VisualParams*)
 {
-    if (!m_deviceReady)
-        return;
-
-    if (d_drawDeviceAxis.getValue())
-    {
-        const HapticAvatar_GrasperDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
-        float glRadius = float(d_scale.getValue());
-
-        for (unsigned int i = 0; i < toolPosition.size(); ++i)
-        {
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
-        }
-    }
-    
-    if (d_drawDebugForce.getValue())
-    {
-        const HapticAvatar_GrasperDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
-        const HapticAvatar_GrasperDeviceController::VecDeriv& force = m_simuData.hapticForces;
-
-        Vec3 dirTotal, angTotal;
-
-        for (auto contact : contactsHaptic)
-        {
-            dirTotal += contact.m_force*contact.distance;
-        }
-
-
-        //for (int i = 0; i < force.size(); i++)
-        //{
-        //    Vec3 dir = force[i].getLinear();
-        //    Vec3 ang = force[i].getAngular();
-        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + dir * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //    //vparams->drawTool()->drawLine(toolPosition[i].getCenter(), toolPosition[i].getCenter() + ang * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-
-        //    dirTotal += dir;
-        //    angTotal += ang;
-        //}
-
-        //dirTotal *= m_forceScale.getValue();
-        //angTotal *= m_forceScale.getValue();
-
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
-        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 1.0f, 1.0f, 1.0));
-
-
-        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolDir * 50, defaulttype::Vec4f(0.0f, 1.0f, 0.0f, 1.0));
-        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_pitchDir * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
-        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_h * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
-        //vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_hTM * 50, defaulttype::Vec4f(0.5f, 0.0f, 0.0f, 1.0));
-    }
-    
-    return;
-
-    
-
-
-
-    size_t newLine = d_fontSize.getValue();    
-    int fontS = d_fontSize.getValue();
-    const sofa::helper::fixed_array<float, 4>& dofV = d_toolValues.getValue();
-    const sofa::helper::fixed_array<float, 4>& motV = d_motorOutput.getValue();
-    defaulttype::Vec4f color(0.0, 1.0, 0.0, 1.0);
-
-    std::string title =      "       Yaw   Pitch   Rot   Z";
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title.c_str());
-    newLine += fontS * 2;
-
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(2) << "Value  "
-        << dofV[Dof::YAW] << "  "
-        << dofV[Dof::PITCH] << "  "
-        << dofV[Dof::ROT] << "  "
-        << dofV[Dof::Z];
-    
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += fontS * 2;
-    
-    ss.str(std::string());
-    ss << std::fixed << std::setprecision(2) << "Motor  "
-        << motV[Dof::YAW] << "  "
-        << motV[Dof::PITCH] << "  "
-        << motV[Dof::ROT] << "  "
-        << motV[Dof::Z];
-
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += fontS * 4;
-
-
-
-    std::string title2 = "           XForce  YForce  Zforce  JTorq";
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title2.c_str());
-    newLine += fontS * 2;
-
-    const sofa::helper::fixed_array<float, 3>& colF = d_collisionForce.getValue();
-    float jTorq = d_jawTorq.getValue();
-
-    ss.str(std::string());
-    ss << std::fixed << std::setprecision(2) << "Collision  "
-        << colF[0] << "    "
-        << colF[1] << "    "
-        << colF[2] << "    "
-        << jTorq;
-
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += fontS * 2;
-
-    ss.str(std::string());
-    ss << std::fixed << std::setprecision(2) << "Jaws opening  "
-        << d_jawOpening.getValue() << "    ";
-
-    vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
-    newLine += fontS * 2;
 
 }
 

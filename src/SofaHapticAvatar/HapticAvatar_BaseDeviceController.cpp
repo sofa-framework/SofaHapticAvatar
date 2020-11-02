@@ -11,6 +11,7 @@
 #include <sofa/simulation/AnimateEndEvent.h>
 
 #include <sofa/core/visual/VisualParams.h>
+#include <iomanip> 
 
 namespace sofa::HapticAvatar
 {
@@ -129,8 +130,7 @@ void HapticAvatar_BaseDeviceController::bwdInit()
     {
         msg_info() << "ForceFeedback found";
     }
-    
-    m_terminate = false;
+        
     m_deviceReady = createHapticThreads();
 }
 

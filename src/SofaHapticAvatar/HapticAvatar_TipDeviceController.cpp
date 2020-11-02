@@ -6,18 +6,9 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_TipDeviceController.h>
-#include <SofaHapticAvatar/HapticAvatar_Defines.h>
-
 #include <sofa/core/ObjectFactory.h>
-
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-#include <sofa/simulation/CollisionEndEvent.h>
-#include <sofa/core/collision/DetectionOutput.h>
-
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
-#include <iomanip>
 
 namespace sofa::HapticAvatar
 {
@@ -48,6 +39,7 @@ HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
 
 bool HapticAvatar_TipDeviceController::createHapticThreads()
 {
+    m_terminate = false;
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
     m_hapticData.hapticForces.resize(5);

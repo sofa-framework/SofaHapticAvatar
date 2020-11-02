@@ -52,6 +52,9 @@ public:
     ///}
 
 protected:
+    /// Internal method to init specific info. Called by init
+    virtual void initImpl() {}
+    
     /// Main method to start haptic threads
     virtual bool createHapticThreads() = 0;
     
