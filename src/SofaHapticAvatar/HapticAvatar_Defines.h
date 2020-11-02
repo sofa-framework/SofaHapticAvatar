@@ -4,11 +4,9 @@
 * Authors:                                                                    *
 * Contact information:                                                        *
 ******************************************************************************/
-#ifndef SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
-#define SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
+#pragma once
 
-
-namespace HapticAvatar
+namespace sofa::HapticAvatar
 {
 
 // device communication
@@ -78,9 +76,4 @@ enum Dof
 #define RAIL_DISTANCE 50
 #define EULER_TO_RAD 0.0174533
 
-
-
-
-} // namespace HapticAvatar
-
-#endif // SOFA_HAPTICAVATAR_HAPTICAVATARDEFINES_H
+} // namespace sofa::HapticAvatar

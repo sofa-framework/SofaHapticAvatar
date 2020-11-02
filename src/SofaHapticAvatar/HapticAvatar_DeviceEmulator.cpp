@@ -5,8 +5,8 @@
 * Contact information:                                                        *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarEmulator.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_DeviceEmulator.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -18,20 +18,20 @@
 #include <chrono>
 #include <iomanip>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
 
-int HapticAvatarEmulatorClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-    .add< HapticAvatarEmulator >()
+int HapticAvatar_DeviceEmulatorClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+    .add< HapticAvatar_DeviceEmulator >()
     ;
 
 using namespace sofa::defaulttype;
 
 //constructeur
-HapticAvatarEmulator::HapticAvatarEmulator()
-    : HapticAvatarDeviceController()
+HapticAvatar_DeviceEmulator::HapticAvatar_DeviceEmulator()
+    : HapticAvatar_DeviceController()
     , m_floorHeight(initData(&m_floorHeight, SReal(0.0), "floorHeight", "jaws opening angle"))
     , m_damping(initData(&m_damping, SReal(1.0), "damping", "jaws opening angle"))
     , m_testMode(initData(&m_testMode, 0, "testMode", "jaws opening angle"))
@@ -45,14 +45,14 @@ HapticAvatarEmulator::HapticAvatarEmulator()
 
 
 
-void HapticAvatarEmulator::bwdInit()
+void HapticAvatar_DeviceEmulator::bwdInit()
 {   
-    msg_info() << "HapticAvatarEmulator::bwdInit()";
+    msg_info() << "HapticAvatar_DeviceEmulator::bwdInit()";
 
     m_portId = m_portalMgr->getPortalId(d_portName.getValue());
     if (m_portId == -1)
     {
-        msg_error("HapticAvatarDeviceController no portal id found");
+        msg_error("HapticAvatar_DeviceController no portal id found");
         m_deviceReady = false;
         return;
     }
@@ -90,21 +90,21 @@ void HapticAvatarEmulator::bwdInit()
 
 using namespace sofa::helper::system::thread;
 
-void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * p_this, void * p_driver)
+void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
     std::cout << "Haptics Emulator thread" << std::endl;
-    HapticAvatarEmulator* _deviceCtrl = static_cast<HapticAvatarEmulator*>(p_this);
-    HapticAvatarDriver* _driver = static_cast<HapticAvatarDriver*>(p_driver);
+    HapticAvatar_DeviceEmulator* _deviceCtrl = static_cast<HapticAvatar_DeviceEmulator*>(p_this);
+    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
    
     if (_deviceCtrl == nullptr)
     {
-        msg_error("Haptics Thread: HapticAvatarEmulator cast failed");
+        msg_error("Haptics Thread: HapticAvatar_DeviceEmulator cast failed");
         return;
     }
 
     if (_driver == nullptr)
     {
-        msg_error("Haptics Thread: HapticAvatarEmulator cast failed");
+        msg_error("Haptics Thread: HapticAvatar_DeviceEmulator cast failed");
         return;
     }
 
@@ -154,7 +154,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
             duration = endTime - startTime;
         }
 
-        const HapticAvatarDeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
+        const HapticAvatar_DeviceController::VecCoord& testPosition = _deviceCtrl->d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[3].getCenter();
         int testMode = _deviceCtrl->m_testMode.getValue();
@@ -242,7 +242,7 @@ void HapticAvatarEmulator::HapticsEmulated(std::atomic<bool>& terminate, void * 
 }
 
 
-void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatar_DeviceEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!m_deviceReady)
         return;
@@ -252,7 +252,7 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 
     if (d_drawDeviceAxis.getValue())
     {
-        const HapticAvatarDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+        const HapticAvatar_DeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         float glRadius = float(d_scale.getValue());
 
         for (unsigned int i = 0; i < toolPosition.size(); ++i)
@@ -278,7 +278,7 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
     else if (testMode == 2 || testMode == 3)
     {
         vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::helper::types::RGBAColor::green());
-        const HapticAvatarDeviceController::VecCoord& testPosition = d_toolPosition.getValue();
+        const HapticAvatar_DeviceController::VecCoord& testPosition = d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[3].getCenter();
 
@@ -288,7 +288,7 @@ void HapticAvatarEmulator::draw(const sofa::core::visual::VisualParams* vparams)
 }
 
 
-void HapticAvatarEmulator::handleEvent(core::objectmodel::Event *event)
+void HapticAvatar_DeviceEmulator::handleEvent(core::objectmodel::Event *event)
 {
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
@@ -370,4 +370,4 @@ void HapticAvatarEmulator::handleEvent(core::objectmodel::Event *event)
     }
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

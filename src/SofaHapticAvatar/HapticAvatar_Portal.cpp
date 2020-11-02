@@ -20,18 +20,13 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
-#include <SofaHapticAvatar/HapticAvatarPortalController.h>
-#include <sofa/helper/Quater.h>
-#include <iostream>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
+#include <SofaHapticAvatar/HapticAvatar_Portal.h>
+#include <SofaHapticAvatar/HapticAvatar_Defines.h>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
-HapticAvatarPortalController::HapticAvatarPortalController(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
+HapticAvatar_Portal::HapticAvatar_Portal(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort)
     : m_id (id)
     , m_rail(rail)
     , m_railPos(railPos)
@@ -46,7 +41,7 @@ HapticAvatarPortalController::HapticAvatarPortalController(int id, int rail, flo
 }
 
 
-void HapticAvatarPortalController::portalSetup()
+void HapticAvatar_Portal::portalSetup()
 {
     m_rootPosition[0] = m_railPos;
     float railDistance = float(RAIL_DISTANCE);
@@ -71,7 +66,7 @@ void HapticAvatarPortalController::portalSetup()
     m_portalPosition.getOrientation() = m_rootOrientation;
 }
 
-void HapticAvatarPortalController::updatePostion(float yawAngle, float pitchAngle)
+void HapticAvatar_Portal::updatePostion(float yawAngle, float pitchAngle)
 {
    // std::cout << "yawAngle: " << yawAngle << std::endl;
     //std::cout << "pitchAngle: " << pitchAngle << std::endl;
@@ -108,7 +103,7 @@ sofa::defaulttype::Mat4x4f MatFromRotation(sofa::defaulttype::Quat rot)
     return mat;
 }
 
-const HapticAvatarPortalController::Coord& HapticAvatarPortalController::getPortalPosition()
+const HapticAvatar_Portal::Coord& HapticAvatar_Portal::getPortalPosition()
 {
     if (m_hasMoved == false)
         return m_portalPosition;
@@ -183,13 +178,13 @@ const HapticAvatarPortalController::Coord& HapticAvatarPortalController::getPort
 }
 
 
-void HapticAvatarPortalController::printInfo()
+void HapticAvatar_Portal::printInfo()
 {
-    std::cout << "## HapticAvatarPortalController Number: " << m_id << std::endl;
+    std::cout << "## HapticAvatar_Portal Number: " << m_id << std::endl;
     std::cout << "# Settings: ComPort: " << m_comPort << " | Rail Number: " << m_rail << std::endl;
     std::cout << "# values: RailPos: " << m_railPos << " | FlipAngle: " << m_flipAngle << " | TiltAngle: " << m_tiltAngle << std::endl;
     std::cout << "# Position: " << m_portalPosition << std::endl;
     std::cout << "##################################" << std::endl;
 }
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

@@ -20,18 +20,14 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarDriver.h>
-#include <iostream>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
+#include <SofaHapticAvatar/HapticAvatar_Driver.h>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
 
-HapticAvatarDriver::HapticAvatarDriver(const std::string& portName)
+HapticAvatar_Driver::HapticAvatar_Driver(const std::string& portName)
     : m_connected(false)
     , m_portName(portName)
 {
@@ -47,7 +43,7 @@ HapticAvatarDriver::HapticAvatarDriver(const std::string& portName)
     }
 }
 
-void HapticAvatarDriver::connectDevice()
+void HapticAvatar_Driver::connectDevice()
 {
     //Try to connect to the given port throuh CreateFile
     m_hSerial = CreateFileA(m_portName.c_str(),
@@ -114,7 +110,7 @@ void HapticAvatarDriver::connectDevice()
 }
 
 
-HapticAvatarDriver::~HapticAvatarDriver()
+HapticAvatar_Driver::~HapticAvatar_Driver()
 {
     //Check if we are connected before trying to disconnect
     if (m_connected)
@@ -132,7 +128,7 @@ HapticAvatarDriver::~HapticAvatarDriver()
 /////     Public API methods for device communication     /////
 ///////////////////////////////////////////////////////////////
 
-int HapticAvatarDriver::resetDevice(int mode)
+int HapticAvatar_Driver::resetDevice(int mode)
 {
     char incomingData[INCOMING_DATA_LEN];
     std::string arguments = std::to_string(mode);
@@ -145,7 +141,7 @@ int HapticAvatarDriver::resetDevice(int mode)
 }
 
 
-std::string HapticAvatarDriver::getIdentity()
+std::string HapticAvatar_Driver::getIdentity()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_IDENTITY, "", incomingData) == false) {
@@ -157,7 +153,7 @@ std::string HapticAvatarDriver::getIdentity()
 }
 
 
-int HapticAvatarDriver::getToolID()
+int HapticAvatar_Driver::getToolID()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_TOOL_ID, "", incomingData) == false) {
@@ -170,7 +166,7 @@ int HapticAvatarDriver::getToolID()
 }
 
 
-int HapticAvatarDriver::getDeviceStatus()
+int HapticAvatar_Driver::getDeviceStatus()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_STATUS, "", incomingData) == false) {
@@ -184,7 +180,7 @@ int HapticAvatarDriver::getDeviceStatus()
 
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAngles_AndLength()
+sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
@@ -203,7 +199,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getAngles_AndLength()
 }
 
 
-float HapticAvatarDriver::getJawTorque()
+float HapticAvatar_Driver::getJawTorque()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
@@ -217,7 +213,7 @@ float HapticAvatarDriver::getJawTorque()
 }
 
 
-float HapticAvatarDriver::getJawOpeningAngle()
+float HapticAvatar_Driver::getJawOpeningAngle()
 {
     char incomingData[INCOMING_DATA_LEN];
     std::cout << "getJawOpeningAngle" << std::endl;
@@ -234,7 +230,7 @@ float HapticAvatarDriver::getJawOpeningAngle()
 
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getLastPWM()
+sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getLastPWM()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
@@ -253,7 +249,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getLastPWM()
 }
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorScalingValues()
+sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
@@ -272,7 +268,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatarDriver::getMotorScalingValues()
 }
 
 
-sofa::helper::fixed_array<float, 3> HapticAvatarDriver::getLastCollisionForce()
+sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
 {
     sofa::helper::fixed_array<float, 3> results;
     char incomingData[INCOMING_DATA_LEN];
@@ -291,7 +287,7 @@ sofa::helper::fixed_array<float, 3> HapticAvatarDriver::getLastCollisionForce()
 }
 
 
-void HapticAvatarDriver::setMotorForce_AndTorques(sofa::helper::fixed_array<float, 4> values)
+void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::helper::fixed_array<float, 4> values)
 {
     std::string arguments;
     for (unsigned int i = 0; i < values.size(); ++i)
@@ -305,7 +301,7 @@ void HapticAvatarDriver::setMotorForce_AndTorques(sofa::helper::fixed_array<floa
     return;
 }
 
-void HapticAvatarDriver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque)
+void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque)
 {
     std::string arguments;
     for (unsigned int i = 0; i < force.size(); ++i)
@@ -323,7 +319,7 @@ void HapticAvatarDriver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 for
 
 int cptF = 0;
 
-void HapticAvatarDriver::setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM)
+void HapticAvatar_Driver::setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 
@@ -360,7 +356,7 @@ void HapticAvatarDriver::setManualForceVector(sofa::defaulttype::Vector3 force, 
 }
 
 
-void HapticAvatarDriver::setTipForceVector(sofa::defaulttype::Vector3 force)
+void HapticAvatar_Driver::setTipForceVector(sofa::defaulttype::Vector3 force)
 {
     sofa::helper::fixed_array<int, 4> values;
     values[0] = int(force[0] * 100);
@@ -384,7 +380,7 @@ void HapticAvatarDriver::setTipForceVector(sofa::defaulttype::Vector3 force)
 }
 
 
-void HapticAvatarDriver::releaseForce()
+void HapticAvatar_Driver::releaseForce()
 {
     sendCommandToDevice(SET_MANUAL_PWM, "0 0 0 0", nullptr);
 }
@@ -393,7 +389,7 @@ void HapticAvatarDriver::releaseForce()
 
 
 
-bool HapticAvatarDriver::sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result)
+bool HapticAvatar_Driver::sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result)
 {
     std::string fullCommand = std::to_string(command) + " " + arguments + " \n";    
     //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
@@ -414,7 +410,7 @@ bool HapticAvatarDriver::sendCommandToDevice(HapticAvatar::Cmd command, const st
 }
 
 
-std::string HapticAvatarDriver::convertSingleData(char *buffer, bool forceRemoveEoL)
+std::string HapticAvatar_Driver::convertSingleData(char *buffer, bool forceRemoveEoL)
 {
     std::string res = std::string(buffer);
     if (forceRemoveEoL)
@@ -436,7 +432,7 @@ std::string HapticAvatarDriver::convertSingleData(char *buffer, bool forceRemove
 /////      Internal Methods for device communication      /////
 ///////////////////////////////////////////////////////////////
 
-int HapticAvatarDriver::getDataImpl(char *buffer, bool do_flush)
+int HapticAvatar_Driver::getDataImpl(char *buffer, bool do_flush)
 {
     bool response = false;
     int cptSecu = 0;
@@ -472,7 +468,7 @@ int HapticAvatarDriver::getDataImpl(char *buffer, bool do_flush)
 }
 
 
-int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
+int HapticAvatar_Driver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
 {
     //Number of bytes we'll have read
     DWORD bytesRead = 0;
@@ -505,7 +501,7 @@ int HapticAvatarDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *que
 }
 
 
-bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
+bool HapticAvatar_Driver::WriteDataImpl(char *buffer, unsigned int nbChar)
 {
     DWORD bytesSend;
 
@@ -522,7 +518,7 @@ bool HapticAvatarDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
         return true;
 }
 
-void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
     //bool sendForce = false;
     //if (pitchTorque != 0.0f || zforce != 0.0f || yawTorque != 0.0f)
@@ -582,7 +578,7 @@ void HapticAvatarDriver::setManual_PWM(float rotTorque, float pitchTorque, float
 }
 
 
-void HapticAvatarDriver::setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
     sofa::helper::fixed_array<int, 4> values;
     values[0] = int(rotTorque * 10000);
@@ -605,4 +601,4 @@ void HapticAvatarDriver::setManual_Force_and_Torques(float rotTorque, float pitc
 }
 
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

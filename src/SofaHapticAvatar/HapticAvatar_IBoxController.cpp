@@ -5,30 +5,23 @@
 * Contact information:                                                        *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatarIBoxController.h>
-#include <SofaHapticAvatar/HapticAvatarDefines.h>
+#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <sofa/core/ObjectFactory.h>
 
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
 
-#include <sofa/core/visual/VisualParams.h>
-#include <chrono>
-#include <iomanip>
-
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace HapticAvatar;
 
-int HapticAvatarIBoxControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-    .add< HapticAvatarIBoxController >()
+int HapticAvatar_IBoxControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+    .add< HapticAvatar_IBoxController >()
     ;
 
 
 //constructeur
-HapticAvatarIBoxController::HapticAvatarIBoxController()
+HapticAvatar_IBoxController::HapticAvatar_IBoxController()
     : d_portName(initData(&d_portName, std::string("//./COM5"), "portName", "position of the base of the part of the device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
     , m_HA_driver(nullptr)
@@ -40,7 +33,7 @@ HapticAvatarIBoxController::HapticAvatarIBoxController()
 }
 
 
-HapticAvatarIBoxController::~HapticAvatarIBoxController()
+HapticAvatar_IBoxController::~HapticAvatar_IBoxController()
 {
     clearDevice();
     if (m_HA_driver)
@@ -52,13 +45,13 @@ HapticAvatarIBoxController::~HapticAvatarIBoxController()
 
 
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatarIBoxController::init()
+void HapticAvatar_IBoxController::init()
 {
-    msg_info() << "HapticAvatarIBoxController::init()";
-    m_HA_driver = new HapticAvatarDriver(d_portName.getValue());
+    msg_info() << "HapticAvatar_IBoxController::init()";
+    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected()) {
-        msg_error() << "HapticAvatarIBoxController driver creation failed";
+        msg_error() << "HapticAvatar_IBoxController driver creation failed";
         return;
     }
 
@@ -70,31 +63,17 @@ void HapticAvatarIBoxController::init()
     return;
 }
 
-float HapticAvatarIBoxController::getJawOpeningAngle()
+float HapticAvatar_IBoxController::getJawOpeningAngle()
 {
     sofa::helper::fixed_array<float, 4> values = m_HA_driver->getAngles_AndLength();
     return values[0];
 }
 
-void HapticAvatarIBoxController::clearDevice()
+void HapticAvatar_IBoxController::clearDevice()
 {
-    msg_info() << "HapticAvatarIBoxController::clearDevice()";
+    msg_info() << "HapticAvatar_IBoxController::clearDevice()";
    
 }
 
 
-void HapticAvatarIBoxController::bwdInit()
-{   
-    msg_info() << "HapticAvatarIBoxController::bwdInit()";
-    
-}
-
-
-void HapticAvatarIBoxController::reinit()
-{
-    msg_info() << "HapticAvatarIBoxController::reinit()";
-}
-
-
-
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

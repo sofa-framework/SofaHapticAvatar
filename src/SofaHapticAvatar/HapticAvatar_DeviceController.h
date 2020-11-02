@@ -14,9 +14,9 @@
 
 #include <SofaUserInteraction/Controller.h>
 
-#include <SofaHapticAvatar/HapticAvatarDriver.h>
-#include <SofaHapticAvatar/HapticAvatarPortalManager.h>
-#include <SofaHapticAvatar/HapticAvatarIBoxController.h>
+#include <SofaHapticAvatar/HapticAvatar_Driver.h>
+#include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
+#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <sofa/simulation/TaskScheduler.h>
 #include <sofa/simulation/InitTasks.h>
@@ -27,28 +27,12 @@
 
 #include <atomic>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace sofa::defaulttype;
 using namespace sofa::simulation;
-
-
-class HapticAvatarDeviceController;
-
-class SOFA_HAPTICAVATAR_API HapticEmulatorTask : public CpuTask
-{
-public:
-    HapticEmulatorTask(HapticAvatarDeviceController* ptr, CpuTask::Status* pStatus);
-
-    virtual ~HapticEmulatorTask() {}
-
-    virtual MemoryAlloc run() override final;
-
-private:
-    HapticAvatarDeviceController * m_controller;
-};
-
+using namespace sofa::component::controller;
 
 // Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
 class SOFA_HAPTICAVATAR_API HapticAvatarJaws
@@ -80,11 +64,11 @@ struct SOFA_HAPTICAVATAR_API HapticContact
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarDeviceController : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceController : public Controller
 {
 
 public:
-    SOFA_CLASS(HapticAvatarDeviceController, Controller);
+    SOFA_CLASS(HapticAvatar_DeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef RigidTypes::VecDeriv VecDeriv;
@@ -92,9 +76,9 @@ public:
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
     typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
-    HapticAvatarDeviceController();
+    HapticAvatar_DeviceController();
 
-	virtual ~HapticAvatarDeviceController();
+	virtual ~HapticAvatar_DeviceController();
 
     virtual void init() override;
     virtual void bwdInit() override;
@@ -157,8 +141,8 @@ public:
 
     std::atomic<bool> m_terminate;
     int m_portId;
-    SingleLink<HapticAvatarDeviceController, HapticAvatarPortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
-    SingleLink<HapticAvatarDeviceController, HapticAvatarIBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+    SingleLink<HapticAvatar_DeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatar_DeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
     LCPForceFeedback::SPtr m_forceFeedback;
     bool m_simulationStarted; ///< Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
 public:
@@ -178,12 +162,11 @@ protected:
     void clearDevice();
 
 protected:
-    HapticAvatarDriver * m_HA_driver;
-    HapticAvatarPortalManager * m_portalMgr;
-    HapticAvatarIBoxController * m_iboxCtrl;
+    HapticAvatar_Driver * m_HA_driver;
+    HapticAvatar_PortalManager * m_portalMgr;
+    HapticAvatar_IBoxController * m_iboxCtrl;
     bool m_deviceReady;
 
-    sofa::simulation::TaskScheduler* m_taskScheduler;
     sofa::simulation::CpuTask::Status m_simStepStatus;
     std::mutex lockPosition;
 
@@ -201,4 +184,4 @@ protected:
     std::vector<HapticContact> contactsSimu, contactsHaptic;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

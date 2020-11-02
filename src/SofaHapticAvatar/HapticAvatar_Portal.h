@@ -22,49 +22,54 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
+#include <sofa/defaulttype/RigidTypes.h>
 #include <string>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 /**
-* HapticAvatar driver
+* HapticAvatar_Portal 
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarDriver
+class SOFA_HAPTICAVATAR_API HapticAvatar_Portal
 {
 public:
-    HapticAvatarDriver(const std::string& portName);
+    typedef sofa::defaulttype::RigidTypes::Coord Coord;
+    typedef sofa::defaulttype::Vec3f Vec3f;
+    typedef sofa::defaulttype::Vec4f Vec4f;
 
-    virtual ~HapticAvatarDriver();
+    HapticAvatar_Portal(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
-    bool IsConnected() { return m_connected; }
+    virtual ~HapticAvatar_Portal() {}
 
-    void connectDevice();
 
-    bool writeData(std::string msg);
-    //int readData(std::string msg);
+    void portalSetup();
 
-    void getAnglesAndLength();
+    void updatePostion(float yawAngle, float pitchAngle);
 
-    std::string getIdentity();
-    int getData(char *buffer, bool do_flush);
-    
-    int ReadData(char *buffer, unsigned int nbChar, int *queue, bool do_flush);
+    void printInfo();
 
-    bool WriteData(char *buffer, unsigned int nbChar);
-
+    const Coord& getPortalPosition();
+    const std::string& getPortalCom() {return m_comPort;}
+  
+    const sofa::defaulttype::Mat4x4f& getPortalTransform() { return m_portalMtx; }
 private:
-    //Connection status
-    bool m_connected;
+    int m_id; ///< 
+    int m_rail; ///< rail number, middle rail has number 0
+    float m_railPos; ///< rail position, mm from centrum in the rail
+    float m_flipAngle; ///< Angles in degrees that the haptic device is flipped 
+    float m_tiltAngle; ///< Angles in degrees that the haptic device is tilted
+    std::string m_comPort; ///< COM port assigned to the device in the portal
 
-    //Serial comm handler
-    HANDLE m_hSerial;
-    //Get various information about the connection
-    COMSTAT m_status;
-    //Keep track of last error
-    DWORD m_errors;
+    float m_yawAngle;
+    float m_pitchAngle;
 
-    std::string m_portName;
+    bool m_hasMoved;
+    Vec3f m_rootPosition;
+    sofa::defaulttype::Quat m_rootOrientation;
+    Coord m_portalPosition;
+
+    sofa::defaulttype::Mat4x4f m_portalMtx;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

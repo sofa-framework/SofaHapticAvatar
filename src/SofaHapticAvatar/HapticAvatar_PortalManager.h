@@ -22,38 +22,32 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <SofaHapticAvatar/HapticAvatarPortalController.h>
+#include <SofaHapticAvatar/HapticAvatar_Portal.h>
+
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <string>
 
-#include <sofa/defaulttype/SolidTypes.h>
-#include <sofa/defaulttype/RigidTypes.h>
-
 class TiXmlElement;
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
 
 using namespace sofa::defaulttype;
 
 /**
-* HapticAvatarPortalManager 
+* HapticAvatar_PortalManager 
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarPortalManager : public sofa::core::objectmodel::BaseObject
+class SOFA_HAPTICAVATAR_API HapticAvatar_PortalManager : public sofa::core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(HapticAvatarPortalManager, sofa::core::objectmodel::BaseObject);
+    SOFA_CLASS(HapticAvatar_PortalManager, sofa::core::objectmodel::BaseObject);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
-    typedef SolidTypes<double>::Transform Transform;
 
-    typedef defaulttype::Vec4f Vec4f;
-    typedef defaulttype::Vector3 Vector3;
+    HapticAvatar_PortalManager();
 
-    HapticAvatarPortalManager();
-
-    virtual ~HapticAvatarPortalManager() {}
+    virtual ~HapticAvatar_PortalManager() {}
 
     void setFilename(std::string f);
     const std::string &getFilename();
@@ -62,7 +56,6 @@ public:
 
     virtual void reinit() override;
     virtual void handleEvent(core::objectmodel::Event *) override;
-    virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
 
     void updatePostion(int portId, float yawAngle, float pitchAngle);
 
@@ -85,8 +78,9 @@ protected:
     bool getFloatAttribute(const TiXmlElement* elem, const char* attributeN, float* value);
 
     void portalsSetup();
+
 private:
-    sofa::helper::vector<HapticAvatarPortalController* > m_portals;
+    sofa::helper::vector<HapticAvatar_Portal* > m_portals;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar

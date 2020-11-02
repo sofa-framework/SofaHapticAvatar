@@ -11,28 +11,28 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/helper/Quater.h>
-#include <SofaHapticAvatar/HapticAvatarDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_DeviceController.h>
 
 #include <atomic>
 
-namespace sofa::component::controller
+namespace sofa::HapticAvatar
 {
     using namespace sofa::defaulttype;
 
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatarEmulator : public HapticAvatarDeviceController
+class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceEmulator : public HapticAvatar_DeviceController
 {
 
 public:
-    SOFA_CLASS(HapticAvatarEmulator, HapticAvatarDeviceController);
+    SOFA_CLASS(HapticAvatar_DeviceEmulator, HapticAvatar_DeviceController);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
 
-    HapticAvatarEmulator();
-    virtual ~HapticAvatarEmulator() {}
+    HapticAvatar_DeviceEmulator();
+    virtual ~HapticAvatar_DeviceEmulator() {}
 
     virtual void bwdInit() override;
     virtual void draw(const sofa::core::visual::VisualParams* vparams) override;
@@ -53,4 +53,4 @@ public:
     bool m_activeTest;
 };
 
-} // namespace sofa::component::controller
+} // namespace sofa::HapticAvatar
