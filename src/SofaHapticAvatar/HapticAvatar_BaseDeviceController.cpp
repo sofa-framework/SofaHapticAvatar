@@ -90,7 +90,7 @@ void HapticAvatar_BaseDeviceController::init()
     // release force
     m_HA_driver->releaseForce();
 
-    return;
+    initImpl();
 }
 
 
@@ -199,6 +199,10 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
         }
     }
     
+    // draw internal specific info
+    drawImpl(vparams);
+
+    // If true draw debug information
     if (d_drawDebug.getValue())
     {
         drawDebug(vparams);
@@ -226,6 +230,65 @@ void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::Visu
     vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + dirTotal * 50, defaulttype::Vec4f(1.0f, 1.0f, 1.0f, 1.0));
     vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + angTotal * 50, defaulttype::Vec4f(1.0f, 0.0f, 0.0f, 1.0));
     vparams->drawTool()->drawLine(toolPosition[3].getCenter(), toolPosition[3].getCenter() + m_toolRotInv * dirTotal * 50, defaulttype::Vec4f(0.0f, 0.0f, 1.0f, 1.0));
+
+
+
+    if (d_drawLogOutputs.getValue())
+    {
+        size_t newLine = 12;
+        int fontS = 12;
+        const sofa::helper::fixed_array<float, 4>& dofV = m_debugData.anglesAndLength;
+        const sofa::helper::fixed_array<float, 4>& motV = m_debugData.motorValues;
+        defaulttype::Vec4f color(0.0, 1.0, 0.0, 1.0);
+
+        std::string title = "       Yaw   Pitch   Rot   Z";
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title.c_str());
+        newLine += fontS * 2;
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(2) << "Value  "
+            << dofV[Dof::YAW] << "  "
+            << dofV[Dof::PITCH] << "  "
+            << dofV[Dof::ROT] << "  "
+            << dofV[Dof::Z];
+
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+        newLine += fontS * 2;
+
+        ss.str(std::string());
+        ss << std::fixed << std::setprecision(2) << "Motor  "
+            << motV[Dof::YAW] << "  "
+            << motV[Dof::PITCH] << "  "
+            << motV[Dof::ROT] << "  "
+            << motV[Dof::Z];
+
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+        newLine += fontS * 4;
+
+
+
+        std::string title2 = "           XForce  YForce  Zforce  JTorq";
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title2.c_str());
+        newLine += fontS * 2;
+
+        const sofa::helper::fixed_array<float, 3>& colF = m_debugData.collisionForces;
+
+        ss.str(std::string());
+        ss << std::fixed << std::setprecision(2) << "Collision  "
+            << colF[0] << "    "
+            << colF[1] << "    "
+            << colF[2] << "    ";
+
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+        newLine += fontS * 2;
+
+        ss.str(std::string());
+        ss << std::fixed << std::setprecision(2) << "Jaws opening  "
+            << m_debugData.jawOpening << "    ";
+
+        vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, ss.str().c_str());
+        newLine += fontS * 2;
+    }
 }
 
 
