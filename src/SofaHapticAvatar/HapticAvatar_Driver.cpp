@@ -189,10 +189,10 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
     }
 
     char* pEnd;
-    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001f;
     for (unsigned int i = 1; i < 4; ++i)
     {
-        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001f;
     }
     
     return results;
@@ -207,7 +207,7 @@ float HapticAvatar_Driver::getJawTorque()
     }
         
     char* pEnd;
-    float res = std::strtof(incomingData, &pEnd) * 0.0001;
+    float res = std::strtof(incomingData, &pEnd) * 0.0001f;
 
     return res;
 }
@@ -222,7 +222,7 @@ float HapticAvatar_Driver::getJawOpeningAngle()
     }
     std::cout << "getJawOpeningAngle out" << std::endl;
     char* pEnd;
-    float res = std::strtof(incomingData, &pEnd) * 0.0001;
+    float res = std::strtof(incomingData, &pEnd) * 0.0001f;
 
     return res;
 }
@@ -258,10 +258,10 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
     }
 
     char* pEnd;
-    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001f;
     for (unsigned int i = 1; i < 4; ++i)
     {
-        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001f;
     }
 
     return results;
@@ -277,10 +277,10 @@ sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
     }
     
     char* pEnd;
-    results[0] = std::strtof(incomingData, &pEnd) * 0.0001;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001f;
     for (unsigned int i = 1; i < 3; ++i)
     {
-        results[i] = std::strtof(pEnd, &pEnd) * 0.0001;
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001f;
     }
 
     return results;
@@ -339,9 +339,9 @@ void HapticAvatar_Driver::setManualForceVector(sofa::defaulttype::Vector3 force,
     sofa::defaulttype::Vector3 pitchDir = sofa::defaulttype::Vector3(-1, 0, 0);
 
     float rotTorque = 0.0f;
-    float pitchTorque = pitchDir * force * 10;
-    float zForce = toolDir * force;
-    float yawTorque = yawDir * force * 10;
+    float pitchTorque = float(pitchDir * force * 10);
+    float zForce = float(toolDir * force);
+    float yawTorque = float(yawDir * force * 10);
 
     /*if (res > 20)
         zForce = 20;
@@ -396,7 +396,7 @@ bool HapticAvatar_Driver::sendCommandToDevice(HapticAvatar::Cmd command, const s
     char outgoingData[OUTGOING_DATA_LEN];
     strcpy(outgoingData, fullCommand.c_str());
 
-    int outlen = strlen(outgoingData);
+    unsigned int outlen = (unsigned int)(strlen(outgoingData));
     bool write_success = WriteDataImpl(outgoingData, outlen);
     if (!write_success) {
         return false;

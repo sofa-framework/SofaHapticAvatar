@@ -235,7 +235,7 @@ void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::Visu
 
     if (d_drawLogOutputs.getValue())
     {
-        size_t newLine = 12;
+        int newLine = 12;
         int fontS = 12;
         const sofa::helper::fixed_array<float, 4>& dofV = m_debugData.anglesAndLength;
         const sofa::helper::fixed_array<float, 4>& motV = m_debugData.motorValues;

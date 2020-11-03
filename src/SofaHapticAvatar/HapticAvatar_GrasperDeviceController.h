@@ -88,6 +88,9 @@ public:
     /// collision distance value, need public to be accessed by haptic thread
     SReal m_distance;
 
+    /// list of contact detected by the collision
+    std::vector<HapticContact> contactsSimu, contactsHaptic;
+
 protected:
     /// Pointer to the IBoxController component
     HapticAvatar_IBoxController * m_iboxCtrl;
@@ -100,8 +103,6 @@ protected:
 
     // Pointer to the scene intersection Method component
     sofa::core::collision::Intersection* m_intersectionMethod;
-
-    std::vector<HapticContact> contactsSimu, contactsHaptic;
 };
 
 } // namespace sofa::HapticAvatar

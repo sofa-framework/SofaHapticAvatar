@@ -69,7 +69,6 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
     }
 
     // Loop Timer
-    HANDLE h_timer;
     long targetSpeedLoop = 1; // Target loop speed: 1ms
     
     // Use computer tick for timer
@@ -117,7 +116,7 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
                 }
             }
 
-            float damping = _deviceCtrl->m_forceScale.getValue();            
+            SReal damping = _deviceCtrl->m_forceScale.getValue();            
             if (contactShaft)
             {
                 //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
@@ -172,7 +171,7 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
     HapticAvatar_TipDeviceController* _deviceCtrl = static_cast<HapticAvatar_TipDeviceController*>(p_this);
     
     // Use computer tick for timer
-    double targetSpeedLoop = 0.5; // Target loop speed: 0.5ms
+    ctime_t targetSpeedLoop = 1/2; // Target loop speed: 0.5ms
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
     ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
     double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());

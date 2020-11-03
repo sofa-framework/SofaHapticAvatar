@@ -109,7 +109,6 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
     }
 
     // Loop Timer
-    HANDLE h_timer;
     long targetSpeedLoop = 1; // Target loop speed: 1ms
 
                                 // Use computer tick for timer
@@ -162,11 +161,11 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
         bool hasContact = false;
         if (_deviceCtrl->m_activeTest)
         {
-            float damping = _deviceCtrl->m_damping.getValue();
+            SReal damping = _deviceCtrl->m_damping.getValue();
 
             if (testMode == 1) // floor test
             {
-                float height = _deviceCtrl->m_floorHeight.getValue();
+                SReal height = _deviceCtrl->m_floorHeight.getValue();
                 Vector3 floorPosition = tipPosition;
                 if (tipPosition.y() < height)
                 {
@@ -358,12 +357,12 @@ void HapticAvatar_DeviceEmulator::handleEvent(core::objectmodel::Event *event)
         // force value
         else if (ke->getKey() == '+')
         {
-            m_roughIntensity += 0.1;
+            m_roughIntensity += 0.1f;
             std::cout << "m_roughIntensity: " << m_roughIntensity << std::endl;
         }
         else if (ke->getKey() == '-')
         {
-            m_roughIntensity -= 0.1;
+            m_roughIntensity -= 0.1f;
             std::cout << "m_roughIntensity: " << m_roughIntensity << std::endl;
         }
 

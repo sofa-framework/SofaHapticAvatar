@@ -43,6 +43,9 @@ HapticAvatar_PortalManager::HapticAvatar_PortalManager()
     , m_portalPosition5(initData(&m_portalPosition5, "portalPosition5", "portal rigid position test"))
 {    
     this->f_listening.setValue(true);
+    m_defaultPosition[0] = 0;
+    m_defaultPosition[1] = 0;
+    m_defaultPosition[2] = 0;
 }
 
 
@@ -86,6 +89,9 @@ int HapticAvatar_PortalManager::getPortalId(std::string comStr)
 
         cpt++;
     }
+
+    msg_error() << "Portal ID not found for name: " << comStr;
+    return res;
 }
 
 
@@ -117,7 +123,7 @@ const HapticAvatar_PortalManager::Coord& HapticAvatar_PortalManager::getPortalPo
     if (portId >= m_portals.size())
     {
         msg_error() << "getPortalTransform: Port id out of bounds: " << portId;
-        return HapticAvatar_PortalManager::Coord();
+        return m_defaultPosition;
     }
 
     return m_portals[portId]->getPortalPosition();

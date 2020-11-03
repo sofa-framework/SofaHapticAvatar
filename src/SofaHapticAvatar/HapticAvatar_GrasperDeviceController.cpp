@@ -80,6 +80,8 @@ bool HapticAvatar_GrasperDeviceController::createHapticThreads()
     m_simuData.hapticForces.resize(5);
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
+
+    return true;
 }
 
 
@@ -103,7 +105,6 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     }
 
     // Loop Timer
-    HANDLE h_timer;
     long targetSpeedLoop = 1; // Target loop speed: 1ms
     
     // Use computer tick for timer
@@ -118,7 +119,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
     bool newMethod = _deviceCtrl->d_newMethod.getValue();
-    float damping = _deviceCtrl->m_forceScale.getValue();
+    SReal damping = _deviceCtrl->m_forceScale.getValue();
 
     int cptF = 0;
     // Haptics Loop
@@ -190,7 +191,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
                 Vec3 centerTool = toolPosition[3].getCenter();
                 //Vec3 dirToolAccum = Vec3(0.0, 0.0, 0.0);
                 int cpt = 0;
-                float torqueAcc = 0;
+                SReal torqueAcc = 0;
                 for (auto contact : _deviceCtrl->contactsHaptic)
                 {
                     Vec3 dirPoint = contact.m_toolPosition - centerTool;
@@ -242,7 +243,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
                 //pitchTorque = 0.0;
                 
                 //yawTorque = 0.0;
-                _driver->setManual_PWM(toolTorque , pitchTorque * 50, zforce, yawTorque * 50);
+                _driver->setManual_PWM(float(toolTorque), float(pitchTorque * 50), float(zforce), float(yawTorque * 50));
             }
             else
             {
@@ -334,7 +335,7 @@ void HapticAvatar_GrasperDeviceController::CopyData(std::atomic<bool>& terminate
     HapticAvatar_GrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_GrasperDeviceController*>(p_this);
     
     // Use computer tick for timer
-    double targetSpeedLoop = 0.5; // Target loop speed: 0.5ms
+    ctime_t targetSpeedLoop = 1/2; // Target loop speed: 0.5ms
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
     ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
     double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
