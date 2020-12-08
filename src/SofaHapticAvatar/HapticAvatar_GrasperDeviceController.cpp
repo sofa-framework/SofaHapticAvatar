@@ -70,14 +70,35 @@ void HapticAvatar_GrasperDeviceController::initImpl()
     SReal alarmDist = m_intersectionMethod->getAlarmDistance();
     SReal contactDist = m_intersectionMethod->getContactDistance();
     m_distance = alarmDist - contactDist;
+
+    // get ibox if one
+    if (!l_iboxCtrl.empty())
+    {
+        m_iboxCtrl = l_iboxCtrl.get();
+        if (m_iboxCtrl != nullptr)
+        {
+            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
+        }
+    }
+
+
+    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
+    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+
+    if (m_forceFeedback != nullptr)
+    {
+        msg_info() << "ForceFeedback found";
+    }
+
+
 }
 
 
 bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
     m_terminate = false;
-    m_hapticData.hapticForces.resize(5);
-    m_simuData.hapticForces.resize(5);
+    m_hapticData.hapticForces.resize(8);
+    m_simuData.hapticForces.resize(8);
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
 
@@ -141,7 +162,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
-
+#if 0
         if (_deviceCtrl->m_simulationStarted && !_deviceCtrl->contactsHaptic.empty())
         {
             sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
@@ -252,15 +273,17 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         }
         else
             _driver->releaseForce();
+#endif
+        // Force feedback computation
+        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
+        {            
+            const HapticAvatar_GrasperDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+            sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
 
-    //    // Force feedback computation
-    //    if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-    //    {            
-    //        const HapticAvatar_GrasperDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
-    //        sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
+            // Check main force feedback
+            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
 
-    //        // Check main force feedback
-    //        _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
+
 
     //        bool contactShaft = false;
     //        totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
@@ -290,9 +313,9 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     ////            _driver->setManual_PWM(zforce, pitchTorque*100, 0.0, yawTorque*100);
 
     //            _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
-    //        }
-    //        else
-    //            _driver->releaseForce();
+            }
+            else
+                _driver->releaseForce();
             
         
         ctime_t endTime = CTime::getRefTime();
