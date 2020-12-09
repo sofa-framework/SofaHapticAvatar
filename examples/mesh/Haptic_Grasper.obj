@@ -1,6 +1,6 @@
 # Blender v2.79 (sub 0) OBJ File: ''
 # www.blender.org
-mtllib Grasper.mtl
+mtllib Haptic_grasper.mtl
 o Mesh1_Group1_Model
 v 2.165060 7.749302 -17.500000
 v 2.414810 8.352253 -17.500000
