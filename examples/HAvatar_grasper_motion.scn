@@ -5,56 +5,13 @@
 
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels " />
 
-    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatar_GrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
     iboxController="@HAIBox" drawDevice="1"/>
-    <!--<HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />-->
+    <!--<HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />-->
 	
     
-    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
-    
-    
-    <Node name="Portal_1">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition1"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    <Node name="Portal_2">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition2"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    <Node name="Portal_3">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition3"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    <Node name="Portal_4">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition4"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    <Node name="Portal_5">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition5"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    
+   <include href="Portals.xml" />
     
     <Node name="ArticulatedTool">
         <MechanicalObject template="Rigid3d" name="Articulations" position="@../HADevice.positionDevice"/>
