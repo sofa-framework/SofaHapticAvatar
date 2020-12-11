@@ -81,6 +81,8 @@ protected:
 
 private:
     sofa::helper::vector<HapticAvatar_Portal* > m_portals;
+
+    Coord m_defaultPosition;
 };
 
 } // namespace sofa::HapticAvatar

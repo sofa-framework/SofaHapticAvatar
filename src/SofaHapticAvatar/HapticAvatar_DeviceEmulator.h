@@ -11,7 +11,7 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/helper/Quater.h>
-#include <SofaHapticAvatar/HapticAvatar_DeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_GrasperDeviceController.h>
 
 #include <atomic>
 
@@ -22,11 +22,11 @@ namespace sofa::HapticAvatar
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceEmulator : public HapticAvatar_DeviceController
+class SOFA_HAPTICAVATAR_API HapticAvatar_DeviceEmulator : public HapticAvatar_GrasperDeviceController
 {
 
 public:
-    SOFA_CLASS(HapticAvatar_DeviceEmulator, HapticAvatar_DeviceController);
+    SOFA_CLASS(HapticAvatar_DeviceEmulator, HapticAvatar_GrasperDeviceController);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef SolidTypes<double>::Transform Transform;
@@ -48,7 +48,7 @@ public:
 
     Vector3 m_targetPosition;
     sofa::helper::fixed_array<float, 4> m_roughForce;
-    SReal m_roughIntensity;
+    float m_roughIntensity;
 
     bool m_activeTest;
 };

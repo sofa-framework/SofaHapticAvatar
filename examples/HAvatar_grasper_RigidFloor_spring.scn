@@ -14,10 +14,10 @@
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
 
     
-    <HapticAvatarPortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatarDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatar_GrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
     drawDeviceAxis="0" drawDebugForce="0" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1"/> 
-    <HapticAvatarIBoxController name="HAIBox" portName="//./COM5" printLog="1" />
+    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
         
     <Node name="Instrument" >
