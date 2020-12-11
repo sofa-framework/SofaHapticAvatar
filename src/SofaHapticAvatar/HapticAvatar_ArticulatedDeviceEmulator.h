@@ -7,6 +7,7 @@
 #pragma once
 
 #include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <atomic>
 
@@ -23,6 +24,8 @@ public:
 
     typedef Vec1Types::Coord Articulation;
     typedef Vec1Types::VecCoord VecArticulation;
+    typedef Vec1Types::VecDeriv VecArtiDeriv;
+    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback1D;
 
     /// Default constructor
     HapticAvatar_ArticulatedDeviceEmulator();
@@ -39,12 +42,29 @@ public:
 
     Data<VecArticulation> d_articulations;
 
+    /// link to the IBox controller component 
+    SingleLink<HapticAvatar_ArticulatedDeviceEmulator, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
+    /// Pointer to the ForceFeedback component
+    LCPForceFeedback1D::SPtr m_forceFeedback1D;
+
+    /// General Haptic thread methods
+    static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
+
+    /// Thread methods to cpy data from m_hapticData to m_simuData
+    static void CopyData(std::atomic<bool>& terminate, void * p_this);
+
 protected:
+    /// Pointer to the IBoxController component
+    HapticAvatar_IBoxController * m_iboxCtrl;
+
     /// override method to create the different threads
     bool createHapticThreads() override;
 
     /// override method to update specific tool position
     void updatePositionImpl() override;
+
+    /// Internal method to init specific collision components
+    void initImpl() override;
 };
 
 }
