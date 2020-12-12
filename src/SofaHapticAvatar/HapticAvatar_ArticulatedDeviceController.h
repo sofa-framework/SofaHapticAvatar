@@ -20,11 +20,10 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_ArticulatedDeviceController : public Ha
 {
 public:
     SOFA_CLASS(HapticAvatar_ArticulatedDeviceController, HapticAvatar_BaseDeviceController);
-
-    typedef Vec1Types::Coord Articulation;
-    typedef Vec1Types::VecCoord VecArticulation;
-    typedef Vec1Types::VecDeriv VecArticDeriv;
-    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback1D;
+    typedef Vec1Types::Coord Coord;
+    typedef Vec1Types::VecCoord VecCoord;
+    typedef Vec1Types::VecDeriv VecDeriv;
+    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback;
 
 
     /// Default constructor
@@ -35,10 +34,11 @@ public:
     
 
 public:
-    Data<VecArticulation> d_articulations;
+    /// output data position of the tool
+    Data<VecCoord> d_toolPosition;
 
     /// Pointer to the ForceFeedback component
-    LCPForceFeedback1D::SPtr m_forceFeedback1D;
+    LCPForceFeedback::SPtr m_forceFeedback;
 
 
 protected:

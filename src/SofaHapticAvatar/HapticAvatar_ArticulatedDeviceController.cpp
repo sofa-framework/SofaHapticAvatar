@@ -24,8 +24,8 @@ using namespace sofa::helper::system::thread;
 //constructeur
 HapticAvatar_ArticulatedDeviceController::HapticAvatar_ArticulatedDeviceController()
     : HapticAvatar_BaseDeviceController()
-    , d_articulations(initData(&d_articulations, "articulations", "Output data position of the tool"))
-    , m_forceFeedback1D(nullptr)
+    , d_toolPosition(initData(&d_toolPosition, "toolPosition", "Output data position of the tool"))
+    , m_forceFeedback(nullptr)
 {
     this->f_listening.setValue(true);
 }
@@ -36,9 +36,9 @@ HapticAvatar_ArticulatedDeviceController::HapticAvatar_ArticulatedDeviceControll
 void HapticAvatar_ArticulatedDeviceController::initImpl()
 {
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback1D = context->get<LCPForceFeedback1D>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
 
-    if (m_forceFeedback1D == nullptr)
+    if (m_forceFeedback == nullptr)
     {
         msg_warning() << "ForceFeedback not found";
     }

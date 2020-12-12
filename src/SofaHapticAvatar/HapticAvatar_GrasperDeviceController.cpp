@@ -39,7 +39,7 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
     m_toolRot.identity();
 
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations.resize(6);
     articulations[0] = 0;
     articulations[1] = 0;
@@ -48,7 +48,7 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
     articulations[4] = 0;
     articulations[5] = 0;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
 
@@ -68,9 +68,9 @@ void HapticAvatar_GrasperDeviceController::initImpl()
 
 
     simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback1D = context->get<LCPForceFeedback1D>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
 
-    if (m_forceFeedback1D == nullptr)
+    if (m_forceFeedback == nullptr)
     {
         msg_warning() << "ForceFeedback not found";
     }
@@ -115,7 +115,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
     ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
 
-    VecArticDeriv resForces;
+    VecDeriv resForces;
     resForces.resize(6);
     int cptLoop = 0;
     while (!terminate)
@@ -136,10 +136,10 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         }
 
         // Force feedback computation
-        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback1D)
+        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
         {
-            const HapticAvatar_GrasperDeviceController::VecArticulation& articulations = _deviceCtrl->d_articulations.getValue();
-            _deviceCtrl->m_forceFeedback1D->computeForce(articulations, resForces);
+            const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->d_toolPosition.getValue();
+            _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
 
             // resForces:             
             //articulations[0] = dofV[Dof::YAW];
@@ -217,7 +217,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     // get info from simuData
     sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
@@ -228,7 +228,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
 
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
 

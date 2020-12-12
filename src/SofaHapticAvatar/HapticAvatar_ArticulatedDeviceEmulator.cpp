@@ -34,7 +34,7 @@ HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
 {
     this->f_listening.setValue(true);
     
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations.resize(6);
     articulations[0] = 0;
     articulations[1] = 0;
@@ -43,7 +43,7 @@ HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
 
     articulations[4] = 0;
     articulations[5] = 0;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 
     //articulations[0] = dofV[Dof::YAW];
     //articulations[1] = -dofV[Dof::PITCH];
@@ -74,7 +74,7 @@ void HapticAvatar_ArticulatedDeviceEmulator::updatePositionImpl()
     // get info from simuData
     sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
@@ -85,44 +85,44 @@ void HapticAvatar_ArticulatedDeviceEmulator::updatePositionImpl()
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
 
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
-void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe1(Articulation value)
+void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe1(Coord value)
 {
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations[0] += value;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
-void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe2(Articulation value)
+void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe2(Coord value)
 {
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations[1] += value;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
-void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe3(Articulation value)
+void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe3(Coord value)
 {
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations[2] += value;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
-void HapticAvatar_ArticulatedDeviceEmulator::moveTranslationAxe1(Articulation value)
+void HapticAvatar_ArticulatedDeviceEmulator::moveTranslationAxe1(Coord value)
 {
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations[3] += value;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
 
-void HapticAvatar_ArticulatedDeviceEmulator::openJaws(Articulation value)
+void HapticAvatar_ArticulatedDeviceEmulator::openJaws(Coord value)
 {
-    VecArticulation & articulations = *d_articulations.beginEdit();
+    VecCoord & articulations = *d_toolPosition.beginEdit();
     articulations[4] += value;
     articulations[5] -= value;
-    d_articulations.endEdit();
+    d_toolPosition.endEdit();
 }
 
 
@@ -134,25 +134,25 @@ void HapticAvatar_ArticulatedDeviceEmulator::handleEvent(core::objectmodel::Even
     if (sofa::core::objectmodel::KeypressedEvent* ke = dynamic_cast<sofa::core::objectmodel::KeypressedEvent*>(event))
     {
         if (ke->getKey() == '1')
-            moveRotationAxe1(Articulation(0.01));
+            moveRotationAxe1(Coord(0.01));
         else if (ke->getKey() == '3')
-            moveRotationAxe1(Articulation(-0.01));
+            moveRotationAxe1(Coord(-0.01));
         else if (ke->getKey() == '4')
-            moveRotationAxe2(Articulation(0.01));
+            moveRotationAxe2(Coord(0.01));
         else if (ke->getKey() == '6')
-            moveRotationAxe2(Articulation(-0.01));
+            moveRotationAxe2(Coord(-0.01));
         else if (ke->getKey() == '7')
-            moveRotationAxe3(Articulation(0.01));
+            moveRotationAxe3(Coord(0.01));
         else if (ke->getKey() == '9')
-            moveRotationAxe3(Articulation(-0.01));
+            moveRotationAxe3(Coord(-0.01));
         else if (ke->getKey() == '8')
-            moveTranslationAxe1(Articulation(1.0));
+            moveTranslationAxe1(Coord(1.0));
         else if (ke->getKey() == '2')
-            moveTranslationAxe1(Articulation(-1.0));
+            moveTranslationAxe1(Coord(-1.0));
         else if (ke->getKey() == '+')
-            openJaws(Articulation(0.1));
+            openJaws(Coord(0.1));
         else if (ke->getKey() == '-')
-            openJaws(Articulation(-0.1));
+            openJaws(Coord(-0.1));
     }
 
 

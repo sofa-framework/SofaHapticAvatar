@@ -149,7 +149,7 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
-#if 1
+
         if (_deviceCtrl->m_simulationStarted && !_deviceCtrl->contactsHaptic.empty())
         {
             sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
@@ -260,7 +260,7 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
         }
         else
             _driver->releaseForce();
-#endif
+
         
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
@@ -274,21 +274,6 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
             duration = endTime - startTime;
         }
 
-        // timer dump
-        cptLoop++;
-
-        if (debugThread && cptLoop % 100 == 0)
-        {
-            ctime_t stepTime = CTime::getRefTime();
-            ctime_t diffLoop = stepTime - lastTime;
-            lastTime = stepTime;
-
-            auto t2 = std::chrono::high_resolution_clock::now();
-            
-            auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
-            t1 = t2;
-            std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << " | " << duration.count() << std::endl;
-        }
     }
 
     // ensure no force
@@ -309,7 +294,7 @@ void HapticAvatar_RigidGrasperDeviceController::CopyData(std::atomic<bool>& term
 
     ctime_t lastTime = CTime::getRefTime();
     std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    int cptLoop = 0;
+
     // Haptics Loop
     while (!terminate)
     {
@@ -325,21 +310,8 @@ void HapticAvatar_RigidGrasperDeviceController::CopyData(std::atomic<bool>& term
             endTime = CTime::getRefTime();
             duration = endTime - startTime;
         }
-
-
-        //if (cptLoop % 100 == 0)
-        //{
-        //    ctime_t stepTime = CTime::getRefTime();
-        //    ctime_t diffLoop = stepTime - lastTime;
-        //    lastTime = stepTime;
-        //    //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
-        //    std::cout << "Copy nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;            
-        //}
-        cptLoop++;
     }
 }
-
-int cpt = 0;
 
 void HapticAvatar_RigidGrasperDeviceController::updatePositionImpl()
 {
@@ -389,27 +361,6 @@ void HapticAvatar_RigidGrasperDeviceController::updatePositionImpl()
     toolPosition[6] = jawUpExtrem;
     toolPosition[7] = jawDownExtrem;
     d_toolPosition.endEdit();
-
-   /* if (cpt == 20)
-    {
-        bool test = false;
-        for (int i = 0; i < m_simuData.hapticForces.size(); i++)
-        {
-            double norm = m_simuData.hapticForces[i].getLinear().norm();
-            if (norm > 0.001)
-            {
-                test = true;
-                std::cout << i << " | Position: " << toolPosition[i] << " | force: " << m_simuData.hapticForces[i].getLinear() << " | angular: " << m_simuData.hapticForces[i].getAngular()
-                    << " => " << m_simuData.hapticForces[i].getLinear().norm() << std::endl;
-            }
-            
-        }
-
-        if (test)
-            std::cout << std::endl;
-        cpt = 0;
-    }
-    cpt++;*/
 }
 
 
