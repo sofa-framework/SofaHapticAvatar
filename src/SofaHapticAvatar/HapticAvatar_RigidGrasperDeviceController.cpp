@@ -26,20 +26,9 @@ int HapticAvatar_RigidGrasperDeviceControllerClass = core::RegisterObject("Drive
     ;
 
 
-HapticRigidAvatarJaws::HapticRigidAvatarJaws()
-    : m_MaxOpeningAngle(60.0f)
-    , m_jawLength(20.0f)
-    , m_jaw1Radius(1.5f)
-    , m_jaw2Radius(1.5f)
-    , m_shaftRadius(2.5f)
-{
-
-}
-
-
 //constructeur
 HapticAvatar_RigidGrasperDeviceController::HapticAvatar_RigidGrasperDeviceController()
-    : HapticAvatar_BaseDeviceController()
+    : HapticAvatar_RigidDeviceController()
     , d_newMethod(initData(&d_newMethod, false, "newMethod", "Parameter to choose old/new method"))
     , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , m_distance(1.0f)

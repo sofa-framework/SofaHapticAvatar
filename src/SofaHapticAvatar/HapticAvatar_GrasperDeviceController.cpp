@@ -26,20 +26,10 @@ int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver all
     ;
 
 
-HapticAvatarJaws::HapticAvatarJaws()
-    : m_MaxOpeningAngle(60.0f)
-    , m_jawLength(20.0f)
-    , m_jaw1Radius(1.5f)
-    , m_jaw2Radius(1.5f)
-    , m_shaftRadius(2.5f)
-{
-
-}
-
-
 //constructeur
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     : HapticAvatar_ArticulatedDeviceController()
+    , d_MaxOpeningAngle(initData(&d_MaxOpeningAngle, SReal(60.0f), "MaxOpeningAngle", "Max jaws opening angle"))
     , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , m_iboxCtrl(nullptr)
 {
@@ -236,7 +226,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     articulations[2] = dofV[Dof::ROT];
     articulations[3] = dofV[Dof::Z];
 
-    float _OpeningAngle = m_simuData.jawOpening * 60.0f * 0.01f;
+    float _OpeningAngle = m_simuData.jawOpening * d_MaxOpeningAngle.getValue() * 0.01f;
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
 

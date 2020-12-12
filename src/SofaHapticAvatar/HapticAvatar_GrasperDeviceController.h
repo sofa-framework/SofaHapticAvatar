@@ -8,27 +8,11 @@
 
 #include <SofaHapticAvatar/HapticAvatar_ArticulatedDeviceController.h>
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
-#include <sofa/core/collision/NarrowPhaseDetection.h>
 
 namespace sofa::HapticAvatar
 {
 
 using namespace sofa::defaulttype;
-
-// Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
-class SOFA_HAPTICAVATAR_API HapticAvatarJaws
-{
-public:
-    HapticAvatarJaws();
-
-
-public:
-    float m_MaxOpeningAngle;
-    float m_jawLength;
-    float m_jaw1Radius;
-    float m_jaw2Radius;
-    float m_shaftRadius;
-};
 
 
 /**
@@ -38,7 +22,6 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_GrasperDeviceController : public Haptic
 {
 public:
     SOFA_CLASS(HapticAvatar_GrasperDeviceController, HapticAvatar_ArticulatedDeviceController);
-    typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
     /// Default constructor
     HapticAvatar_GrasperDeviceController();
@@ -69,12 +52,12 @@ public:
     /// link to the IBox controller component 
     SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
 
+    /// Max opening angle of the Jaws
+    Data<SReal> d_MaxOpeningAngle;
+
 protected:
     /// Pointer to the IBoxController component
     HapticAvatar_IBoxController * m_iboxCtrl;
-
-    /// Jaws specific informations
-    HapticAvatarJaws m_jawsData;
 };
 
 } // namespace sofa::HapticAvatar

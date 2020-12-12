@@ -6,7 +6,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_RigidDeviceController.h>
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
 
@@ -15,21 +15,6 @@ namespace sofa::HapticAvatar
 
 using namespace sofa::defaulttype;
 using namespace sofa::simulation;
-
-// Set class to store Jaws Data information instead of struct so in the future could have a hiearchy of different tools.
-class SOFA_HAPTICAVATAR_API HapticRigidAvatarJaws
-{
-public:
-    HapticRigidAvatarJaws();
-
-
-public:
-    float m_MaxOpeningAngle;
-    float m_jawLength;
-    float m_jaw1Radius;
-    float m_jaw2Radius;
-    float m_shaftRadius;
-};
 
 struct SOFA_HAPTICAVATAR_API HapticContact
 {
@@ -44,10 +29,10 @@ struct SOFA_HAPTICAVATAR_API HapticContact
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_RigidGrasperDeviceController : public HapticAvatar_BaseDeviceController
+class SOFA_HAPTICAVATAR_API HapticAvatar_RigidGrasperDeviceController : public HapticAvatar_RigidDeviceController
 {
 public:
-    SOFA_CLASS(HapticAvatar_RigidGrasperDeviceController, Controller);
+    SOFA_CLASS(HapticAvatar_RigidGrasperDeviceController, HapticAvatar_RigidDeviceController);
     typedef helper::vector<core::collision::DetectionOutput> ContactVector;
 
     /// Default constructor
