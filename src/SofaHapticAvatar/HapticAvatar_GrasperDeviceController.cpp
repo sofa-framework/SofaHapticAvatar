@@ -41,7 +41,6 @@ HapticAvatarJaws::HapticAvatarJaws()
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     : HapticAvatar_BaseDeviceController()
     , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
-    , m_distance(1.0f)
     , m_iboxCtrl(nullptr)
 {
     this->f_listening.setValue(true);
@@ -219,8 +218,6 @@ void HapticAvatar_GrasperDeviceController::CopyData(std::atomic<bool>& terminate
         }
     }
 }
-
-int cpt = 0;
 
 void HapticAvatar_GrasperDeviceController::updatePositionImpl()
 {
