@@ -72,9 +72,6 @@ protected:
     /// override method to update specific tool position
     void updatePositionImpl() override;
 
-    /// Internal method to retrieve the collision information per simulation step
-    void retrieveCollisions();
-
     /// Internal method to draw specific informations
     void drawImpl(const sofa::core::visual::VisualParams*) override {}
 

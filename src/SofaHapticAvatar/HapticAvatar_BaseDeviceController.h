@@ -34,8 +34,14 @@ public:
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef RigidTypes::VecDeriv VecDeriv;
-    typedef SolidTypes<double>::Transform Transform;
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
+
+    typedef Vec1Types::Coord Articulation;
+    typedef Vec1Types::VecCoord VecArticulation;
+    typedef Vec1Types::VecDeriv VecArticDeriv;
+    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback1D;
+
+    typedef SolidTypes<double>::Transform Transform;
 
     /// default constructor
     HapticAvatar_BaseDeviceController();
@@ -94,6 +100,10 @@ public:
     /// output data position of the tool
     Data<VecCoord> d_toolPosition;
 
+
+    Data<VecArticulation> d_articulations;
+
+
     /// Parameter to dump thread info. //TODO: check if this should not be removed...
     Data<bool> d_dumpThreadInfo;
     
@@ -128,6 +138,10 @@ public:
 
     /// Pointer to the ForceFeedback component
     LCPForceFeedback::SPtr m_forceFeedback;
+
+    /// Pointer to the ForceFeedback component
+    LCPForceFeedback1D::SPtr m_forceFeedback1D;
+
 
     /// Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
     bool m_simulationStarted; 
