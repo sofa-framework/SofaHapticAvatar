@@ -30,7 +30,7 @@ int HapticAvatar_ArticulatedDeviceEmulatorClass = core::RegisterObject("Driver a
 
 //constructeur
 HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
-    : HapticAvatar_BaseDeviceController()
+    : HapticAvatar_ArticulatedDeviceController()
 {
     this->f_listening.setValue(true);
     

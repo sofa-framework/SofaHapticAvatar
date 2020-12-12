@@ -27,22 +27,27 @@ using namespace sofa::component::controller;
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_BaseDeviceController : public Controller
+class SOFA_HAPTICAVATAR_API HapticAvatar_RigidDeviceController : public Controller
 {
 public:
-    SOFA_CLASS(HapticAvatar_BaseDeviceController, Controller);
+    SOFA_CLASS(HapticAvatar_RigidDeviceController, Controller);
     typedef RigidTypes::Coord Coord;
     typedef RigidTypes::VecCoord VecCoord;
     typedef RigidTypes::VecDeriv VecDeriv;
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
 
+    typedef Vec1Types::Coord Articulation;
+    typedef Vec1Types::VecCoord VecArticulation;
+    typedef Vec1Types::VecDeriv VecArticDeriv;
+    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback1D;
+
     typedef SolidTypes<double>::Transform Transform;
 
     /// default constructor
-    HapticAvatar_BaseDeviceController();
+    HapticAvatar_RigidDeviceController();
 
     /// default destructor
-	virtual ~HapticAvatar_BaseDeviceController();
+	virtual ~HapticAvatar_RigidDeviceController();
 
     /// Component API 
     ///{
@@ -64,7 +69,7 @@ protected:
 
     /// Main method to update the tool device from haptic information. 
     /// Will call @sa updatePortalAnglesAndLength and @sa updatePositionImpl
-    virtual void updatePosition();
+    void updatePosition();
 
     /// Method to propage
     void updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
@@ -96,7 +101,7 @@ public:
     Data<VecCoord> d_toolPosition;
 
 
-    
+    Data<VecArticulation> d_articulations;
 
 
     /// Parameter to dump thread info. //TODO: check if this should not be removed...
@@ -111,7 +116,7 @@ public:
 
     
     /// Link to the portalManager component
-    SingleLink<HapticAvatar_BaseDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
+    SingleLink<HapticAvatar_RigidDeviceController, HapticAvatar_PortalManager, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_portalMgr;
 
 public: 
     /// Data public for haptic thread
@@ -133,6 +138,10 @@ public:
 
     /// Pointer to the ForceFeedback component
     LCPForceFeedback::SPtr m_forceFeedback;
+
+    /// Pointer to the ForceFeedback component
+    LCPForceFeedback1D::SPtr m_forceFeedback1D;
+
 
     /// Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
     bool m_simulationStarted; 

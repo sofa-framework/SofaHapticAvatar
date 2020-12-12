@@ -39,7 +39,7 @@ HapticAvatarJaws::HapticAvatarJaws()
 
 //constructeur
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
-    : HapticAvatar_BaseDeviceController()
+    : HapticAvatar_ArticulatedDeviceController()
     , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , m_iboxCtrl(nullptr)
 {

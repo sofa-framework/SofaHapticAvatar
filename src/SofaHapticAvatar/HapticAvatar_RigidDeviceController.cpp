@@ -5,7 +5,7 @@
 * Contact information:                                                        *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_RigidDeviceController.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
@@ -17,19 +17,21 @@ namespace sofa::HapticAvatar
 {
 
 //constructeur
-HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
+HapticAvatar_RigidDeviceController::HapticAvatar_RigidDeviceController()
     : d_portName(initData(&d_portName, std::string("//./COM3"), "portName", "Name of the port used by this device"))
     , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "Data to store Information received by HW device"))
     , d_scale(initData(&d_scale, 1.0, "scale", "Default scale applied to the tool Coordinates"))
     , m_forceScale(initData(&m_forceScale, SReal(1.0), "forceScale", "jaws opening angle"))
     , d_posDevice(initData(&d_posDevice, "positionDevice", "Position of the base of the device"))
     , d_toolPosition(initData(&d_toolPosition, "toolPosition", "Output data position of the tool"))
+    , d_articulations(initData(&d_articulations, "articulations", "Output data position of the tool"))
     , d_dumpThreadInfo(initData(&d_dumpThreadInfo, false, "dumpThreadInfo", "Parameter to dump thread info"))
     , d_drawDeviceAxis(initData(&d_drawDeviceAxis, false, "drawDeviceAxis", "Parameter to draw dof axis"))
     , d_drawDebug(initData(&d_drawDebug, false, "drawDebugForce", "Parameter to draw debug information"))
     , d_drawLogOutputs(initData(&d_drawLogOutputs, false, "drawLogOutputs", "Parameter to draw output logs"))
     , l_portalMgr(initLink("portalManager", "link to portalManager"))
     , m_forceFeedback(nullptr)
+    , m_forceFeedback1D(nullptr)
     , m_simulationStarted(false)
     , m_terminate(true)
     , m_HA_driver(nullptr)
@@ -43,13 +45,13 @@ HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
 
     m_toolRot.identity();
 
-    HapticAvatar_BaseDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
+    HapticAvatar_RigidDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
     toolPosition.resize(8);
     d_toolPosition.endEdit();    
 }
 
 
-HapticAvatar_BaseDeviceController::~HapticAvatar_BaseDeviceController()
+HapticAvatar_RigidDeviceController::~HapticAvatar_RigidDeviceController()
 {
     clearDevice();
     if (m_HA_driver)
@@ -61,9 +63,9 @@ HapticAvatar_BaseDeviceController::~HapticAvatar_BaseDeviceController()
 
 
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatar_BaseDeviceController::init()
+void HapticAvatar_RigidDeviceController::init()
 {
-    msg_info() << "HapticAvatar_BaseDeviceController::init()";
+    msg_info() << "HapticAvatar_RigidDeviceController::init()";
     m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected())
@@ -72,7 +74,7 @@ void HapticAvatar_BaseDeviceController::init()
     // get identity
     std::string identity = m_HA_driver->getIdentity();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatar_BaseDeviceController identity: '" << identity << "'" << std::endl;
+    std::cout << "HapticAvatar_RigidDeviceController identity: '" << identity << "'" << std::endl;
 
     // get access to portalMgr
     if (l_portalMgr.empty())
@@ -95,9 +97,9 @@ void HapticAvatar_BaseDeviceController::init()
 }
 
 
-void HapticAvatar_BaseDeviceController::clearDevice()
+void HapticAvatar_RigidDeviceController::clearDevice()
 {
-    msg_info() << "HapticAvatar_BaseDeviceController::clearDevice()";
+    msg_info() << "HapticAvatar_RigidDeviceController::clearDevice()";
     if (m_terminate == false && m_deviceReady)
     {
         m_terminate = true;
@@ -107,16 +109,16 @@ void HapticAvatar_BaseDeviceController::clearDevice()
 }
 
 
-void HapticAvatar_BaseDeviceController::bwdInit()
+void HapticAvatar_RigidDeviceController::bwdInit()
 {   
-    msg_info() << "HapticAvatar_BaseDeviceController::bwdInit()";
+    msg_info() << "HapticAvatar_RigidDeviceController::bwdInit()";
     if (!m_portalMgr)
         return;
     
     m_portId = m_portalMgr->getPortalId(d_portName.getValue());
     if (m_portId == -1)
     {
-        msg_error("HapticAvatar_BaseDeviceController no portal id found");
+        msg_error("HapticAvatar_RigidDeviceController no portal id found");
         m_deviceReady = false;
         return;
     }
@@ -136,14 +138,14 @@ void HapticAvatar_BaseDeviceController::bwdInit()
 
 
 
-void HapticAvatar_BaseDeviceController::updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
+void HapticAvatar_RigidDeviceController::updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
 {
     m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
 }
 
 
 
-void HapticAvatar_BaseDeviceController::updatePosition()
+void HapticAvatar_RigidDeviceController::updatePosition()
 {
     if (!m_HA_driver)
         return;
@@ -180,7 +182,7 @@ void HapticAvatar_BaseDeviceController::updatePosition()
 }
 
 
-void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatar_RigidDeviceController::draw(const sofa::core::visual::VisualParams* vparams)
 {
     if (!m_deviceReady)
         return;
@@ -188,7 +190,7 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
     // draw tool rigid dof arrows
     if (d_drawDeviceAxis.getValue())
     {
-        const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+        const HapticAvatar_RigidDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
         float glRadius = float(d_scale.getValue());
 
         for (unsigned int i = 0; i < toolPosition.size(); ++i)
@@ -210,10 +212,10 @@ void HapticAvatar_BaseDeviceController::draw(const sofa::core::visual::VisualPar
 }
 
 
-void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::VisualParams* vparams)
+void HapticAvatar_RigidDeviceController::drawDebug(const sofa::core::visual::VisualParams* vparams)
 {
-    const HapticAvatar_BaseDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
-    const HapticAvatar_BaseDeviceController::VecDeriv& force = m_debugData.hapticForces;
+    const HapticAvatar_RigidDeviceController::VecCoord & toolPosition = d_toolPosition.getValue();
+    const HapticAvatar_RigidDeviceController::VecDeriv& force = m_debugData.hapticForces;
 
     Vec3 dirTotal, angTotal;
     for (int i = 0; i < force.size(); i++)
@@ -292,7 +294,7 @@ void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::Visu
 }
 
 
-void HapticAvatar_BaseDeviceController::handleEvent(core::objectmodel::Event *event)
+void HapticAvatar_RigidDeviceController::handleEvent(core::objectmodel::Event *event)
 {
     if (!m_deviceReady)
         return;

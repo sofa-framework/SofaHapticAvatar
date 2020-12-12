@@ -6,7 +6,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_ArticulatedDeviceController.h>
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <atomic>
@@ -17,10 +17,10 @@ namespace sofa::HapticAvatar
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_ArticulatedDeviceEmulator : public HapticAvatar_BaseDeviceController
+class SOFA_HAPTICAVATAR_API HapticAvatar_ArticulatedDeviceEmulator : public HapticAvatar_ArticulatedDeviceController
 {
 public:
-    SOFA_CLASS(HapticAvatar_ArticulatedDeviceEmulator, HapticAvatar_BaseDeviceController);
+    SOFA_CLASS(HapticAvatar_ArticulatedDeviceEmulator, HapticAvatar_ArticulatedDeviceController);
 
     /// Default constructor
     HapticAvatar_ArticulatedDeviceEmulator();
