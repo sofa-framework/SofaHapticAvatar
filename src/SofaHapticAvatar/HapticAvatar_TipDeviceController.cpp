@@ -23,7 +23,7 @@ int HapticAvatar_TipDeviceControllerClass = core::RegisterObject("Driver allowin
 
 //constructeur
 HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
-    : HapticAvatar_BaseDeviceController()
+    : HapticAvatar_RigidDeviceController()
 {
     this->f_listening.setValue(true);
     
@@ -42,8 +42,6 @@ bool HapticAvatar_TipDeviceController::createHapticThreads()
     m_terminate = false;
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
-    m_hapticData.hapticForces.resize(5);
-    m_simuData.hapticForces.resize(5);
 
     return true;
 }
@@ -83,6 +81,9 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
 
+    VecDeriv forces;
+    forces.resize(5);
+
     // Haptics Loop
     while (!terminate)
     {
@@ -100,10 +101,10 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
             sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
 
             // Check main force feedback
-            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, _deviceCtrl->m_hapticData.hapticForces);
+            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, forces);
 
             bool contactShaft = false;
-            totalForce = _deviceCtrl->m_hapticData.hapticForces[3].getLinear() + _deviceCtrl->m_hapticData.hapticForces[4].getLinear() + _deviceCtrl->m_hapticData.hapticForces[5].getLinear();
+            totalForce = forces[3].getLinear() + forces[4].getLinear() + forces[5].getLinear();
             
 
             
@@ -216,18 +217,18 @@ void HapticAvatar_TipDeviceController::updatePositionImpl()
     orien.fromMatrix(m_toolRot);
 
     // compute bati position
-    HapticAvatar_BaseDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
+    HapticAvatar_RigidDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
     rootPos.getOrientation() = orien;
 
-    HapticAvatar_BaseDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
+    HapticAvatar_RigidDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
     posDevice.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
     d_posDevice.endEdit();
 
     // Update jaws rigid
     float _OpeningAngle = 0.0f;// d_info_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
-    HapticAvatar_BaseDeviceController::Coord jawUp;
-    HapticAvatar_BaseDeviceController::Coord jawDown;
+    HapticAvatar_RigidDeviceController::Coord jawUp;
+    HapticAvatar_RigidDeviceController::Coord jawDown;
 
     jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
     jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
@@ -237,14 +238,14 @@ void HapticAvatar_TipDeviceController::updatePositionImpl()
 
     // Update jaws exterimies
     Vec3f posExtrem = Vec3f(0.0, /*-m_jawsData.m_jawLength*/-20.0, 0.0);
-    HapticAvatar_BaseDeviceController::Coord jawUpExtrem = jawUp;
-    HapticAvatar_BaseDeviceController::Coord jawDownExtrem = jawDown;
+    HapticAvatar_RigidDeviceController::Coord jawUpExtrem = jawUp;
+    HapticAvatar_RigidDeviceController::Coord jawDownExtrem = jawDown;
 
     jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
     jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
 
     // Udpate articulated device
-    HapticAvatar_BaseDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
+    HapticAvatar_RigidDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
     toolPosition[0] = rootPos;
     toolPosition[1] = rootPos;
     toolPosition[2] = rootPos;

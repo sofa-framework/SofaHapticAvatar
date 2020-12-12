@@ -47,7 +47,20 @@ public:
     /// default destructor
 	virtual ~HapticAvatar_RigidDeviceController();
 
-  
+protected:
+    /// Internal method to init specific collision components
+    void initImpl() override;
+    
+    /// Internal method to draw specific informations
+    void drawImpl(const sofa::core::visual::VisualParams* vparams) override;
+
+public:
+    /// output data position of the tool
+    Data<VecCoord> d_toolPosition;
+
+    /// Pointer to the ForceFeedback component
+    LCPForceFeedback::SPtr m_forceFeedback;
+
 };
 
 } // namespace sofa::HapticAvatar

@@ -82,8 +82,6 @@ void HapticAvatar_GrasperDeviceController::initImpl()
 bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
     m_terminate = false;
-    m_hapticData.hapticForces.resize(5);
-    m_simuData.hapticForces.resize(5);
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
 

@@ -6,7 +6,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_RigidDeviceController.h>
 #include <atomic>
 
 namespace sofa::HapticAvatar
@@ -15,10 +15,10 @@ namespace sofa::HapticAvatar
 /**
 * Haptic Avatar driver
 */
-class SOFA_HAPTICAVATAR_API HapticAvatar_TipDeviceController : public HapticAvatar_BaseDeviceController
+class SOFA_HAPTICAVATAR_API HapticAvatar_TipDeviceController : public HapticAvatar_RigidDeviceController
 {
 public:
-    SOFA_CLASS(HapticAvatar_TipDeviceController, HapticAvatar_BaseDeviceController);
+    SOFA_CLASS(HapticAvatar_TipDeviceController, HapticAvatar_RigidDeviceController);
 
     /// Default constructor
     HapticAvatar_TipDeviceController();
