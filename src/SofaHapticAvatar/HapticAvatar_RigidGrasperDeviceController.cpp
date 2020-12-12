@@ -29,10 +29,7 @@ int HapticAvatar_RigidGrasperDeviceControllerClass = core::RegisterObject("Drive
 //constructeur
 HapticAvatar_RigidGrasperDeviceController::HapticAvatar_RigidGrasperDeviceController()
     : HapticAvatar_RigidDeviceController()
-    , d_newMethod(initData(&d_newMethod, false, "newMethod", "Parameter to choose old/new method"))
-    , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , m_distance(1.0f)
-    , m_iboxCtrl(nullptr)    
     , m_detectionNP(nullptr)
 {
     this->f_listening.setValue(true);
@@ -126,7 +123,6 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
-    bool newMethod = _deviceCtrl->d_newMethod.getValue();
     SReal damping = _deviceCtrl->m_forceScale.getValue();
 
     int cptF = 0;
@@ -159,104 +155,97 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
                 totalForce += contact.m_force * contact.distance;
             }
 
-            if (newMethod)
+            sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
+            sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
+            sofa::defaulttype::Mat3x3f rotM;
+            for (unsigned int i = 0; i < 3; i++) {
+                for (unsigned int j = 0; j < 3; j++) {
+                    rotM[i][j] = R_rot[i][j];
+                }
+            }
+
+            Vec3 toolDir = Vec3(0, -1, 0);
+            toolDir = _deviceCtrl->m_toolRot * toolDir;
+            toolDir.normalize();
+                
+
+            Vec3 yawDir = Vec3(1, 0, 0);
+            yawDir = _deviceCtrl->m_PortalRot * yawDir;
+            yawDir.normalize();
+
+            Vec3 pitchDir = Vec3(0, 0, 1);
+            Vec3 pitchDirTool = Vec3(0, 0, 1);
+            pitchDir = _deviceCtrl->m_PortalRot * pitchDir;
+            pitchDirTool = _deviceCtrl->m_toolRot * pitchDirTool;
+            pitchDir.normalize();
+                
+            totalForce = totalForce * damping;
+            //Vec3 totalForceTM = _deviceCtrl->m_toolRotInv * totalForce;
+            Vec3 h = cross(totalForce, toolDir);
+                
+
+            SReal zforce = dot(-toolDir, totalForce);
+            SReal yawTorque = dot(yawDir, h);
+            SReal pitchTorque = dot(pitchDir, h);                
+
+                
+            const HapticAvatar_RigidGrasperDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
+            Vec3 centerTool = toolPosition[3].getCenter();
+            //Vec3 dirToolAccum = Vec3(0.0, 0.0, 0.0);
+            int cpt = 0;
+            SReal torqueAcc = 0;
+            for (auto contact : _deviceCtrl->contactsHaptic)
             {
-                sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
-                sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
-                sofa::defaulttype::Mat3x3f rotM;
-                for (unsigned int i = 0; i < 3; i++) {
-                    for (unsigned int j = 0; j < 3; j++) {
-                        rotM[i][j] = R_rot[i][j];
-                    }
-                }
-
-                Vec3 toolDir = Vec3(0, -1, 0);
-                toolDir = _deviceCtrl->m_toolRot * toolDir;
-                toolDir.normalize();
-                
-
-                Vec3 yawDir = Vec3(1, 0, 0);
-                yawDir = _deviceCtrl->m_PortalRot * yawDir;
-                yawDir.normalize();
-
-                Vec3 pitchDir = Vec3(0, 0, 1);
-                Vec3 pitchDirTool = Vec3(0, 0, 1);
-                pitchDir = _deviceCtrl->m_PortalRot * pitchDir;
-                pitchDirTool = _deviceCtrl->m_toolRot * pitchDirTool;
-                pitchDir.normalize();
-                
-                totalForce = totalForce * damping;
-                //Vec3 totalForceTM = _deviceCtrl->m_toolRotInv * totalForce;
-                Vec3 h = cross(totalForce, toolDir);
-                
-
-                SReal zforce = dot(-toolDir, totalForce);
-                SReal yawTorque = dot(yawDir, h);
-                SReal pitchTorque = dot(pitchDir, h);                
-
-                
-                const HapticAvatar_RigidGrasperDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
-                Vec3 centerTool = toolPosition[3].getCenter();
-                //Vec3 dirToolAccum = Vec3(0.0, 0.0, 0.0);
-                int cpt = 0;
-                SReal torqueAcc = 0;
-                for (auto contact : _deviceCtrl->contactsHaptic)
-                {
-                    Vec3 dirPoint = contact.m_toolPosition - centerTool;
-                    Vec3 cross1 = cross(-contact.m_normal, dirPoint);
-                    torqueAcc += dot(cross1, toolDir);
-                    //if (dot(dirPoint, toolDir) > 0)
-                    //{
-                    //    dirToolAccum += dirPoint;
-                    //    cpt++;
-                    //}
+                Vec3 dirPoint = contact.m_toolPosition - centerTool;
+                Vec3 cross1 = cross(-contact.m_normal, dirPoint);
+                torqueAcc += dot(cross1, toolDir);
+                //if (dot(dirPoint, toolDir) > 0)
+                //{
+                //    dirToolAccum += dirPoint;
+                //    cpt++;
+                //}
 
 
-                }
-                //if (cpt != 0)
-                //    dirToolAccum = dirToolAccum/cpt;
+            }
+            //if (cpt != 0)
+            //    dirToolAccum = dirToolAccum/cpt;
 
-                //Vec3 hTM = cross(dirToolAccum, toolDir);
-                SReal toolTorque = torqueAcc;// dot(hTM, pitchDirTool);
-                //_deviceCtrl->m_toolDir = toolDir;
-                //_deviceCtrl->m_pitchDir = pitchDirTool;
-                //_deviceCtrl->m_h = h;
-                //_deviceCtrl->m_hTM = dirToolAccum;
-                //_deviceCtrl->m_hTM = cross(toolDir, toolDir);
+            //Vec3 hTM = cross(dirToolAccum, toolDir);
+            SReal toolTorque = torqueAcc;// dot(hTM, pitchDirTool);
+            //_deviceCtrl->m_toolDir = toolDir;
+            //_deviceCtrl->m_pitchDir = pitchDirTool;
+            //_deviceCtrl->m_h = h;
+            //_deviceCtrl->m_hTM = dirToolAccum;
+            //_deviceCtrl->m_hTM = cross(toolDir, toolDir);
 
 
-                if (cptF == 100)
-                {
-                    Vector3 root = toolPosition[3].getCenter();
+            if (cptF == 100)
+            {
+                Vector3 root = toolPosition[3].getCenter();
                     
 
-                    for (auto contact : _deviceCtrl->contactsHaptic)
-                    {
-                        SReal res = dot(contact.m_toolPosition - root, root + toolDir);
-                        std::cout << res << std::endl;
-                    }
-
-                    std::cout << "zforce: " << zforce
-                        << " | pitchTorque: " << pitchTorque
-                        << " | yawTorque: " << yawTorque
-                        << " | toolTorque: " << toolTorque
-                        << std::endl;
-
-                    cptF = 0;
+                for (auto contact : _deviceCtrl->contactsHaptic)
+                {
+                    SReal res = dot(contact.m_toolPosition - root, root + toolDir);
+                    std::cout << res << std::endl;
                 }
-                //cptF++;
 
-                //zforce = 0.0;
-                //toolTorque = 0.0;
-                //pitchTorque = 0.0;
+                std::cout << "zforce: " << zforce
+                    << " | pitchTorque: " << pitchTorque
+                    << " | yawTorque: " << yawTorque
+                    << " | toolTorque: " << toolTorque
+                    << std::endl;
+
+                cptF = 0;
+            }
+            //cptF++;
+
+            //zforce = 0.0;
+            //toolTorque = 0.0;
+            //pitchTorque = 0.0;
                 
-                //yawTorque = 0.0;
-                _driver->setManual_PWM(float(toolTorque), float(pitchTorque * 50), float(zforce), float(yawTorque * 50));
-            }
-            else
-            {
-                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
-            }
+            //yawTorque = 0.0;
+            _driver->setManual_PWM(float(toolTorque), float(pitchTorque * 50), float(zforce), float(yawTorque * 50));
         }
         else
             _driver->releaseForce();

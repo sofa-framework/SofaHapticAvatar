@@ -49,16 +49,6 @@ protected:
     /// Internal method to draw specific informations
     void drawImpl(const sofa::core::visual::VisualParams*) override {}
 
-public:
-    /// link to the IBox controller component 
-    SingleLink<HapticAvatar_DirectGrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
-
-protected:
-    /// Pointer to the IBoxController component
-    HapticAvatar_IBoxController * m_iboxCtrl;
-
-    /// Jaws specific informations
-    HapticRigidAvatarJaws m_jawsData;
 };
 
 } // namespace sofa::HapticAvatar

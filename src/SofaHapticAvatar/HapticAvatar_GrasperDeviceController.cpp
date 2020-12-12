@@ -74,8 +74,6 @@ void HapticAvatar_GrasperDeviceController::initImpl()
     {
         msg_warning() << "ForceFeedback not found";
     }
-
-
 }
 
 

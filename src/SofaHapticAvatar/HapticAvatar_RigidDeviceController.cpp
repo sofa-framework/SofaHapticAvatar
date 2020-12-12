@@ -16,11 +16,24 @@
 namespace sofa::HapticAvatar
 {
 
+HapticRigidAvatarJaws::HapticRigidAvatarJaws()
+    : m_MaxOpeningAngle(60.0f)
+    , m_jawLength(20.0f)
+    , m_jaw1Radius(1.5f)
+    , m_jaw2Radius(1.5f)
+    , m_shaftRadius(2.5f)
+{
+
+}
+
+
 //constructeur
 HapticAvatar_RigidDeviceController::HapticAvatar_RigidDeviceController()
     : HapticAvatar_BaseDeviceController()
+    , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
     , d_toolPosition(initData(&d_toolPosition, "toolPosition", "Output data position of the tool"))
     , m_forceFeedback(nullptr)
+    , m_iboxCtrl(nullptr)
 {
     this->f_listening.setValue(true);
     
@@ -37,18 +50,6 @@ HapticAvatar_RigidDeviceController::HapticAvatar_RigidDeviceController()
 HapticAvatar_RigidDeviceController::~HapticAvatar_RigidDeviceController()
 {
 
-}
-
-
-void HapticAvatar_RigidDeviceController::initImpl()
-{
-    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-
-    if (m_forceFeedback != nullptr)
-    {
-        msg_info() << "ForceFeedback found";
-    }
 }
 
 

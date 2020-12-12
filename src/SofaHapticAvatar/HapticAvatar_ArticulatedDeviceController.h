@@ -25,13 +25,8 @@ public:
     typedef Vec1Types::VecDeriv VecDeriv;
     typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback;
 
-
     /// Default constructor
     HapticAvatar_ArticulatedDeviceController();
-
-    ///// handleEvent component method to catch collision info
-    //void handleEvent(core::objectmodel::Event *) override;
-    
 
 public:
     /// output data position of the tool
@@ -40,19 +35,6 @@ public:
     /// Pointer to the ForceFeedback component
     LCPForceFeedback::SPtr m_forceFeedback;
 
-
-protected:
-    /// Internal method to init specific collision components
-    void initImpl() override;
-
-    ///// override method to create the different threads
-    //bool createHapticThreads() override;
-
-    ///// override method to update specific tool position
-    //void updatePositionImpl() override;
-
-    ///// Internal method to draw specific informations
-    //void drawImpl(const sofa::core::visual::VisualParams*) override {}
 };
 
 } // namespace sofa::HapticAvatar

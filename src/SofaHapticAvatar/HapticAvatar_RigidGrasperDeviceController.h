@@ -7,7 +7,6 @@
 #pragma once
 
 #include <SofaHapticAvatar/HapticAvatar_RigidDeviceController.h>
-#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
 
 namespace sofa::HapticAvatar
@@ -64,12 +63,6 @@ protected:
     void drawImpl(const sofa::core::visual::VisualParams*) override {}
 
 public:
-    /// Parameter to choose old/new method
-    Data<bool> d_newMethod;
-
-    /// link to the IBox controller component 
-    SingleLink<HapticAvatar_RigidGrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
-
     /// collision distance value, need public to be accessed by haptic thread
     SReal m_distance;
 
@@ -77,12 +70,6 @@ public:
     std::vector<HapticContact> contactsSimu, contactsHaptic;
 
 protected:
-    /// Pointer to the IBoxController component
-    HapticAvatar_IBoxController * m_iboxCtrl;
-
-    /// Jaws specific informations
-    HapticRigidAvatarJaws m_jawsData;
-
     // Pointer to the scene detection Method component (Narrow phase only)
     sofa::core::collision::NarrowPhaseDetection* m_detectionNP;
 

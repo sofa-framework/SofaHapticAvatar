@@ -26,22 +26,9 @@ int HapticAvatar_DirectGrasperDeviceControllerClass = core::RegisterObject("Driv
     ;
 
 
-HapticRigidAvatarJaws::HapticRigidAvatarJaws()
-    : m_MaxOpeningAngle(60.0f)
-    , m_jawLength(20.0f)
-    , m_jaw1Radius(1.5f)
-    , m_jaw2Radius(1.5f)
-    , m_shaftRadius(2.5f)
-{
-
-}
-
-
 //constructeur
 HapticAvatar_DirectGrasperDeviceController::HapticAvatar_DirectGrasperDeviceController()
     : HapticAvatar_RigidDeviceController()
-    , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
-    , m_iboxCtrl(nullptr)    
 {
     this->f_listening.setValue(true);
     
