@@ -4,12 +4,12 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels" />
 
-    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_TipDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr"/>
+    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="0" />
+    <HapticAvatar_TipDeviceController name="HADevice" portName="//./COM3" printLog="0" portalManager="@portalMgr"/>
 	<include href="Portals.xml" />
     
     <Node name="Tool">
-        <MechanicalObject template="Rigid" name="DOFs" position="@../HADevice.positionDevice"/>
+        <MechanicalObject template="Rigid3d" name="DOFs" position="@../HADevice.positionDevice"/>
         
         <Node name="VisualModel" >
             <MeshObjLoader name="meshLoader_1" filename="./mesh/Grasper.obj" handleSeams="1" />
