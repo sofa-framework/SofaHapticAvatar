@@ -84,55 +84,57 @@
                     </Node>
                 </Node>
                 
-                <Node name="Grasper_shaft">
+                <Node name="Grasper_shaft_visu">
                     <MeshObjLoader filename="./mesh/Haptic_grasper_shaft.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    
-                    <TriangleCollisionModel group="0"/>
-                    <LineCollisionModel group="0"/>
-                    <PointCollisionModel group="0"/>
-                    
+                    <OglModel name="Visual" src="@loader" />
                     <RigidMapping input="@.." output="@." index="3"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
+                </Node>
+                
+                <Node name="Grasper_shaft_collision">
+                    <MeshObjLoader filename="./mesh/Haptic_grasper_shaft_collision.obj"  name="loader"/>
+                    <MechanicalObject template="Vec3d" position="@loader.position" />
+                    <MeshTopology src="@loader"/>
+                    
+                    <TriangleCollisionModel group="0"/>
+                    <LineCollisionModel group="0"/>
+                    <PointCollisionModel group="0"/>
+                    <RigidMapping input="@.." output="@." index="3"/>
                 </Node>
                 
                 
-                <Node name="Grasper_jaws_up">
+                <Node name="Grasper_jaws_up_visu">
                     <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_up.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    
-                    <TriangleCollisionModel group="0"/>
-                    <LineCollisionModel group="0"/>
-                    <PointCollisionModel group="0"/>
-                    
-                    <RigidMapping input="@.." output="@." index="4"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
+                    <OglModel name="Visual" src="@loader" />
+                    <RigidMapping input="@.." output="@." index="5"/>
                 </Node>
                 
-                
-                <Node name="Grasper_jaws_down">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
+                <Node name="Grasper_jaws_up_collision">
+                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_up_collision.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
                     
                     <TriangleCollisionModel group="0"/>
                     <LineCollisionModel group="0"/>
                     <PointCollisionModel group="0"/>
-
-                    
                     <RigidMapping input="@.." output="@." index="5"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
+                </Node>
+
+                
+                <Node name="Grasper_jaws_up_visu">
+                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
+                    <OglModel name="Visual" src="@loader" />
+                    <RigidMapping input="@.." output="@." index="4"/>
+                </Node>
+                
+                <Node name="Grasper_jaws_up_collision">
+                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down_collision.obj"  name="loader"/>
+                    <MechanicalObject template="Vec3d" position="@loader.position" />
+                    <MeshTopology src="@loader"/>
+                    
+                    <TriangleCollisionModel group="0"/>
+                    <LineCollisionModel group="0"/>
+                    <PointCollisionModel group="0"/>
+                    <RigidMapping input="@.." output="@." index="4"/>
                 </Node>
 
             </Node>
