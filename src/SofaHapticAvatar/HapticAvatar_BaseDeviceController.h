@@ -31,11 +31,8 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_BaseDeviceController : public Controlle
 {
 public:
     SOFA_CLASS(HapticAvatar_BaseDeviceController, Controller);
-    typedef RigidTypes::Coord Coord;
-    typedef RigidTypes::VecCoord VecCoord;
-    typedef RigidTypes::VecDeriv VecDeriv;
+    typedef RigidTypes::Coord RigidCoord;
     typedef SolidTypes<double>::Transform Transform;
-    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Rigid3Types> LCPForceFeedback;
 
     /// default constructor
     HapticAvatar_BaseDeviceController();
@@ -63,7 +60,7 @@ protected:
 
     /// Main method to update the tool device from haptic information. 
     /// Will call @sa updatePortalAnglesAndLength and @sa updatePositionImpl
-    void updatePosition();
+    virtual void updatePosition();
 
     /// Method to propage
     void updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
@@ -90,9 +87,8 @@ public:
     Data<SReal> m_forceScale;
 
     /// position of the base of the device
-    Data< Coord > d_posDevice;
-    /// output data position of the tool
-    Data<VecCoord> d_toolPosition;
+    Data<RigidCoord> d_posDevice;
+
 
     /// Parameter to dump thread info. //TODO: check if this should not be removed...
     Data<bool> d_dumpThreadInfo;
@@ -117,7 +113,6 @@ public:
         sofa::helper::fixed_array<float, 4> anglesAndLength;
         sofa::helper::fixed_array<float, 4> motorValues;
         sofa::helper::fixed_array<float, 3> collisionForces;
-        VecDeriv hapticForces;
         float jawOpening;
     };
 
@@ -125,9 +120,6 @@ public:
     DeviceData m_hapticData;
     /// Data used in the copy thread to copy @sa m_hapticData into this data that can be used by simulation thread.
     DeviceData m_simuData;
-
-    /// Pointer to the ForceFeedback component
-    LCPForceFeedback::SPtr m_forceFeedback;
 
     /// Boolean to warn scheduler when SOFA has started the simulation (changed by AnimateBeginEvent)
     bool m_simulationStarted; 

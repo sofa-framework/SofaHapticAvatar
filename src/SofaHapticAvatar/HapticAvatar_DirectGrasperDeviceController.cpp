@@ -5,24 +5,29 @@
 * Contact information:                                                        *
 ******************************************************************************/
 
-#include <SofaHapticAvatar/HapticAvatar_TipDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_DirectGrasperDeviceController.h>
+
 #include <sofa/core/ObjectFactory.h>
+
+#include <sofa/simulation/AnimateBeginEvent.h>
+#include <sofa/simulation/AnimateEndEvent.h>
+#include <sofa/simulation/CollisionEndEvent.h>
+#include <sofa/core/collision/DetectionOutput.h>
+
 #include <sofa/core/visual/VisualParams.h>
-#include <chrono>
 
 namespace sofa::HapticAvatar
 {
 
-using namespace HapticAvatar;
 using namespace sofa::helper::system::thread;
 
-int HapticAvatar_TipDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
-    .add< HapticAvatar_TipDeviceController >()
+int HapticAvatar_DirectGrasperDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+    .add< HapticAvatar_DirectGrasperDeviceController >()
     ;
 
 
 //constructeur
-HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
+HapticAvatar_DirectGrasperDeviceController::HapticAvatar_DirectGrasperDeviceController()
     : HapticAvatar_RigidDeviceController()
 {
     this->f_listening.setValue(true);
@@ -31,14 +36,38 @@ HapticAvatar_TipDeviceController::HapticAvatar_TipDeviceController()
 
     m_toolRot.identity();
 
-    HapticAvatar_TipDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
+    HapticAvatar_DirectGrasperDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
     toolPosition.resize(8);
     d_toolPosition.endEdit();    
 }
 
 
-bool HapticAvatar_TipDeviceController::createHapticThreads()
+
+//executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
+void HapticAvatar_DirectGrasperDeviceController::initImpl()
 {
+    // get ibox if one
+    if (!l_iboxCtrl.empty())
+    {
+        m_iboxCtrl = l_iboxCtrl.get();
+        if (m_iboxCtrl != nullptr)
+        {
+            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
+        }
+    }
+
+    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
+    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+
+    if (m_forceFeedback != nullptr)
+    {
+        msg_info() << "ForceFeedback found";
+    }
+}
+
+
+bool HapticAvatar_DirectGrasperDeviceController::createHapticThreads()
+{   
     m_terminate = false;
     haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
     copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
@@ -47,16 +76,16 @@ bool HapticAvatar_TipDeviceController::createHapticThreads()
 }
 
 
-void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
+void HapticAvatar_DirectGrasperDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
     std::cout << "Haptics thread" << std::endl;
 
-    HapticAvatar_TipDeviceController* _deviceCtrl = static_cast<HapticAvatar_TipDeviceController*>(p_this);
+    HapticAvatar_DirectGrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_DirectGrasperDeviceController*>(p_this);
     HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
 
     if (_deviceCtrl == nullptr)
     {
-        msg_error("Haptics Thread: HapticAvatar_TipDeviceController cast failed");
+        msg_error("Haptics Thread: HapticAvatar_DirectGrasperDeviceController cast failed");
         return;
     }
 
@@ -80,10 +109,9 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
     int cptLoop = 0;
 
     bool debugThread = _deviceCtrl->d_dumpThreadInfo.getValue();
+    SReal damping = _deviceCtrl->m_forceScale.getValue();
 
-    VecDeriv forces;
-    forces.resize(5);
-
+    int cptF = 0;
     // Haptics Loop
     while (!terminate)
     {
@@ -93,51 +121,21 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
+        //_deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
 
-        // Force feedback computation
-        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-        {            
-            const HapticAvatar_TipDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
-            sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
-
-            // Check main force feedback
-            _deviceCtrl->m_forceFeedback->computeForce(toolPosition, forces);
-
-            bool contactShaft = false;
-            totalForce = forces[3].getLinear() + forces[4].getLinear() + forces[5].getLinear();
-            
-
-            
-            for (int i = 0; i < 3; i++)
-            {
-                if (totalForce[i] > 0.0)
-                {
-                    contactShaft = true;
-                    break;
-                }
-            }
-
-            SReal damping = _deviceCtrl->m_forceScale.getValue();            
-            if (contactShaft)
-            {
-                //std::cout << "_deviceCtrl->m_toolRot: " << _deviceCtrl->m_toolRot << std::endl;
-                //_deviceCtrl->m_hapticData.collisionForces[0] = shaftForce[0];
-                //_deviceCtrl->m_hapticData.collisionForces[1] = shaftForce[1];
-                //_deviceCtrl->m_hapticData.collisionForces[2] = shaftForce[2];
-                //std::cout << "haptic shaftForce: " << shaftForce << std::endl;  
-                _driver->setManualForceVector(_deviceCtrl->m_toolRotInv * totalForce * damping, true);
-            }
-            else
-                _driver->releaseForce();
-            
+        // get info regarding jaws
+        //float jtorq = _driver->getJawTorque();
+        if (_deviceCtrl->m_iboxCtrl)
+        {
+            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
+        
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
 
         // If loop is quicker than the target loop speed. Wait here.
-        //if (duration < targetTicksPerLoop)
-        //    std::cout << "Need to Wait!!!" << std::endl;
         while (duration < targetTicksPerLoop)
         {
             endTime = CTime::getRefTime();
@@ -152,7 +150,7 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
             ctime_t stepTime = CTime::getRefTime();
             ctime_t diffLoop = stepTime - lastTime;
             lastTime = stepTime;
-            
+
             auto t2 = std::chrono::high_resolution_clock::now();
             
             auto duration = std::chrono::milliseconds(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count());
@@ -167,9 +165,9 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
 }
 
 
-void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, void * p_this)
+void HapticAvatar_DirectGrasperDeviceController::CopyData(std::atomic<bool>& terminate, void * p_this)
 {
-    HapticAvatar_TipDeviceController* _deviceCtrl = static_cast<HapticAvatar_TipDeviceController*>(p_this);
+    HapticAvatar_DirectGrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_DirectGrasperDeviceController*>(p_this);
     
     // Use computer tick for timer
     ctime_t targetSpeedLoop = 1/2; // Target loop speed: 0.5ms
@@ -178,9 +176,8 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
     double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
 
     ctime_t lastTime = CTime::getRefTime();
-    //std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
-    //int cptLoop = 0;
-
+    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
+    int cptLoop = 0;
     // Haptics Loop
     while (!terminate)
     {
@@ -197,6 +194,7 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
             duration = endTime - startTime;
         }
 
+
         //if (cptLoop % 100 == 0)
         //{
         //    ctime_t stepTime = CTime::getRefTime();
@@ -205,47 +203,48 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
         //    //std::cout << "loop nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;
         //    std::cout << "Copy nb: " << cptLoop << " -> " << diffLoop * speedTimerMs << std::endl;            
         //}
-        //cptLoop++;
+        cptLoop++;
     }
 }
 
-
-void HapticAvatar_TipDeviceController::updatePositionImpl()
+void HapticAvatar_DirectGrasperDeviceController::updatePositionImpl()
 {
-    // m_toolRot = rotM.inverted();
+    if (!m_HA_driver)
+        return;
+
     sofa::defaulttype::Quat orien;
     orien.fromMatrix(m_toolRot);
 
     // compute bati position
-    HapticAvatar_RigidDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
+    HapticAvatar_DirectGrasperDeviceController::Coord rootPos = m_portalMgr->getPortalPosition(m_portId);
     rootPos.getOrientation() = orien;
 
-    HapticAvatar_RigidDeviceController::Coord & posDevice = *d_posDevice.beginEdit();
+    HapticAvatar_DirectGrasperDeviceController::Coord & posDevice = *d_posDevice.beginEdit();    
     posDevice.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     posDevice.getOrientation() = orien;
     d_posDevice.endEdit();
 
     // Update jaws rigid
-    float _OpeningAngle = 0.0f;// d_info_jawOpening.getValue() * m_jawsData.m_MaxOpeningAngle * 0.01f;
-    HapticAvatar_RigidDeviceController::Coord jawUp;
-    HapticAvatar_RigidDeviceController::Coord jawDown;
-
+    float _OpeningAngle = m_simuData.jawOpening * m_jawsData.m_MaxOpeningAngle * 0.01f;
+    HapticAvatar_DirectGrasperDeviceController::Coord jawUp;
+    HapticAvatar_DirectGrasperDeviceController::Coord jawDown;
+    
     jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
     jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
     jawUp.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
-
+    
     // Update jaws exterimies
-    Vec3f posExtrem = Vec3f(0.0, /*-m_jawsData.m_jawLength*/-20.0, 0.0);
-    HapticAvatar_RigidDeviceController::Coord jawUpExtrem = jawUp;
-    HapticAvatar_RigidDeviceController::Coord jawDownExtrem = jawDown;
-
+    Vec3f posExtrem = Vec3f(0.0, -m_jawsData.m_jawLength, 0.0);
+    HapticAvatar_DirectGrasperDeviceController::Coord jawUpExtrem = jawUp;
+    HapticAvatar_DirectGrasperDeviceController::Coord jawDownExtrem = jawDown;
+        
     jawUpExtrem.getCenter() += jawUpExtrem.getOrientation().rotate(posExtrem);
     jawDownExtrem.getCenter() += jawDownExtrem.getOrientation().rotate(posExtrem);
 
     // Udpate articulated device
-    HapticAvatar_RigidDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
+    HapticAvatar_DirectGrasperDeviceController::VecCoord & toolPosition = *d_toolPosition.beginEdit();
     toolPosition[0] = rootPos;
     toolPosition[1] = rootPos;
     toolPosition[2] = rootPos;
@@ -259,5 +258,18 @@ void HapticAvatar_TipDeviceController::updatePositionImpl()
 
 }
 
+
+
+void HapticAvatar_DirectGrasperDeviceController::handleEvent(core::objectmodel::Event *event)
+{
+    if (!m_deviceReady)
+        return;
+
+    if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
+    {
+        m_simulationStarted = true;
+        updatePosition();
+    }
+}
 
 } // namespace sofa::HapticAvatar
