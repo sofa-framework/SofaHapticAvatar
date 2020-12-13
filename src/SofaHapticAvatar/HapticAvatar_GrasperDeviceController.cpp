@@ -146,13 +146,13 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             //articulations[3] = dofV[Dof::Z];
             _driver->setManual_PWM(float(-resForces[2][0]), float(-resForces[1][0]), float(resForces[3][0]), float(-resForces[0][0]));
 
-            if (cptLoop == 50)
-            {
-                std::cout << "resForces: " << resForces << std::endl;
-                cptLoop = 0;
-            }
+            //if (cptLoop == 50)
+            //{
+            //    std::cout << "resForces: " << resForces << std::endl;
+            //    cptLoop = 0;
+            //}
 
-            cptLoop++;
+            //cptLoop++;
         }
         else
             _driver->releaseForce();
