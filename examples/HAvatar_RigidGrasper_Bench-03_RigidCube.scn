@@ -4,6 +4,10 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics' />
     <RequiredPlugin name='SofaSparseSolver'/>
+    <RequiredPlugin name='SofaConstraint'/>
+    <RequiredPlugin name='SofaGeneralRigid'/>
+    <RequiredPlugin name='SofaTopologyMapping'/>
+    
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
   
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
@@ -19,13 +23,11 @@
     <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
     
     <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_GrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" damping="3"
-    newMethod="1"/>
+    <HapticAvatar_RigidGrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" />
     <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
-    
     <Node name="Portal_4">
         <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition4"/>
         <Node name="VisuPortal">
@@ -33,11 +35,10 @@
             <RigidMapping input="@.." output="@Visual" index="0"/>
         </Node>
     </Node>
+    
     <Node name="Instrument" >
         <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.toolPosition"/>
     </Node>
-    
-    
     
     
     <Node name="articulation">
@@ -59,8 +60,7 @@
             
             -->
             <UncoupledConstraintCorrection />
-     
-            
+
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
             <Node name="CollisionModel" >
@@ -108,24 +108,25 @@
             </Node>
         </Node>
         
+        
         <ArticulatedHierarchyContainer />        
-        <Node name="articulationCenters">
+        <Node name="articulationCenters1">
             <Node name="articulationCenter1">
                 <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations">
+                <Node name="articulations1">
                     <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="0" />
                 </Node>
-                <Node name="articulations">
+                <Node name="articulations2">
                     <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="1" />
                 </Node>
-                <Node name="articulations">
+                <Node name="articulations3">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="2" />
                 </Node>
             </Node>
             
             <Node name="articulationCenter2">
                 <ArticulationCenter parentIndex="1" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations">
+                <Node name="articulations4">
                     <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="3" />
                 </Node>
             </Node>
@@ -133,14 +134,14 @@
             
             <Node name="articulationCenter3">
                 <ArticulationCenter parentIndex="3" childIndex="4" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations">
+                <Node name="articulations5">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="4" />
                 </Node>
             </Node>
             
             <Node name="articulationCenter4">
                 <ArticulationCenter parentIndex="3" childIndex="5" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations">
+                <Node name="articulations6">
                     <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="5" />
                 </Node>
             </Node>
@@ -149,65 +150,57 @@
     </Node>
 
     
-    
-  
-    <RegularGridTopology name="grid_1" n="6 6 6" min="50 0 -50" max="150 50 50" />
+    <RegularGridTopology name="grid_1" n="6 2 6" min="-100 -20 -100" max="100 0 100" />
     <Node name="Cube1">
         <MechanicalObject src="@../grid_1" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
         
         <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
-       
-        <Node name="Surface1">
+        
+        <Node name="Surface">
             <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="Surface1" group="4"/>
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
             
-            
-            <Node name="VisuSurface1">
+            <Node name="VisuSurface">
                 <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
                 <BarycentricMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>
     
-    
-    
-    <RegularGridTopology name="grid_2" n="6 6 6" min="80 50 -10" max="150 120 10" />
+    <RegularGridTopology name="grid_2" n="4 4 4" min="50 0 0" max="150 100 100" />
     <Node name="Cube2">
         <MechanicalObject src="@../grid_2" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
         
         <Hexa2TetraTopologicalMapping name="default28" input="@../grid_2" output="@Tetra_topo" />
-       
-        <Node name="Surface2">
+        
+        <Node name="Surface">
             <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel name="Surface2"  group="4"/>
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
             
-            
-            <Node name="VisuSurface2">
+            <Node name="VisuSurface">
                 <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
                 <BarycentricMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>
-    
-    
 </Node>

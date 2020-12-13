@@ -20,20 +20,17 @@
 
     
     <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_ArticulatedDeviceEmulator name="HA_Emulator" portName="//./COM3" iboxController="@HAIBox" portalManager="@portalMgr"/>
+    <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM3" iboxController="@HAIBox" portalManager="@portalMgr"/>
     <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />
     
     <Node name="Tool">
-        <!-- <Node name="Rest_articulation"> -->
-            <!-- <MechanicalObject name="rest" template="Vec1d" position="0 0 0 0" /> -->
-            <!-- <FixedConstraint indices="0 1 2 3" /> -->
-        <!-- </Node> -->
+        <MechanicalObject name="bati" template="Rigid3d" position="0 0 200  0 0 0 1" rotation="0 -90 -90"/>
         
         <Node name="Articulation">
             <EulerImplicitSolver name="cg_odesolver"  />
             <SparseLUSolver name="linear solver" tolerance="1e-09" />  
             
-            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.articulations"/>
+            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
             <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="100000000 100000000 100000000 100000 100000000 100000000" printLog="true"/>
             <UniformMass totalMass="0.01"/>
             <LinearSolverConstraintCorrection />
@@ -47,7 +44,7 @@
                 0 0 0  0 0 0 1  
                 0 0 0  0 0 0 1
                 0 0 0  0 0 0 1" />
-                <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
+                <ArticulatedSystemMapping input1="@../Articulations" input2="@../../bati" output="@DOFs" />
                 
                 <Node name="Device_base">
                     <MeshObjLoader filename="./mesh/Haptic_device_base.obj"  name="loader"/>
@@ -120,13 +117,13 @@
                 </Node>
 
                 
-                <Node name="Grasper_jaws_up_visu">
+                <Node name="Grasper_jaws_down_visu">
                     <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
                     <OglModel name="Visual" src="@loader" />
                     <RigidMapping input="@.." output="@." index="4"/>
                 </Node>
                 
-                <Node name="Grasper_jaws_up_collision">
+                <Node name="Grasper_jaws_down_collision">
                     <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down_collision.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
@@ -175,16 +172,15 @@
                         <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="5" />                        
                     </Node>
                 </Node>
-                
-                
+
             </Node>
         </Node>
 
     </Node>
     
     
-    <RegularGridTopology name="grid_1" n="6 6 2" min="-100 -100 -200" max="100 100 -180" />
-    <Node name="Cube">
+    <RegularGridTopology name="grid_1" n="6 2 6" min="-100 -20 -100" max="100 0 100" />
+    <Node name="Cube1">
         <MechanicalObject src="@../grid_1" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
@@ -209,5 +205,31 @@
             </Node>
         </Node>
     </Node>
+    
+    <RegularGridTopology name="grid_2" n="4 4 4" min="50 0 0" max="150 100 100" />
+    <Node name="Cube2">
+        <MechanicalObject src="@../grid_2" name="Volume" />
+        
+        <TetrahedronSetTopologyContainer name="Tetra_topo" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
+        
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_2" output="@Tetra_topo" />
+        
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
+            <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="1"/>
+            <LineCollisionModel simulated="0" moving="0" group="1" />
+            <PointCollisionModel simulated="0" moving="0" group="1"/>
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
 </Node>
