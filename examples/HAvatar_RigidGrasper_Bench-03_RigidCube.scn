@@ -14,8 +14,7 @@
     <BruteForceDetection name="detection" />
     <DefaultContactManager name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.1" angleCone="0.0" />
-    <!--<MinProximityIntersection />-->
-    
+        
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
 
@@ -53,7 +52,7 @@
             0 0 0  0 0 0 1  0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
             
             <UniformMass name="mass" totalMass="150" />
-            <LCPForceFeedback activate="true" forceCoef="0.0008" />   
+            <LCPForceFeedback activate="true" forceCoef="0.0005" />   
             <RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
             angularStiffness='100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
             external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5 6 7' external_points='0 1 2 3 4 5 6 7' drawSpring="1"

@@ -183,7 +183,7 @@
         <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
 		<SparseLDLSolver />
 
-        <MeshGmshLoader filename="./mesh/liver2.msh" name="meshLoader" scale3d="50 50 50" rotation="-80 -90 0" translation="80 40 50"/>
+        <MeshGmshLoader filename="./mesh/liver2.msh" name="meshLoader" scale3d="100 100 100" rotation="-80 -90 0" translation="80 40 50"/>
         <MechanicalObject name="dofs" src="@meshLoader" />
 		<TetrahedronSetTopologyContainer name="TetraContainer" src="@meshLoader" />
         <TetrahedronSetTopologyModifier name="Modifier" />
