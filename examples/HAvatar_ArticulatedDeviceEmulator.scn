@@ -23,7 +23,7 @@
         
         <Node name="Articulation">
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.articulations"/>
-            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="1000 1000 1000 1000 1000 1000" printLog="true"/>
+            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="100000000 100000000 100000000 100000 100000000 100000000" printLog="true"/>
             <UniformMass totalMass="0.01"/>
             <UncoupledConstraintCorrection />
             
