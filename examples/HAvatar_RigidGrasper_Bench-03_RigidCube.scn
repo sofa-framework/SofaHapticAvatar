@@ -46,14 +46,17 @@
         <UncoupledConstraintCorrection />
        
         <Node name="model">
-            <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  0 0 0  0 0 0 1  0 0 0  0 0 0 1
-            0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
+            <MechanicalObject template="Rigid3d" name="DOFs" 
+            position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  
+            0 0 0  0 0 0 1  0 0 0  0 0 0 1
+            0 0 0  0 0 0 1  0 0 0  0 0 0 1
+            0 0 0  0 0 0 1  0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
             
             <UniformMass name="mass" totalMass="150" />
-            <LCPForceFeedback activate="true" forceCoef="0.001" localHapticConstraintAllFrames="0"/>   
-            <RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
-            angularStiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
-            external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5' external_points='0 1 2 3 4 5' drawSpring="1"
+            <LCPForceFeedback activate="true" forceCoef="0.0008" />   
+            <RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
+            angularStiffness='100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
+            external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5 6 7' external_points='0 1 2 3 4 5 6 7' drawSpring="1"
             />
             <!--
             <UniformMass template="Rigid3d" name="mass" totalMass="100" />
