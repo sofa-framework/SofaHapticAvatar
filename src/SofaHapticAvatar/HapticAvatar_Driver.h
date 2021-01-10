@@ -46,22 +46,22 @@ public:
     * Command: RESET
     * @param {int} mode: specify what to reset. See doc. 
     */
-    virtual int resetDevice(int mode = 15);
+    int resetDevice(int mode = 15);
 
     /** Ask for the identity and build version of the firmware in the device.
     * Command: GET_IDENTITY
     */
-    virtual std::string getIdentity();
+    std::string getIdentity();
 
     /** To get an identification number of which tool is inserted (if any). The identification number is related to the length of the pin at the tip of the tool. 
     * Command: GET_TOOL_ID
     */
-    virtual int getToolID();
+    int getToolID();
 
     /** To get the device status for calibration, amplifiers, hall effect sensors, battery, fan, power and board temperature. This is mainly for diagnostics and error detection. 
     * Command: GET_STATUS
     */
-    virtual int getDeviceStatus();
+    int getDeviceStatus();
 
 
 
@@ -71,7 +71,7 @@ public:
     * @param {char *} result: if not null, response will be asked to device and stored in this char*.
     * @returns {bool} true if command success otherwise false before getting result.
     */
-    bool sendCommandToDevice(CmdTool command, const std::string& arguments, char *result);
+    bool sendCommandToDevice(int commandId, const std::string& arguments, char *result);
 
     
     /// Will convert a char* array response into std::string while removing end of line and space at end.
@@ -99,7 +99,20 @@ protected:
     * @param {char *} buffer: full command as an array.
     * @param {uint} nbChar: size of the command array
     */
-    bool WriteDataImpl(char *buffer, unsigned int nbChar);    
+    bool WriteDataImpl(char *buffer, unsigned int nbChar);
+
+    
+    /// Internal method to get the enum id for reset command. To be overwritten by child
+    virtual int getResetCommandId() = 0;
+
+    /// Internal method to get the enum id for identity command. To be overwritten by child
+    virtual int getIdentityCommandId() = 0;
+
+    /// Internal method to get the enum id for toolID command. To be overwritten by child
+    virtual int getToolIDCommandId() = 0;
+
+    /// Internal method to get the enum id for status command. To be overwritten by child
+    virtual int getStatusCommandId() = 0;
 
 private:
     //Connection status
@@ -122,7 +135,6 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_Driver : public HapticAvatar_BaseDriver
 {
 public:
     HapticAvatar_Driver(const std::string& portName);
-
 
 
     /** get the angles of the port (Yaw + Pitch) and the insertion length and rotation of the tool.
@@ -195,6 +207,18 @@ public:
 
     void setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque);
 
+protected:
+    /// Internal method to get the enum id for reset command. To be overwritten by child
+    int getResetCommandId() override { return CmdTool::RESET; }
+
+    /// Internal method to get the enum id for identity command. To be overwritten by child
+    int getIdentityCommandId() override { return CmdTool::GET_IDENTITY; }
+
+    /// Internal method to get the enum id for toolID command. To be overwritten by child
+    int getToolIDCommandId() override { return CmdTool::GET_TOOL_ID; }
+
+    /// Internal method to get the enum id for status command. To be overwritten by child
+    int getStatusCommandId() override { return CmdTool::GET_STATUS; }
 };
 
 } // namespace sofa::HapticAvatar

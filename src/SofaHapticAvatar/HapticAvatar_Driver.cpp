@@ -59,9 +59,61 @@ HapticAvatar_BaseDriver::~HapticAvatar_BaseDriver()
 /////      Public API methods for any communication       /////
 ///////////////////////////////////////////////////////////////
 
-bool HapticAvatar_BaseDriver::sendCommandToDevice(CmdTool command, const std::string& arguments, char *result)
+int HapticAvatar_BaseDriver::resetDevice(int mode)
 {
-    std::string fullCommand = std::to_string(command) + " " + arguments + " \n";
+    char incomingData[INCOMING_DATA_LEN];
+    std::string arguments = std::to_string(mode);
+    if (sendCommandToDevice(getResetCommandId(), arguments, incomingData) == false) {
+        return -1;
+    }
+
+    int res = std::atoi(incomingData);
+    return res;
+}
+
+
+
+std::string HapticAvatar_BaseDriver::getIdentity()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(getIdentityCommandId(), "", incomingData) == false) {
+        return "Unknown";
+    }
+
+    std::string iden = convertSingleData(incomingData);
+    return iden;
+}
+
+
+int HapticAvatar_BaseDriver::getToolID()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(getToolIDCommandId(), "", incomingData) == false) {
+        return -1;
+    }
+
+    int res = std::atoi(incomingData);
+    std::cout << "getToolID: " << res << std::endl;
+    return res;
+}
+
+
+int HapticAvatar_BaseDriver::getDeviceStatus()
+{
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(getStatusCommandId(), "", incomingData) == false) {
+        return -1;
+    }
+
+    int res = std::atoi(incomingData);
+    std::cout << "getDeviceStatus: " << res << std::endl;
+    return res;
+}
+
+
+bool HapticAvatar_BaseDriver::sendCommandToDevice(int commandId, const std::string& arguments, char *result)
+{
+    std::string fullCommand = std::to_string(commandId) + " " + arguments + " \n";
     //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
     char outgoingData[OUTGOING_DATA_LEN];
     strcpy(outgoingData, fullCommand.c_str());
@@ -259,69 +311,6 @@ bool HapticAvatar_BaseDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
 
 
 
-
-
-
-
-
-
-int HapticAvatar_BaseDriver::resetDevice(int mode)
-{
-    char incomingData[INCOMING_DATA_LEN];
-    std::string arguments = std::to_string(mode);
-    if (sendCommandToDevice(RESET, arguments, incomingData) == false) {
-        return -1;
-    }
-
-    int res = std::atoi(incomingData);    
-    return res;
-}
-
-
-
-std::string HapticAvatar_BaseDriver::getIdentity()
-{
-    char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_IDENTITY, "", incomingData) == false) {
-        return "Unknown";
-    }
-    
-    std::string iden = convertSingleData(incomingData);
-    return iden;
-}
-
-
-int HapticAvatar_BaseDriver::getToolID()
-{
-    char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_TOOL_ID, "", incomingData) == false) {
-        return -1;
-    }
-
-    int res = std::atoi(incomingData);
-    std::cout << "getToolID: " << res << std::endl;
-    return res;
-}
-
-
-int HapticAvatar_BaseDriver::getDeviceStatus()
-{
-    char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_STATUS, "", incomingData) == false) {
-        return -1;
-    }
-
-    int res = std::atoi(incomingData);
-    std::cout << "getDeviceStatus: " << res << std::endl;
-    return res;
-}
-
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////
 /////      Methods for specific device communication      /////
 ///////////////////////////////////////////////////////////////
@@ -337,7 +326,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_ANGLES_AND_LENGTH, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::GET_ANGLES_AND_LENGTH, "", incomingData) == false) {
         return results;
     }
 
@@ -355,7 +344,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
 float HapticAvatar_Driver::getJawTorque()
 {
     char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
         return 0.0f;
     }
 
@@ -370,7 +359,7 @@ float HapticAvatar_Driver::getJawOpeningAngle()
 {
     char incomingData[INCOMING_DATA_LEN];
     std::cout << "getJawOpeningAngle" << std::endl;
-    if (sendCommandToDevice(SET_TOOL_JAW_OPENING_ANGLE, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::SET_TOOL_JAW_OPENING_ANGLE, "", incomingData) == false) {
         return 0.0f;
     }
     std::cout << "getJawOpeningAngle out" << std::endl;
@@ -387,7 +376,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getLastPWM()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_LAST_PWM, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::GET_LAST_PWM, "", incomingData) == false) {
         return results;
     }
 
@@ -406,7 +395,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
 {
     sofa::helper::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_MOTOR_SCALING_VALUES, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::GET_MOTOR_SCALING_VALUES, "", incomingData) == false) {
         return results;
     }
 
@@ -425,7 +414,7 @@ sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
 {
     sofa::helper::fixed_array<float, 3> results;
     char incomingData[INCOMING_DATA_LEN];
-    if (sendCommandToDevice(GET_LAST_COLLISION_FORCE, "", incomingData) == false) {
+    if (sendCommandToDevice(CmdTool::GET_LAST_COLLISION_FORCE, "", incomingData) == false) {
         return results;
     }
 
@@ -450,7 +439,7 @@ void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::helper::fixed_array<flo
     }
     arguments.pop_back(); // remove last space, too avoid any synthax problem.
 
-    sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
+    sendCommandToDevice(CmdTool::SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
     return;
 }
 
@@ -466,7 +455,7 @@ void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 fo
     int rotValue = int(RotTorque * 10000);
     arguments += std::to_string(rotValue);
 
-    sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
+    sendCommandToDevice(CmdTool::SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
     return;
 }
 
@@ -524,7 +513,7 @@ void HapticAvatar_Driver::setTipForceVector(sofa::defaulttype::Vector3 force)
         + " " + std::to_string(values[2])
         + " " + std::to_string(values[3]);
 
-    bool resB = sendCommandToDevice(SET_TIP_FORCE_AND_ROT_TORQUE, args, nullptr);
+    bool resB = sendCommandToDevice(CmdTool::SET_TIP_FORCE_AND_ROT_TORQUE, args, nullptr);
     std::cout << "args: '" << args << "'" << std::endl;
     if (resB == false)
     {
@@ -536,7 +525,7 @@ void HapticAvatar_Driver::setTipForceVector(sofa::defaulttype::Vector3 force)
 
 void HapticAvatar_Driver::releaseForce()
 {
-    sendCommandToDevice(SET_MANUAL_PWM, "0 0 0 0", nullptr);
+    sendCommandToDevice(CmdTool::SET_MANUAL_PWM, "0 0 0 0", nullptr);
 }
 
 
@@ -586,7 +575,7 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
         + " " + std::to_string(values[2])
         + " " + std::to_string(values[3]);
 
-    bool resB = sendCommandToDevice(SET_MANUAL_PWM, args, nullptr);
+    bool resB = sendCommandToDevice(CmdTool::SET_MANUAL_PWM, args, nullptr);
     if (resB == false)
     {
         std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
@@ -614,7 +603,7 @@ void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pit
         + " " + std::to_string(values[2])
         + " " + std::to_string(values[3]);
 
-    bool resB = sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, args, nullptr);
+    bool resB = sendCommandToDevice(CmdTool::SET_MOTOR_FORCE_AND_TORQUES, args, nullptr);
     if (resB == false)
     {
         std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
