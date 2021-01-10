@@ -611,4 +611,37 @@ void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pit
     //std::cout << "force resB: " << resB << std::endl;
 }
 
+
+
+///////////////////////////////////////////////////////////////
+/////       Methods for specific IBOX communication       /////
+///////////////////////////////////////////////////////////////
+
+HapticAvatar_IboxDriver::HapticAvatar_IboxDriver(const std::string& portName)
+    : HapticAvatar_BaseDriver(portName)
+{
+
+}
+
+
+sofa::helper::fixed_array<float, 4> HapticAvatar_IboxDriver::getOpeningValues()
+{
+    sofa::helper::fixed_array<float, 4> results;
+    char incomingData[INCOMING_DATA_LEN];
+    if (sendCommandToDevice(CmdIBox::GET_IBOX_OPENING_VALUES, "", incomingData) == false) {
+        return results;
+    }
+
+    char* pEnd;
+    results[0] = std::strtof(incomingData, &pEnd) * 0.0001f;
+    for (unsigned int i = 1; i < 4; ++i)
+    {
+        results[i] = std::strtof(pEnd, &pEnd) * 0.0001f;
+    }
+
+    return results;
+}
+
+
+
 } // namespace sofa::HapticAvatar

@@ -48,7 +48,7 @@ HapticAvatar_IBoxController::~HapticAvatar_IBoxController()
 void HapticAvatar_IBoxController::init()
 {
     msg_info() << "HapticAvatar_IBoxController::init()";
-    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
+    m_HA_driver = new HapticAvatar_IboxDriver(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected()) {
         msg_error() << "HapticAvatar_IBoxController driver creation failed";
@@ -65,7 +65,7 @@ void HapticAvatar_IBoxController::init()
 
 float HapticAvatar_IBoxController::getJawOpeningAngle()
 {
-    sofa::helper::fixed_array<float, 4> values = m_HA_driver->getAngles_AndLength();
+    sofa::helper::fixed_array<float, 4> values = m_HA_driver->getOpeningValues();
     return values[0];
 }
 

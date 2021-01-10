@@ -221,4 +221,33 @@ protected:
     int getStatusCommandId() override { return CmdTool::GET_STATUS; }
 };
 
+
+
+
+class SOFA_HAPTICAVATAR_API HapticAvatar_IboxDriver : public HapticAvatar_BaseDriver
+{
+public:
+    HapticAvatar_IboxDriver(const std::string& portName);
+
+
+    /**  TODO check if returning a Vec4 is the best to do
+    */
+    sofa::helper::fixed_array<float, 4> getOpeningValues();
+
+
+protected:
+    /// Internal method to get the enum id for reset command. To be overwritten by child
+    int getResetCommandId() override { return CmdIBox::RESET_IBOX; }
+
+    /// Internal method to get the enum id for identity command. To be overwritten by child
+    int getIdentityCommandId() override { return CmdIBox::GET_IBOX_DEVICE_TYPE; }
+
+    /// Internal method to get the enum id for toolID command. To be overwritten by child
+    int getToolIDCommandId() override { return CmdIBox::GET_IBOX_HANDLE_IDS; }
+
+    /// Internal method to get the enum id for status command. To be overwritten by child
+    int getStatusCommandId() override { return CmdIBox::GET_IBOX_STATUS; }
+};
+
+
 } // namespace sofa::HapticAvatar
