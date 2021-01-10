@@ -27,23 +27,83 @@ namespace sofa::HapticAvatar
 
 using namespace HapticAvatar;
 
-HapticAvatar_Driver::HapticAvatar_Driver(const std::string& portName)
+HapticAvatar_BaseDriver::HapticAvatar_BaseDriver(const std::string& portName)
     : m_connected(false)
     , m_portName(portName)
 {
+    // First try to connect to device
     connectDevice();
 
-    if (m_connected == true)
+    if (!m_connected)
     {
-        std::cout << "## Connected!!!!" << std::endl;
-    }
-    else
-    {
-        std::cout << "## Not Connected...." << std::endl;
+        msg_error("HapticAvatar_BaseDriver") << "## Device Not Connected at port: " << m_portName;
     }
 }
 
-void HapticAvatar_Driver::connectDevice()
+
+HapticAvatar_BaseDriver::~HapticAvatar_BaseDriver()
+{
+    //Check if we are connected before trying to disconnect
+    if (m_connected)
+    {
+        //We're no longer connected
+        m_connected = false;
+        //Close the serial handler
+        CloseHandle(m_hSerial);
+    }
+}
+
+
+
+///////////////////////////////////////////////////////////////
+/////      Public API methods for any communication       /////
+///////////////////////////////////////////////////////////////
+
+bool HapticAvatar_BaseDriver::sendCommandToDevice(CmdTool command, const std::string& arguments, char *result)
+{
+    std::string fullCommand = std::to_string(command) + " " + arguments + " \n";
+    //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
+    char outgoingData[OUTGOING_DATA_LEN];
+    strcpy(outgoingData, fullCommand.c_str());
+
+    unsigned int outlen = (unsigned int)(strlen(outgoingData));
+    bool write_success = WriteDataImpl(outgoingData, outlen);
+    if (!write_success) {
+        return false;
+    }
+
+    // request data
+    if (result != nullptr)
+        getDataImpl(result, false);
+
+    return true;
+}
+
+
+std::string HapticAvatar_BaseDriver::convertSingleData(char *buffer, bool forceRemoveEoL)
+{
+    std::string res = std::string(buffer);
+    if (forceRemoveEoL)
+        res.pop_back();
+    else if (res.back() == '\n')
+        res.pop_back();
+
+    while (res.back() == ' ' || res.back() == '\n')
+    {
+        res.pop_back();
+    }
+
+    return res;
+}
+
+
+
+
+///////////////////////////////////////////////////////////////
+/////      Internal Methods for device communication      /////
+///////////////////////////////////////////////////////////////
+
+void HapticAvatar_BaseDriver::connectDevice()
 {
     //Try to connect to the given port throuh CreateFile
     m_hSerial = CreateFileA(m_portName.c_str(),
@@ -62,11 +122,11 @@ void HapticAvatar_Driver::connectDevice()
         if (GetLastError() == ERROR_FILE_NOT_FOUND) {
 
             //Print Error if neccessary
-            std::cout << "ERROR: Handle was not attached. Reason: " << m_portName << " not available." << std::endl;
+            msg_error("HapticAvatar_BaseDriver") << "Handle was not attached. Reason: " << m_portName << " not available.";
         }
         else
         {
-            std::cout << "ERROR!!!" << std::endl;
+            msg_error("HapticAvatar_BaseDriver") << "Unknown error occured!";
         }
     }
     else
@@ -78,7 +138,7 @@ void HapticAvatar_Driver::connectDevice()
         if (!GetCommState(m_hSerial, &dcbSerialParams))
         {
             //If impossible, show an error
-            std::cout << "failed to get current serial parameters!" << std::endl;
+            msg_warning("HapticAvatar_BaseDriver") << "Failed to get current serial parameters!";
         }
         else
         {
@@ -94,7 +154,7 @@ void HapticAvatar_Driver::connectDevice()
             //Set the parameters and check for their proper application
             if (!SetCommState(m_hSerial, &dcbSerialParams))
             {
-                std::cout << "ALERT: Could not set Serial Port parameters" << std::endl;
+                msg_warning("HapticAvatar_BaseDriver") << "ALERT: Could not set Serial Port parameters";
             }
             else
             {
@@ -110,25 +170,102 @@ void HapticAvatar_Driver::connectDevice()
 }
 
 
-HapticAvatar_Driver::~HapticAvatar_Driver()
+int HapticAvatar_BaseDriver::getDataImpl(char *buffer, bool do_flush)
 {
-    //Check if we are connected before trying to disconnect
-    if (m_connected)
+    bool response = false;
+    int cptSecu = 0;
+    int n = 0;
+    int que = 0;
+    char * pch;
+    int num_cr = 0;
+    while (!response && cptSecu < 10000)
     {
-        //We're no longer connected
-        m_connected = false;
-        //Close the serial handler
-        CloseHandle(m_hSerial);
+        n = ReadDataImpl(buffer, INCOMING_DATA_LEN, &que, do_flush);
+        if (n > 0)
+        {
+            // count the number of \n in the return string
+            pch = strchr(buffer, '\n');
+            while (pch != NULL)
+            {
+                num_cr++;
+                pch = strchr(pch + 1, '\n');
+            }
+            response = true;
+        }
+
+        cptSecu++;
     }
+
+    if (!response) // secu loop reach end
+    {
+        std::cerr << "## Error getData no message returned. Reach security loop limit: " << cptSecu << std::endl;
+        return -1;
+    }
+
+    return num_cr;
+}
+
+
+int HapticAvatar_BaseDriver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
+{
+    //Number of bytes we'll have read
+    DWORD bytesRead = 0;
+    DWORD junkBytesRead = 0;
+
+    //Use the ClearCommError function to get status info on the Serial port
+    ClearCommError(m_hSerial, &m_errors, &m_status);
+
+    *queue = (int)m_status.cbInQue;
+
+
+    if (do_flush) {
+        if (*queue > 0)
+            // read away as much as possible, max 512
+            ReadFile(m_hSerial, buffer, std::min(unsigned int(*queue), nbChar), &bytesRead, NULL);
+    }
+    else {
+        // regardless of what the queue is, read nbChar bytes, in an attempt to suspend the thread
+        ReadFile(m_hSerial, buffer, *queue, &bytesRead, NULL);
+        //ClearCommError(this->hSerial, &this->errors, &this->status);
+        //*queue = (int)status.cbInQue;
+        //if (*queue > 0) {
+        //	char junkbuffer[32];
+        //	// clear the buffer from any remaining bytes
+        //	ReadFile(this->hSerial, junkbuffer, min(*queue, 32), &junkBytesRead, NULL);
+        //}
+
+    }
+    return bytesRead;
+}
+
+
+bool HapticAvatar_BaseDriver::WriteDataImpl(char *buffer, unsigned int nbChar)
+{
+    DWORD bytesSend;
+
+    //Try to write the buffer on the Serial port
+    if (!WriteFile(m_hSerial, (void *)buffer, nbChar, &bytesSend, 0))
+    {
+        //In case it don't work get comm error and return false
+        ClearCommError(m_hSerial, &m_errors, &m_status);
+
+        std::cerr << "Error failed to send command: '" << buffer << "'. Error returned: " << m_errors << std::endl;
+        return false;
+    }
+    else
+        return true;
 }
 
 
 
-///////////////////////////////////////////////////////////////
-/////     Public API methods for device communication     /////
-///////////////////////////////////////////////////////////////
 
-int HapticAvatar_Driver::resetDevice(int mode)
+
+
+
+
+
+
+int HapticAvatar_BaseDriver::resetDevice(int mode)
 {
     char incomingData[INCOMING_DATA_LEN];
     std::string arguments = std::to_string(mode);
@@ -141,7 +278,8 @@ int HapticAvatar_Driver::resetDevice(int mode)
 }
 
 
-std::string HapticAvatar_Driver::getIdentity()
+
+std::string HapticAvatar_BaseDriver::getIdentity()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_IDENTITY, "", incomingData) == false) {
@@ -153,7 +291,7 @@ std::string HapticAvatar_Driver::getIdentity()
 }
 
 
-int HapticAvatar_Driver::getToolID()
+int HapticAvatar_BaseDriver::getToolID()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_TOOL_ID, "", incomingData) == false) {
@@ -166,7 +304,7 @@ int HapticAvatar_Driver::getToolID()
 }
 
 
-int HapticAvatar_Driver::getDeviceStatus()
+int HapticAvatar_BaseDriver::getDeviceStatus()
 {
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(GET_STATUS, "", incomingData) == false) {
@@ -178,6 +316,21 @@ int HapticAvatar_Driver::getDeviceStatus()
     return res;
 }
 
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////
+/////      Methods for specific device communication      /////
+///////////////////////////////////////////////////////////////
+
+HapticAvatar_Driver::HapticAvatar_Driver(const std::string& portName)
+    : HapticAvatar_BaseDriver(portName)
+{
+
+}
 
 
 sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
@@ -194,7 +347,7 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
     {
         results[i] = std::strtof(pEnd, &pEnd) * 0.0001f;
     }
-    
+
     return results;
 }
 
@@ -205,7 +358,7 @@ float HapticAvatar_Driver::getJawTorque()
     if (sendCommandToDevice(GET_TOOL_JAW_TORQUE, "", incomingData) == false) {
         return 0.0f;
     }
-        
+
     char* pEnd;
     float res = std::strtof(incomingData, &pEnd) * 0.0001f;
 
@@ -275,7 +428,7 @@ sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
     if (sendCommandToDevice(GET_LAST_COLLISION_FORCE, "", incomingData) == false) {
         return results;
     }
-    
+
     char* pEnd;
     results[0] = std::strtof(incomingData, &pEnd) * 0.0001f;
     for (unsigned int i = 1; i < 3; ++i)
@@ -296,10 +449,11 @@ void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::helper::fixed_array<flo
         arguments = arguments + std::to_string(value) + " ";
     }
     arguments.pop_back(); // remove last space, too avoid any synthax problem.
-    
+
     sendCommandToDevice(SET_MOTOR_FORCE_AND_TORQUES, arguments, nullptr);
     return;
 }
+
 
 void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque)
 {
@@ -376,7 +530,7 @@ void HapticAvatar_Driver::setTipForceVector(sofa::defaulttype::Vector3 force)
     {
         std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
     }
-    
+
 }
 
 
@@ -385,138 +539,6 @@ void HapticAvatar_Driver::releaseForce()
     sendCommandToDevice(SET_MANUAL_PWM, "0 0 0 0", nullptr);
 }
 
-
-
-
-
-bool HapticAvatar_Driver::sendCommandToDevice(HapticAvatar::Cmd command, const std::string& arguments, char *result)
-{
-    std::string fullCommand = std::to_string(command) + " " + arguments + " \n";    
-    //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
-    char outgoingData[OUTGOING_DATA_LEN];
-    strcpy(outgoingData, fullCommand.c_str());
-
-    unsigned int outlen = (unsigned int)(strlen(outgoingData));
-    bool write_success = WriteDataImpl(outgoingData, outlen);
-    if (!write_success) {
-        return false;
-    }
-
-    // request data
-    if (result != nullptr)
-        getDataImpl(result, false);
-
-    return true;
-}
-
-
-std::string HapticAvatar_Driver::convertSingleData(char *buffer, bool forceRemoveEoL)
-{
-    std::string res = std::string(buffer);
-    if (forceRemoveEoL)
-        res.pop_back();
-    else if (res.back() == '\n')
-        res.pop_back();
-
-    while (res.back() == ' ' || res.back() == '\n')
-    {
-        res.pop_back();
-    }
-
-    return res;
-}
-
-
-
-///////////////////////////////////////////////////////////////
-/////      Internal Methods for device communication      /////
-///////////////////////////////////////////////////////////////
-
-int HapticAvatar_Driver::getDataImpl(char *buffer, bool do_flush)
-{
-    bool response = false;
-    int cptSecu = 0;
-    int n = 0;
-    int que = 0;
-    char * pch;
-    int num_cr = 0;
-    while (!response && cptSecu < 10000)
-    {
-        n = ReadDataImpl(buffer, INCOMING_DATA_LEN, &que, do_flush);
-        if (n > 0)
-        {
-            // count the number of \n in the return string
-            pch = strchr(buffer, '\n');
-            while (pch != NULL)
-            {
-                num_cr++;
-                pch = strchr(pch + 1, '\n');
-            }
-            response = true;
-        }
-
-        cptSecu++;
-    }
-
-    if (!response) // secu loop reach end
-    {
-        std::cerr << "## Error getData no message returned. Reach security loop limit: " << cptSecu << std::endl;
-        return -1;
-    }
-
-    return num_cr;
-}
-
-
-int HapticAvatar_Driver::ReadDataImpl(char *buffer, unsigned int nbChar, int *queue, bool do_flush)
-{
-    //Number of bytes we'll have read
-    DWORD bytesRead = 0;
-    DWORD junkBytesRead = 0;
-
-    //Use the ClearCommError function to get status info on the Serial port
-    ClearCommError(m_hSerial, &m_errors, &m_status);
-
-    *queue = (int)m_status.cbInQue;
-
-
-    if (do_flush) {
-        if (*queue > 0)
-            // read away as much as possible, max 512
-            ReadFile(m_hSerial, buffer, std::min(unsigned int(*queue), nbChar), &bytesRead, NULL);
-    }
-    else {
-        // regardless of what the queue is, read nbChar bytes, in an attempt to suspend the thread
-        ReadFile(m_hSerial, buffer, *queue, &bytesRead, NULL);
-        //ClearCommError(this->hSerial, &this->errors, &this->status);
-        //*queue = (int)status.cbInQue;
-        //if (*queue > 0) {
-        //	char junkbuffer[32];
-        //	// clear the buffer from any remaining bytes
-        //	ReadFile(this->hSerial, junkbuffer, min(*queue, 32), &junkBytesRead, NULL);
-        //}
-
-    }
-    return bytesRead;
-}
-
-
-bool HapticAvatar_Driver::WriteDataImpl(char *buffer, unsigned int nbChar)
-{
-    DWORD bytesSend;
-
-    //Try to write the buffer on the Serial port
-    if (!WriteFile(m_hSerial, (void *)buffer, nbChar, &bytesSend, 0))
-    {
-        //In case it don't work get comm error and return false
-        ClearCommError(m_hSerial, &m_errors, &m_status);
-
-        std::cerr << "Error failed to send command: '" << buffer << "'. Error returned: " << m_errors << std::endl;
-        return false;
-    }
-    else
-        return true;
-}
 
 void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
@@ -531,7 +553,7 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
     //    //sendForce = true;
     //}
 
-    sofa::helper::fixed_array<int, 4> values;     
+    sofa::helper::fixed_array<int, 4> values;
     values[0] = int(-17.56 * rotTorque); // RotPWM
     values[1] = int(2.34 * pitchTorque); // PitchPWM
     values[2] = int(-82.93 * zforce); // ZPWM
@@ -547,8 +569,8 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
 
         cptF = 0;
     }
-   // cptF++;
-   
+    // cptF++;
+
     int maxPWM = 1000;
     for (int i = 0; i < 4; i++)
     {
@@ -567,7 +589,7 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
     bool resB = sendCommandToDevice(SET_MANUAL_PWM, args, nullptr);
     if (resB == false)
     {
-        std::cerr << "Error failed to send command: '" << args << "'"<< std::endl;
+        std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
     }
     //std::cout << "force resB: " << resB << std::endl;
 
@@ -599,6 +621,5 @@ void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pit
     }
     //std::cout << "force resB: " << resB << std::endl;
 }
-
 
 } // namespace sofa::HapticAvatar
