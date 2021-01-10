@@ -234,6 +234,8 @@ public:
     */
     sofa::helper::fixed_array<float, 4> getOpeningValues();
 
+    void setHandleForces(float upperJawForce, float lowerJawForce);
+
 
 protected:
     /// Internal method to get the enum id for reset command. To be overwritten by child

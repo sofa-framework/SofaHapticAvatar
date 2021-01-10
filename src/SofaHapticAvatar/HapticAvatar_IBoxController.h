@@ -39,6 +39,8 @@ public:
 
     float getJawOpeningAngle();
 
+    void setHandleForces(float upperJawForce, float lowerJawForce);
+
 private:
     void clearDevice();
 

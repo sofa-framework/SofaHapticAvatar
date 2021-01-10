@@ -106,6 +106,9 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         return;
     }
 
+    /// Pointer to the IBoxController component
+    HapticAvatar_IBoxController * _iboxCtrl = _deviceCtrl->m_iboxCtrl;
+
     // Loop Timer
     long targetSpeedLoop = 1; // Target loop speed: 1ms
 
@@ -127,9 +130,9 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
         // get info regarding jaws
         //float jtorq = _driver->getJawTorque();
-        if (_deviceCtrl->m_iboxCtrl)
+        if (_iboxCtrl)
         {
-            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            float angle = _iboxCtrl->getJawOpeningAngle();
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
@@ -139,12 +142,22 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->d_toolPosition.getValue();
             _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
 
-            // resForces:             
-            //articulations[0] = dofV[Dof::YAW];
-            //articulations[1] = -dofV[Dof::PITCH];
-            //articulations[2] = dofV[Dof::ROT];
-            //articulations[3] = dofV[Dof::Z];
+            /// ** resForces: **             
+            /// articulations[0] => dofV[Dof::YAW];
+            /// articulations[1] => -dofV[Dof::PITCH];
+            /// articulations[2] => dofV[Dof::ROT];
+            /// articulations[3] => dofV[Dof::Z];
+
+            /// articulations[4] => Grasper up
+            /// articulations[5] => Grasper Down 
+
             _driver->setManual_PWM(float(-resForces[2][0]), float(-resForces[1][0]), float(resForces[3][0]), float(-resForces[0][0]));
+
+            if (_iboxCtrl)
+            {
+                // TODO: implement Grasper ForceFeedback here, should be a conversion from 1D angular constraint into force
+                _iboxCtrl->setHandleForces(resForces[4][0], resForces[5][0]);
+            }
 
             //if (cptLoop == 50)
             //{

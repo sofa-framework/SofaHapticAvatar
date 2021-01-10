@@ -643,5 +643,31 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_IboxDriver::getOpeningValues()
 }
 
 
+void HapticAvatar_IboxDriver::setHandleForces(float upperJawForce, float lowerJawForce)
+{
+    // TODO convert force into string command
+
+    // add value threashold check if needed
+    //float maxPWM = 1000;
+    //if (upperJawForce > maxPWM)
+    //    upperJawForce = maxPWM;
+
+    //if (lowerJawForce > maxPWM)
+    //    lowerJawForce = maxPWM;
+
+
+    std::string args;
+    args = std::to_string(upperJawForce)
+        + " " + std::to_string(lowerJawForce);
+
+    std::cout << "setHandleForces command args: " << args << std::endl;
+
+    bool resB = sendCommandToDevice(CmdIBox::SET_IBOX_ALL_FORCES, args, nullptr);
+    if (resB == false)
+    {
+        std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
+    }
+}
+
 
 } // namespace sofa::HapticAvatar

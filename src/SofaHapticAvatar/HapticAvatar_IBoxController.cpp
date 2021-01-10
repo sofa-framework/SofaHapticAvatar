@@ -69,6 +69,13 @@ float HapticAvatar_IBoxController::getJawOpeningAngle()
     return values[0];
 }
 
+
+void HapticAvatar_IBoxController::setHandleForces(float upperJawForce, float lowerJawForce)
+{
+    return m_HA_driver->setHandleForces(upperJawForce, lowerJawForce);
+}
+
+
 void HapticAvatar_IBoxController::clearDevice()
 {
     msg_info() << "HapticAvatar_IBoxController::clearDevice()";
