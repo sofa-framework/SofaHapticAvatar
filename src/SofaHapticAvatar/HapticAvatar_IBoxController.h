@@ -41,6 +41,8 @@ public:
 
     void setHandleForces(float upperJawForce, float lowerJawForce);
 
+	void setLoopGain(int loopGain);
+
 private:
     void clearDevice();
 

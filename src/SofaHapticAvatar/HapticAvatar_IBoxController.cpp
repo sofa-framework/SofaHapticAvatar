@@ -60,6 +60,8 @@ void HapticAvatar_IBoxController::init()
     d_hapticIdentity.setValue(identity);
     std::cout << "HapticAvatarDeviceController identity: '" << identity << "'" << std::endl;
 
+	setLoopGain(120000);
+
     return;
 }
 
@@ -73,6 +75,11 @@ float HapticAvatar_IBoxController::getJawOpeningAngle()
 void HapticAvatar_IBoxController::setHandleForces(float upperJawForce, float lowerJawForce)
 {
     return m_HA_driver->setHandleForces(upperJawForce, lowerJawForce);
+}
+
+void HapticAvatar_IBoxController::setLoopGain(int loopGain)
+{
+	return m_HA_driver->setLoopGain(loopGain);
 }
 
 

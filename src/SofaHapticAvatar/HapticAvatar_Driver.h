@@ -236,6 +236,8 @@ public:
 
     void setHandleForces(float upperJawForce, float lowerJawForce);
 
+	void setLoopGain(int loopGain);
+
 
 protected:
     /// Internal method to get the enum id for reset command. To be overwritten by child

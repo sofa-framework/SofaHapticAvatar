@@ -655,10 +655,14 @@ void HapticAvatar_IboxDriver::setHandleForces(float upperJawForce, float lowerJa
     //if (lowerJawForce > maxPWM)
     //    lowerJawForce = maxPWM;
 
-
+	int force = (int)(10000.0f * (upperJawForce - lowerJawForce));	
     std::string args;
-    args = std::to_string(upperJawForce)
-        + " " + std::to_string(lowerJawForce);
+    args = std::to_string(force)
+        + " " + std::to_string(0)
+		+ " " + std::to_string(0)
+		+ " " + std::to_string(0)
+		+ " " + std::to_string(0)
+		+ " " + std::to_string(0);
 
     std::cout << "setHandleForces command args: " << args << std::endl;
 
@@ -667,6 +671,25 @@ void HapticAvatar_IboxDriver::setHandleForces(float upperJawForce, float lowerJa
     {
         std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
     }
+}
+
+void HapticAvatar_IboxDriver::setLoopGain(int loopGain)
+{
+	std::string args;
+	args = std::to_string(loopGain);
+	for (int chan = 0; chan < 6; chan++)
+	{
+		args = std::to_string(chan) + " " + std::to_string(loopGain) + " " + std::to_string(0);
+
+		std::string fullCommand = std::to_string(CmdIBox::SET_IBOX_LOOP_GAIN) + " " + args + " \n";
+		std::cout << "LoopGain command args: " << fullCommand << std::endl;
+
+		bool resB = sendCommandToDevice(CmdIBox::SET_IBOX_LOOP_GAIN, args, nullptr);
+		if (resB == false)
+		{
+			std::cerr << "Error failed to send command: '" << args << "'" << std::endl;
+		}
+	}
 }
 
 
