@@ -183,26 +183,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
-
-		//if (cptLoop == 1000)
-		//{
-		//	contact = false;
-		//	for (int i = 0; i < 6; i++)
-		//	{
-		//		if (resForces[i][0] != 0.0)
-		//		{
-		//			//driver->m_isInContact = true;
-		//			contact = true;
-		//			break;
-		//		}
-		//	}
-		//	if (logFile.is_open())
-		//	{
-		//		logFile << duration * 1000 / refTicksPerMs << std::endl;
-		//	}
-		//	cptLoop = 0;
-		//}
-		//cptLoop++;
+		
 		contact = false;
 		for (int i = 0; i < 6; i++)
 		{
