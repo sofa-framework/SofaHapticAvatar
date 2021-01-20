@@ -15,6 +15,10 @@
 #include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <fstream>
 
 namespace sofa::HapticAvatar
 {
@@ -116,9 +120,15 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
     ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
 
+	auto startSimulationTime = std::chrono::high_resolution_clock::now();
+
     VecDeriv resForces;
     resForces.resize(6);
     int cptLoop = 0;
+	
+	//log file
+	std::ofstream logFile("HapticAvatarLog.txt");
+	bool contact = false;
     while (!terminate)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -126,7 +136,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-        _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
+        //_deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
 
         // get info regarding jaws
         //float jtorq = _driver->getJawTorque();
@@ -166,6 +176,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             //}
 
             //cptLoop++;
+
         }
         else
             _driver->releaseForce();
@@ -173,6 +184,49 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
 
+		//if (cptLoop == 1000)
+		//{
+		//	contact = false;
+		//	for (int i = 0; i < 6; i++)
+		//	{
+		//		if (resForces[i][0] != 0.0)
+		//		{
+		//			//driver->m_isInContact = true;
+		//			contact = true;
+		//			break;
+		//		}
+		//	}
+		//	if (logFile.is_open())
+		//	{
+		//		logFile << duration * 1000 / refTicksPerMs << std::endl;
+		//	}
+		//	cptLoop = 0;
+		//}
+		//cptLoop++;
+		contact = false;
+		for (int i = 0; i < 6; i++)
+		{
+			if (resForces[i][0] != 0.0)
+			{
+				contact = true;
+				break;
+			}
+		}
+		if (contact)
+		{
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			auto timeSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startSimulationTime);
+
+			if (logFile.is_open())
+			{
+				logFile << timeSinceStart.count() << " ";
+				logFile << contact << " "; 
+				logFile << duration * 1000 / refTicksPerMs << " ";
+				logFile << resForces << std::endl;
+			}
+		}
+
+		
         // If loop is quicker than the target loop speed. Wait here.
         while (duration < targetTicksPerLoop)
         {
@@ -180,6 +234,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             duration = endTime - startTime;
         }
     }
+	logFile.close();
 
     // ensure no force
     _driver->releaseForce();
