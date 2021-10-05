@@ -15,7 +15,7 @@
 
     
     <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_GrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
+    <HapticAvatar_DirectGrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
     drawDeviceAxis="0" drawDebugForce="0" iboxController="@HAIBox" dumpThreadInfo="0"/>
     <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />    
     <include href="Portals.xml" />
@@ -89,7 +89,6 @@
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
         <BoxROI name="boxRoi" box="-100 -50 -100 100 -30 100" drawBoxes="1"/>
         <FixedConstraint name="FixedConstraint" indices="@boxRoi.indices" />
@@ -101,7 +100,6 @@
         <Node name="Surface">
             <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
