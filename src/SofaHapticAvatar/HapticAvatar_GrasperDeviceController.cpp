@@ -9,6 +9,7 @@
 
 #include <sofa/core/ObjectFactory.h>
 
+#include <sofa/simulation/Node.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/CollisionEndEvent.h>
@@ -213,7 +214,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     //std::cout << "updatePositionImpl" << std::endl;
 
     // get info from simuData
-    sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
+    sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
     VecCoord & articulations = *d_toolPosition.beginEdit();
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;

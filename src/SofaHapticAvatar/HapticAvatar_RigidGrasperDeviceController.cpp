@@ -9,6 +9,7 @@
 
 #include <sofa/core/ObjectFactory.h>
 
+#include <sofa/simulation/Node.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/CollisionEndEvent.h>
@@ -148,16 +149,16 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
 
         if (_deviceCtrl->m_simulationStarted && !_deviceCtrl->contactsHaptic.empty())
         {
-            sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
+            sofa::type::Vector3 totalForce = sofa::type::Vector3(0, 0, 0);
 
             for (auto contact : _deviceCtrl->contactsHaptic)
             {
                 totalForce += contact.m_force * contact.distance;
             }
 
-            sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
-            sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
-            sofa::defaulttype::Mat3x3f rotM;
+            sofa::type::Quatf rotRot = sofa::type::Quatf::fromEuler(0.0f, _deviceCtrl->m_hapticData.anglesAndLength[Dof::ROT], 0.0f);
+            sofa::type::Mat4x4f R_rot = sofa::type::Mat4x4f::transformRotation(rotRot);
+            sofa::type::Mat3x3f rotM;
             for (unsigned int i = 0; i < 3; i++) {
                 for (unsigned int j = 0; j < 3; j++) {
                     rotM[i][j] = R_rot[i][j];
@@ -307,7 +308,7 @@ void HapticAvatar_RigidGrasperDeviceController::updatePositionImpl()
     if (!m_HA_driver)
         return;
 
-    sofa::defaulttype::Quat orien;
+    sofa::type::Quatf orien;
     orien.fromMatrix(m_toolRot);
 
     // compute bati position
@@ -324,8 +325,8 @@ void HapticAvatar_RigidGrasperDeviceController::updatePositionImpl()
     HapticAvatar_RigidGrasperDeviceController::Coord jawUp;
     HapticAvatar_RigidGrasperDeviceController::Coord jawDown;
     
-    jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
-    jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
+    jawUp.getOrientation() = sofa::type::Quatf::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
+    jawDown.getOrientation() = sofa::type::Quatf::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
     jawUp.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);

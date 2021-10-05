@@ -72,7 +72,7 @@ public:
     * Command: GET_ANGLES_AND_LENGTH
     * @returns {vec4f} {Tool rotation angle, Pitch angle, Pitch angle, Yaw angle}
     */
-    sofa::helper::fixed_array<float, 4> getAngles_AndLength();
+    sofa::type::fixed_array<float, 4> getAngles_AndLength();
 
     /** Get the torque on the jaws around the jaw rotation pin. 
     * Command: GET_TOOL_JAW_TORQUE
@@ -92,19 +92,19 @@ public:
     * Command: GET_LAST_PWM
     * @returns {vec4f}  {Rot motor, Pitch motor, Z motor, Yaw motor} PWM values [-2040 .. 2040] 
     */
-    sofa::helper::fixed_array<float, 4> getLastPWM();
+    sofa::type::fixed_array<float, 4> getLastPWM();
 
     /** To get conversion factors from raw pwm values to torques or forces. 
     * Command: GET_MOTOR_SCALING_VALUES
     * @returns {vec4f} {Rot motor, Pitch motor, Z motor, Yaw motor} scaling factor (in Nmm/pwm-value) 
     */
-    sofa::helper::fixed_array<float, 4> getMotorScalingValues();
+    sofa::type::fixed_array<float, 4> getMotorScalingValues();
 
     /** Get the most recent collision force sum. This is only related to collisions against primitives.
     * Command: GET_LAST_COLLISION_FORCE
     * @returns {vec3f} A vector (Fx, Fy, Fz) in the Device LCS
     */
-    sofa::helper::fixed_array<float, 3> getLastCollisionForce();
+    sofa::type::fixed_array<float, 3> getLastCollisionForce();
 
 
    
@@ -112,23 +112,23 @@ public:
     * Command: SET_MOTOR_FORCE_AND_TORQUES
     * @param {vec4f} values: specify what to reset. See doc.
     */
-    void setMotorForce_AndTorques(sofa::helper::fixed_array<float, 4> values);
+    void setMotorForce_AndTorques(sofa::type::fixed_array<float, 4> values);
 
     /** Set a force vector on the tool tip plus the tool rotation torque. This is an alternative way to output force (compared to SET_MOTOR_FORCE_AND_TORQUES) 
     * Command: SET_TIP_FORCE_AND_ROT_TORQUE
     * @param {vec3f} force: specify what to reset. See doc.
     * @param {float} RotTorque: specify what to reset. See doc.
     */
-    void setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque);
+    void setTipForce_AndRotTorque(sofa::type::Vector3 force, float RotTorque);
     
        
     /** Will decompose a force vector in device coordinate system to compute torque and force to be sent to apply to the device. Using @sa writeRoughForce.
     * @param {vec3f} force: force vector to apply to the device in its coordinate space.
     */
-    void setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM = false);
+    void setManualForceVector(sofa::type::Vector3 force, bool useManualPWM = false);
 
 
-    void setTipForceVector(sofa::defaulttype::Vector3 force);
+    void setTipForceVector(sofa::type::Vector3 force);
 
     // Will send 0 torque and force values to the device. Using SET_MANUAL_PWM.
     void releaseForce();

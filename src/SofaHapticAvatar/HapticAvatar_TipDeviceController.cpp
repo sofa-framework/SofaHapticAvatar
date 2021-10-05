@@ -98,7 +98,7 @@ void HapticAvatar_TipDeviceController::Haptics(std::atomic<bool>& terminate, voi
         if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
         {            
             const HapticAvatar_TipDeviceController::VecCoord& toolPosition = _deviceCtrl->d_toolPosition.getValue();
-            sofa::defaulttype::Vector3 totalForce = sofa::defaulttype::Vector3(0, 0, 0);
+            sofa::type::Vector3 totalForce = sofa::type::Vector3(0, 0, 0);
 
             // Check main force feedback
             _deviceCtrl->m_forceFeedback->computeForce(toolPosition, forces);
@@ -213,7 +213,7 @@ void HapticAvatar_TipDeviceController::CopyData(std::atomic<bool>& terminate, vo
 void HapticAvatar_TipDeviceController::updatePositionImpl()
 {
     // m_toolRot = rotM.inverted();
-    sofa::defaulttype::Quat orien;
+    Quat orien;
     orien.fromMatrix(m_toolRot);
 
     // compute bati position
@@ -230,8 +230,8 @@ void HapticAvatar_TipDeviceController::updatePositionImpl()
     HapticAvatar_RigidDeviceController::Coord jawUp;
     HapticAvatar_RigidDeviceController::Coord jawDown;
 
-    jawUp.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
-    jawDown.getOrientation() = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
+    jawUp.getOrientation() = Quat::fromEuler(0.0f, 0.0f, _OpeningAngle) + orien;
+    jawDown.getOrientation() = Quat::fromEuler(0.0f, 0.0f, -_OpeningAngle) + orien;
 
     jawUp.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
     jawDown.getCenter() = Vec3f(m_instrumentMtx[0][3], m_instrumentMtx[1][3], m_instrumentMtx[2][3]);
