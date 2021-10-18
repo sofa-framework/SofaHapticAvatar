@@ -10,6 +10,7 @@
 
 #include <sofa/core/ObjectFactory.h>
 
+#include <sofa/simulation/Node.h>
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/core/objectmodel/KeypressedEvent.h>
@@ -39,7 +40,7 @@ HapticAvatar_DeviceEmulator::HapticAvatar_DeviceEmulator()
 {
     this->f_listening.setValue(true);
     m_targetPosition = Vector3(0.0, 0.0, 0.0);
-    m_roughForce = sofa::helper::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
+    m_roughForce = sofa::type::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
     m_roughIntensity = 1.0;
 }
 
@@ -256,9 +257,9 @@ void HapticAvatar_DeviceEmulator::draw(const sofa::core::visual::VisualParams* v
 
         for (unsigned int i = 0; i < toolPosition.size(); ++i)
         {
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, Vec4f(1, 0, 0, 1));
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, Vec4f(0, 1, 0, 1));
-            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, Vec4f(0, 0, 1, 1));
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(20, 0, 0)*d_scale.getValue()), glRadius, sofa::type::RGBAColor(1, 0, 0, 1));
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 20, 0)*d_scale.getValue()), glRadius, sofa::type::RGBAColor(0, 1, 0, 1));
+            vparams->drawTool()->drawArrow(toolPosition[i].getCenter(), toolPosition[i].getCenter() + toolPosition[i].getOrientation().rotate(Vector3(0, 0, 20)*d_scale.getValue()), glRadius, sofa::type::RGBAColor(0, 0, 1, 1));
         }
     }
 
@@ -272,17 +273,17 @@ void HapticAvatar_DeviceEmulator::draw(const sofa::core::visual::VisualParams* v
             defaulttype::Vector3(-quadL, floorH, quadL),
             defaulttype::Vector3(quadL, floorH, quadL),
             defaulttype::Vector3(quadL, floorH, -quadL),
-            defaulttype::Vector3(0.0, 1.0, 0.0), sofa::helper::types::RGBAColor::green());
+            defaulttype::Vector3(0.0, 1.0, 0.0), sofa::type::RGBAColor::green());
     }
     else if (testMode == 2 || testMode == 3)
     {
-        vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::helper::types::RGBAColor::green());
+        vparams->drawTool()->drawSphere(m_targetPosition, 3, sofa::type::RGBAColor::green());
         const HapticAvatar_RigidGrasperDeviceController::VecCoord& testPosition = d_toolPosition.getValue();
         // Check main force feedback
         Vector3 tipPosition = testPosition[3].getCenter();
 
-        vparams->drawTool()->drawSphere(tipPosition, 3, sofa::helper::types::RGBAColor::red());
-        vparams->drawTool()->drawLine(m_targetPosition, tipPosition, sofa::helper::types::RGBAColor::green());
+        vparams->drawTool()->drawSphere(tipPosition, 3, sofa::type::RGBAColor::red());
+        vparams->drawTool()->drawLine(m_targetPosition, tipPosition, sofa::type::RGBAColor::green());
     }
 }
 
@@ -351,7 +352,7 @@ void HapticAvatar_DeviceEmulator::handleEvent(core::objectmodel::Event *event)
         }
         else if (ke->getKey() == '5')
         {
-            m_roughForce = sofa::helper::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
+            m_roughForce = sofa::type::fixed_array<float, 4>(0.0, 0.0, 0.0, 0.0);
             std::cout << "m_roughForce: " << m_roughForce << std::endl;
         }
         // force value

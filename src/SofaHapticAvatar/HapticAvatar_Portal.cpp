@@ -55,7 +55,7 @@ void HapticAvatar_Portal::portalSetup()
         m_rootPosition[1] = 194.23f; //mm
     }
 
-    m_rootOrientation = sofa::defaulttype::Quat::fromEuler(0.0f, m_flipAngle*EULER_TO_RAD, m_tiltAngle*EULER_TO_RAD);
+    m_rootOrientation = sofa::type::Quatf::fromEuler(0.0f, m_flipAngle*EULER_TO_RAD, m_tiltAngle*EULER_TO_RAD);
     if (m_flipAngle == 180) // TODO: remove this hack. FIX problem in fromEuler sign in SOFA for extrem angles.
         m_rootOrientation[0] *= -1;
 
@@ -77,9 +77,9 @@ void HapticAvatar_Portal::updatePostion(float yawAngle, float pitchAngle)
 }
 
 
-sofa::defaulttype::Mat4x4f MatFromTranslation(sofa::defaulttype::Vec3f trans)
+sofa::type::Mat4x4f MatFromTranslation(sofa::type::Vec3f trans)
 {
-    sofa::defaulttype::Mat4x4f mat;
+    sofa::type::Mat4x4f mat;
     
     mat.identity();
     for (unsigned int i = 0; i < 3; ++i)
@@ -89,11 +89,11 @@ sofa::defaulttype::Mat4x4f MatFromTranslation(sofa::defaulttype::Vec3f trans)
     return mat;
 }
 
-sofa::defaulttype::Mat4x4f MatFromRotation(sofa::defaulttype::Quat rot)
+sofa::type::Mat4x4f MatFromRotation(sofa::type::Quatf rot)
 {
-    sofa::defaulttype::Mat4x4f mat;
+    sofa::type::Mat4x4f mat;
     mat[3][3] = 1;
-    sofa::defaulttype::Mat3x3f rotM;
+    sofa::type::Mat3x3f rotM;
     rot.toMatrix(rotM);
     
     for (unsigned int i = 0; i < 3; i++)
@@ -115,15 +115,15 @@ const HapticAvatar_Portal::Coord& HapticAvatar_Portal::getPortalPosition()
     // potion = position + gear translation
     //MatFromTranslation(m_rootPosition);
 
-    sofa::defaulttype::Mat4x4f T_gear = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(8.8f, 0.0f, 0.0f));    
-    sofa::defaulttype::Mat4x4f T_portal = sofa::defaulttype::Mat4x4f::transformTranslation(m_rootPosition);
+    sofa::type::Mat4x4f T_gear = sofa::type::Mat4x4f::transformTranslation(Vec3f(8.8f, 0.0f, 0.0f));    
+    sofa::type::Mat4x4f T_portal = sofa::type::Mat4x4f::transformTranslation(m_rootPosition);
     
-    sofa::defaulttype::Mat4x4f R_tiltflip = sofa::defaulttype::Mat4x4f::transformRotation(m_rootOrientation);
-    sofa::defaulttype::Quat pitchRot = sofa::defaulttype::Quat::fromEuler(0.0f, 0.0f, -m_pitchAngle);
-    sofa::defaulttype::Quat yawRot = sofa::defaulttype::Quat::fromEuler(m_yawAngle, 0.0f, 0.0f);
+    sofa::type::Mat4x4f R_tiltflip = sofa::type::Mat4x4f::transformRotation(m_rootOrientation);
+    sofa::type::Quatf pitchRot = sofa::type::Quatf::fromEuler(0.0f, 0.0f, -m_pitchAngle);
+    sofa::type::Quatf yawRot = sofa::type::Quatf::fromEuler(m_yawAngle, 0.0f, 0.0f);
     
-    sofa::defaulttype::Mat4x4f R_yaw = sofa::defaulttype::Mat4x4f::transformRotation(pitchRot);
-    sofa::defaulttype::Mat4x4f R_pitch = sofa::defaulttype::Mat4x4f::transformRotation(yawRot);
+    sofa::type::Mat4x4f R_yaw = sofa::type::Mat4x4f::transformRotation(pitchRot);
+    sofa::type::Mat4x4f R_pitch = sofa::type::Mat4x4f::transformRotation(yawRot);
     
     m_portalMtx = T_portal * R_tiltflip * R_yaw * R_pitch * T_gear;
     
@@ -140,12 +140,12 @@ const HapticAvatar_Portal::Coord& HapticAvatar_Portal::getPortalPosition()
         std::cout << "---------------------------------" << std::endl;
     }
 
-    sofa::defaulttype::Mat3x3f rotM;
+    sofa::type::Mat3x3f rotM;
     for (unsigned int i = 0; i < 3; i++)
         for (unsigned int j = 0; j < 3; j++)
             rotM[i][j] = m_portalMtx[i][j];
 
-    sofa::defaulttype::Quat orien;
+    sofa::type::Quatf orien;
     orien.fromMatrix(rotM);
     m_portalPosition.getCenter() = Vec3f(m_portalMtx[0][3], m_portalMtx[1][3], m_portalMtx[2][3]);
     m_portalPosition.getOrientation() = orien;
@@ -154,7 +154,7 @@ const HapticAvatar_Portal::Coord& HapticAvatar_Portal::getPortalPosition()
     
     //Vec3f position = m_rootOrientation.rotate(m_rootPosition)
 
-    //sofa::defaulttype::Quat fullRot = m_rootOrientation *pitchRot * yawRot;
+    //sofa::type::Quatf fullRot = m_rootOrientation *pitchRot * yawRot;
 
     //Vec3f T_gear = Vec3f(8.8f, 0.0f, 0.0f);
     //Vec3f translation = m_rootPosition + T_gear;

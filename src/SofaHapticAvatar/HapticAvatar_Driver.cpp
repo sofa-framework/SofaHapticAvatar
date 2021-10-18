@@ -322,9 +322,9 @@ HapticAvatar_Driver::HapticAvatar_Driver(const std::string& portName)
 }
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
+sofa::type::fixed_array<float, 4> HapticAvatar_Driver::getAngles_AndLength()
 {
-    sofa::helper::fixed_array<float, 4> results;
+    sofa::type::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(CmdTool::GET_ANGLES_AND_LENGTH, "", incomingData) == false) {
         return results;
@@ -372,9 +372,9 @@ float HapticAvatar_Driver::getJawOpeningAngle()
 
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getLastPWM()
+sofa::type::fixed_array<float, 4> HapticAvatar_Driver::getLastPWM()
 {
-    sofa::helper::fixed_array<float, 4> results;
+    sofa::type::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(CmdTool::GET_LAST_PWM, "", incomingData) == false) {
         return results;
@@ -391,9 +391,9 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getLastPWM()
 }
 
 
-sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
+sofa::type::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
 {
-    sofa::helper::fixed_array<float, 4> results;
+    sofa::type::fixed_array<float, 4> results;
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(CmdTool::GET_MOTOR_SCALING_VALUES, "", incomingData) == false) {
         return results;
@@ -410,9 +410,9 @@ sofa::helper::fixed_array<float, 4> HapticAvatar_Driver::getMotorScalingValues()
 }
 
 
-sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
+sofa::type::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
 {
-    sofa::helper::fixed_array<float, 3> results;
+    sofa::type::fixed_array<float, 3> results;
     char incomingData[INCOMING_DATA_LEN];
     if (sendCommandToDevice(CmdTool::GET_LAST_COLLISION_FORCE, "", incomingData) == false) {
         return results;
@@ -429,7 +429,7 @@ sofa::helper::fixed_array<float, 3> HapticAvatar_Driver::getLastCollisionForce()
 }
 
 
-void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::helper::fixed_array<float, 4> values)
+void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::type::fixed_array<float, 4> values)
 {
     std::string arguments;
     for (unsigned int i = 0; i < values.size(); ++i)
@@ -443,8 +443,7 @@ void HapticAvatar_Driver::setMotorForce_AndTorques(sofa::helper::fixed_array<flo
     return;
 }
 
-
-void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 force, float RotTorque)
+void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::type::Vector3 force, float RotTorque)
 {
     std::string arguments;
     for (unsigned int i = 0; i < force.size(); ++i)
@@ -462,7 +461,7 @@ void HapticAvatar_Driver::setTipForce_AndRotTorque(sofa::defaulttype::Vector3 fo
 
 int cptF = 0;
 
-void HapticAvatar_Driver::setManualForceVector(sofa::defaulttype::Vector3 force, bool useManualPWM)
+void HapticAvatar_Driver::setManualForceVector(sofa::type::Vector3 force, bool useManualPWM)
 {
     // ./sofa-build/bin/Release/runSofa.exe sofa_plugins/SofaHapticAvatar/examples/HapticAvatar_collision_cube.scn
 
@@ -477,9 +476,9 @@ void HapticAvatar_Driver::setManualForceVector(sofa::defaulttype::Vector3 force,
     //std::cout << "setTranslationForce: " << force << std::endl;
     //double res = force.norm();
 
-    sofa::defaulttype::Vector3 toolDir = sofa::defaulttype::Vector3(0, 1, 0);
-    sofa::defaulttype::Vector3 yawDir = sofa::defaulttype::Vector3(0, 0, 1);
-    sofa::defaulttype::Vector3 pitchDir = sofa::defaulttype::Vector3(-1, 0, 0);
+    sofa::type::Vector3 toolDir = sofa::type::Vector3(0, 1, 0);
+    sofa::type::Vector3 yawDir = sofa::type::Vector3(0, 0, 1);
+    sofa::type::Vector3 pitchDir = sofa::type::Vector3(-1, 0, 0);
 
     float rotTorque = 0.0f;
     float pitchTorque = float(pitchDir * force * 10);
@@ -499,9 +498,9 @@ void HapticAvatar_Driver::setManualForceVector(sofa::defaulttype::Vector3 force,
 }
 
 
-void HapticAvatar_Driver::setTipForceVector(sofa::defaulttype::Vector3 force)
+void HapticAvatar_Driver::setTipForceVector(sofa::type::Vector3 force)
 {
-    sofa::helper::fixed_array<int, 4> values;
+    sofa::type::fixed_array<int, 4> values;
     values[0] = int(force[0] * 100);
     values[1] = int(force[2] * 100);
     values[2] = -int(force[1] * 100);
@@ -542,7 +541,7 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
     //    //sendForce = true;
     //}
 
-    sofa::helper::fixed_array<int, 4> values;
+    sofa::type::fixed_array<int, 4> values;     
     values[0] = int(-17.56 * rotTorque); // RotPWM
     values[1] = int(2.34 * pitchTorque); // PitchPWM
     values[2] = int(-82.93 * zforce); // ZPWM
@@ -591,7 +590,7 @@ void HapticAvatar_Driver::setManual_PWM(float rotTorque, float pitchTorque, floa
 
 void HapticAvatar_Driver::setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque)
 {
-    sofa::helper::fixed_array<int, 4> values;
+    sofa::type::fixed_array<int, 4> values;
     values[0] = int(rotTorque * 10000);
     values[1] = int(pitchTorque * 10000);
     values[2] = int(zforce * 10000);

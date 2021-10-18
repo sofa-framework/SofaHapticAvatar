@@ -8,6 +8,7 @@
 
 #include <SofaHapticAvatar/HapticAvatar_RigidDeviceController.h>
 #include <sofa/core/collision/NarrowPhaseDetection.h>
+#include <sofa/core/collision/Intersection.h>
 
 namespace sofa::HapticAvatar
 {
@@ -32,7 +33,7 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_RigidGrasperDeviceController : public H
 {
 public:
     SOFA_CLASS(HapticAvatar_RigidGrasperDeviceController, HapticAvatar_RigidDeviceController);
-    typedef helper::vector<core::collision::DetectionOutput> ContactVector;
+    typedef type::vector<core::collision::DetectionOutput> ContactVector;
 
     /// Default constructor
     HapticAvatar_RigidGrasperDeviceController();

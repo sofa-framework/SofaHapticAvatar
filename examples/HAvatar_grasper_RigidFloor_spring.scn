@@ -132,7 +132,6 @@
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetTopologyAlgorithms name="TopoAlgo" template="Vec3d" />
         <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
         
         <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
@@ -140,7 +139,6 @@
         <Node name="Surface">
             <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
-            <TriangleSetTopologyAlgorithms name="TopoAlgo"   template="Vec3d" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 

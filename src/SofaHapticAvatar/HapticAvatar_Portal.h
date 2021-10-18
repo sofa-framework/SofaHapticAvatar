@@ -35,8 +35,8 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_Portal
 {
 public:
     typedef sofa::defaulttype::RigidTypes::Coord Coord;
-    typedef sofa::defaulttype::Vec3f Vec3f;
-    typedef sofa::defaulttype::Vec4f Vec4f;
+    typedef sofa::type::Vec3f Vec3f;
+    typedef sofa::type::Vec4f Vec4f;
 
     HapticAvatar_Portal(int id, int rail, float railPos, float flipAngle, float tiltAngle, std::string comPort);
 
@@ -52,7 +52,7 @@ public:
     const Coord& getPortalPosition();
     const std::string& getPortalCom() {return m_comPort;}
   
-    const sofa::defaulttype::Mat4x4f& getPortalTransform() { return m_portalMtx; }
+    const sofa::type::Mat4x4f& getPortalTransform() { return m_portalMtx; }
 private:
     int m_id; ///< 
     int m_rail; ///< rail number, middle rail has number 0
@@ -66,10 +66,10 @@ private:
 
     bool m_hasMoved;
     Vec3f m_rootPosition;
-    sofa::defaulttype::Quat m_rootOrientation;
+    sofa::type::Quatf m_rootOrientation;
     Coord m_portalPosition;
 
-    sofa::defaulttype::Mat4x4f m_portalMtx;
+    sofa::type::Mat4x4f m_portalMtx;
 };
 
 } // namespace sofa::HapticAvatar

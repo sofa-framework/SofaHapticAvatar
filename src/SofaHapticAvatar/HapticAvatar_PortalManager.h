@@ -63,7 +63,7 @@ public:
     void printInfo();
 
     int getPortalId(std::string comStr);
-    const sofa::defaulttype::Mat4x4f& getPortalTransform(int portId);
+    const sofa::type::Mat4x4f& getPortalTransform(int portId);
     const Coord& getPortalPosition(int portId);
 
     sofa::core::objectmodel::DataFileName m_configFilename;
@@ -80,7 +80,7 @@ protected:
     void portalsSetup();
 
 private:
-    sofa::helper::vector<HapticAvatar_Portal* > m_portals;
+    sofa::type::vector<HapticAvatar_Portal* > m_portals;
 
     Coord m_defaultPosition;
 };

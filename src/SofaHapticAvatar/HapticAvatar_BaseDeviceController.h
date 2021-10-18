@@ -33,6 +33,7 @@ public:
     SOFA_CLASS(HapticAvatar_BaseDeviceController, Controller);
     typedef RigidTypes::Coord RigidCoord;
     typedef SolidTypes<double>::Transform Transform;
+    typedef sofa::type::Quat<SReal> Quat;
 
     /// default constructor
     HapticAvatar_BaseDeviceController();
@@ -63,7 +64,7 @@ protected:
     virtual void updatePosition();
 
     /// Method to propage
-    void updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values);
+    void updatePortalAnglesAndLength(sofa::type::fixed_array<float, 4> values);
 
     /// Internal method to bo overriden by child class to propagate specific position. Called by @sa updatePosition
     virtual void updatePositionImpl() = 0;
@@ -110,9 +111,9 @@ public:
     /// Structure used to transfer data fromt he haptic thread to the simulation thread.
     struct DeviceData
     {
-        sofa::helper::fixed_array<float, 4> anglesAndLength;
-        sofa::helper::fixed_array<float, 4> motorValues;
-        sofa::helper::fixed_array<float, 3> collisionForces;
+        sofa::type::fixed_array<float, 4> anglesAndLength;
+        sofa::type::fixed_array<float, 4> motorValues;
+        sofa::type::fixed_array<float, 3> collisionForces;
         float jawOpening;
     };
 
@@ -146,10 +147,10 @@ protected:
     std::thread copy_thread;
 
 
-    sofa::defaulttype::Mat3x3f m_toolRot;
-    sofa::defaulttype::Mat3x3f m_toolRotInv;
-    sofa::defaulttype::Mat3x3f m_PortalRot;
-    sofa::defaulttype::Mat4x4f m_instrumentMtx;
+    sofa::type::Mat3x3f m_toolRot;
+    sofa::type::Mat3x3f m_toolRotInv;
+    sofa::type::Mat3x3f m_PortalRot;
+    sofa::type::Mat4x4f m_instrumentMtx;
 };
 
 } // namespace sofa::HapticAvatar

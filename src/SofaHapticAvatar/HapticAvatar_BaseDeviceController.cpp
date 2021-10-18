@@ -122,7 +122,7 @@ void HapticAvatar_BaseDeviceController::bwdInit()
 
 
 
-void HapticAvatar_BaseDeviceController::updatePortalAnglesAndLength(sofa::helper::fixed_array<float, 4> values)
+void HapticAvatar_BaseDeviceController::updatePortalAnglesAndLength(sofa::type::fixed_array<float, 4> values)
 {
     m_portalMgr->updatePostion(m_portId, values[Dof::YAW], values[Dof::PITCH]);
 }
@@ -135,7 +135,7 @@ void HapticAvatar_BaseDeviceController::updatePosition()
         return;
 
     // get info from simuData
-    sofa::helper::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
+    sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
     // propagate info to portal
     updatePortalAnglesAndLength(dofV);
@@ -147,10 +147,10 @@ void HapticAvatar_BaseDeviceController::updatePosition()
     }
     
     // compute portal and tool rotation matrices
-    const sofa::defaulttype::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
-    sofa::defaulttype::Quat rotRot = sofa::defaulttype::Quat::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
-    sofa::defaulttype::Mat4x4f T_insert = sofa::defaulttype::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
-    sofa::defaulttype::Mat4x4f R_rot = sofa::defaulttype::Mat4x4f::transformRotation(rotRot);
+    const sofa::type::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
+    sofa::type::Quatf rotRot = sofa::type::Quatf::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
+    sofa::type::Mat4x4f T_insert = sofa::type::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
+    sofa::type::Mat4x4f R_rot = sofa::type::Mat4x4f::transformRotation(rotRot);
     m_instrumentMtx = portalMtx * R_rot * T_insert;
 
     for (unsigned int i = 0; i < 3; i++) {
@@ -188,9 +188,9 @@ void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::Visu
     {
         int newLine = 12;
         int fontS = 12;
-        const sofa::helper::fixed_array<float, 4>& dofV = m_debugData.anglesAndLength;
-        const sofa::helper::fixed_array<float, 4>& motV = m_debugData.motorValues;
-        defaulttype::Vec4f color(0.0, 1.0, 0.0, 1.0);
+        const sofa::type::fixed_array<float, 4>& dofV = m_debugData.anglesAndLength;
+        const sofa::type::fixed_array<float, 4>& motV = m_debugData.motorValues;
+        sofa::type::RGBAColor color(0.0, 1.0, 0.0, 1.0);
 
         std::string title = "       Yaw   Pitch   Rot   Z";
         vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title.c_str());
@@ -222,7 +222,7 @@ void HapticAvatar_BaseDeviceController::drawDebug(const sofa::core::visual::Visu
         vparams->drawTool()->writeOverlayText(8, newLine, fontS, color, title2.c_str());
         newLine += fontS * 2;
 
-        const sofa::helper::fixed_array<float, 3>& colF = m_debugData.collisionForces;
+        const sofa::type::fixed_array<float, 3>& colF = m_debugData.collisionForces;
 
         ss.str(std::string());
         ss << std::fixed << std::setprecision(2) << "Collision  "

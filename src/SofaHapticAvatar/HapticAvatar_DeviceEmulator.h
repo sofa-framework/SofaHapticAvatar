@@ -47,7 +47,7 @@ public:
     Data<int> m_testMode;
 
     Vector3 m_targetPosition;
-    sofa::helper::fixed_array<float, 4> m_roughForce;
+    sofa::type::fixed_array<float, 4> m_roughForce;
     float m_roughIntensity;
 
     bool m_activeTest;
