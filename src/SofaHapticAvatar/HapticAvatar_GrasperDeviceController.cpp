@@ -16,6 +16,10 @@
 #include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <fstream>
 
 namespace sofa::HapticAvatar
 {
@@ -107,6 +111,9 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         return;
     }
 
+    /// Pointer to the IBoxController component
+    HapticAvatar_IBoxController * _iboxCtrl = _deviceCtrl->m_iboxCtrl;
+
     // Loop Timer
     long targetSpeedLoop = 1; // Target loop speed: 1ms
 
@@ -114,9 +121,15 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
     ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
 
+	auto startSimulationTime = std::chrono::high_resolution_clock::now();
+
     VecDeriv resForces;
     resForces.resize(6);
     int cptLoop = 0;
+	
+	//log file
+	std::ofstream logFile("HapticAvatarLog.txt");
+	bool contact = false;
     while (!terminate)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -124,13 +137,13 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-        _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
+        //_deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
 
         // get info regarding jaws
         //float jtorq = _driver->getJawTorque();
-        if (_deviceCtrl->m_iboxCtrl)
+        if (_iboxCtrl)
         {
-            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            float angle = _iboxCtrl->getJawOpeningAngle();
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
@@ -140,12 +153,22 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->d_toolPosition.getValue();
             _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
 
-            // resForces:             
-            //articulations[0] = dofV[Dof::YAW];
-            //articulations[1] = -dofV[Dof::PITCH];
-            //articulations[2] = dofV[Dof::ROT];
-            //articulations[3] = dofV[Dof::Z];
+            /// ** resForces: **             
+            /// articulations[0] => dofV[Dof::YAW];
+            /// articulations[1] => -dofV[Dof::PITCH];
+            /// articulations[2] => dofV[Dof::ROT];
+            /// articulations[3] => dofV[Dof::Z];
+
+            /// articulations[4] => Grasper up
+            /// articulations[5] => Grasper Down 
+
             _driver->setManual_PWM(float(-resForces[2][0]), float(-resForces[1][0]), float(resForces[3][0]), float(-resForces[0][0]));
+
+            if (_iboxCtrl)
+            {
+                // TODO: implement Grasper ForceFeedback here, should be a conversion from 1D angular constraint into force
+                _iboxCtrl->setHandleForces(resForces[4][0], resForces[5][0]);
+            }
 
             //if (cptLoop == 50)
             //{
@@ -154,13 +177,38 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             //}
 
             //cptLoop++;
+
         }
         else
             _driver->releaseForce();
 
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
+		
+		contact = false;
+		for (int i = 0; i < 6; i++)
+		{
+			if (resForces[i][0] != 0.0)
+			{
+				contact = true;
+				break;
+			}
+		}
+		if (contact)
+		{
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			auto timeSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startSimulationTime);
 
+			if (logFile.is_open())
+			{
+				logFile << timeSinceStart.count() << " ";
+				logFile << contact << " "; 
+				logFile << duration * 1000 / refTicksPerMs << " ";
+				logFile << resForces << std::endl;
+			}
+		}
+
+		
         // If loop is quicker than the target loop speed. Wait here.
         while (duration < targetTicksPerLoop)
         {
@@ -168,6 +216,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             duration = endTime - startTime;
         }
     }
+	logFile.close();
 
     // ensure no force
     _driver->releaseForce();

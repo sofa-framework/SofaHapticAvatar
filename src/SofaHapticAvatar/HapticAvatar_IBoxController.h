@@ -39,11 +39,15 @@ public:
 
     float getJawOpeningAngle();
 
+    void setHandleForces(float upperJawForce, float lowerJawForce);
+
+	void setLoopGain(int loopGain);
+
 private:
     void clearDevice();
 
 private:
-    HapticAvatar_Driver * m_HA_driver;
+    HapticAvatar_IboxDriver * m_HA_driver;
     bool m_deviceReady;
 };
 
