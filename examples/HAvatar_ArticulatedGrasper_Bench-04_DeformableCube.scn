@@ -1,188 +1,41 @@
 <?xml version="1.0" ?>
 <Node dt="0.01" gravity="0 0 0" name="root">
-    <VisualStyle displayFlags="showVisualModels showBehaviorModels showCollisionModels" />
+    <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels" />
+    <DefaultVisualManagerLoop/>
     
-    <RequiredPlugin name="SofaOpenglVisual"/>
-    <RequiredPlugin name='SofaBoundaryCondition'/>
-    <RequiredPlugin name='SofaGeneralRigid'/>
-    <RequiredPlugin name='SofaConstraint'/>
+    <RequiredPlugin name="SofaBoundaryCondition"/> <!-- Needed to use components [FixedConstraint] -->
+    <RequiredPlugin name="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LinearSolverConstraintCorrection, LocalMinDistance] -->
+    <RequiredPlugin name="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
+    <RequiredPlugin name="SofaEngine"/> <!-- Needed to use components [BoxROI] -->
+    <RequiredPlugin name="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
+    <RequiredPlugin name="SofaSimpleFem"/> <!-- Needed to use components [TetrahedronFEMForceField] -->
+    <RequiredPlugin name="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin name="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
+    <RequiredPlugin name="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
+    <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
+    <RequiredPlugin name="SofaRigid"/> <!-- Needed to use components [RigidMapping] -->
+    <RequiredPlugin name="SofaSparseSolver"/> <!-- Needed to use components [SparseLDLSolver] -->
+    <RequiredPlugin name="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
     <RequiredPlugin name="SofaHapticAvatar"/>
-    <RequiredPlugin pluginName='SofaHaptics'/>
-    <RequiredPlugin pluginName='SofaTopologyMapping'/>
-    <RequiredPlugin pluginName='SofaSparseSolver'/>
+    <RequiredPlugin name='SofaHaptics'/>
     
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
-    <BruteForceDetection name="detection" />
+    <BruteForceBroadPhase />
+    <BVHNarrowPhase />
     <DefaultContactManager name="response" response="FrictionContact" />
-    <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" angleCone="0.1"/>
+    <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
 
-    
-    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM3" iboxController="@HAIBox" portalManager="@portalMgr"/>
-    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />
-    
-    <Node name="Tool">
-        <MechanicalObject name="bati" template="Rigid3d" position="0 0 200  0 0 0 1" rotation="0 -90 -90"/>
-        
-        <Node name="Articulation">
-            <EulerImplicitSolver name="cg_odesolver"  />
-            <SparseLUSolver name="linear solver" tolerance="1e-09" />  
-            
-            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
-            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="100000000 100000000 100000000 100000 100000000 100000000" printLog="true"/>
-            <UniformMass totalMass="0.01"/>
-            <LinearSolverConstraintCorrection />
-            <LCPForceFeedback template="Vec1d" activate="true" forceCoef="0.01"/>
-            
-            <Node name="Models">
-                <MechanicalObject template="Rigid3d" name="DOFs" 
-                position="0 0 0  0 0 0 1  
-                0 0 0  0 0 0 1  
-                0 0 0  0 0 0 1  
-                0 0 0  0 0 0 1  
-                0 0 0  0 0 0 1
-                0 0 0  0 0 0 1" />
-                <ArticulatedSystemMapping input1="@../Articulations" input2="@../../bati" output="@DOFs" />
-                
-                <Node name="Device_base">
-                    <MeshObjLoader filename="./mesh/Haptic_device_base.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-
-                    <RigidMapping input="@.." output="@." index="0"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
-                </Node>
-                
-                
-                <Node name="Device_head">
-                    <MeshObjLoader filename="./mesh/Haptic_device_head.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    <RigidMapping input="@.." output="@." index="1"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
-                </Node>
-                
-                <Node name="Device_portal">
-                    <MeshObjLoader filename="./mesh/Haptic_device_portal.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>                   
-                    <RigidMapping input="@.." output="@." index="2"/>
-                    <Node name="Visu">
-                        <OglModel name="Visual" src="@../loader" />
-                        <IdentityMapping />
-                    </Node>
-                </Node>
-                
-                <Node name="Grasper_shaft_visu">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_shaft.obj"  name="loader"/>
-                    <OglModel name="Visual" src="@loader" />
-                    <RigidMapping input="@.." output="@." index="3"/>
-                </Node>
-                
-                <Node name="Grasper_shaft_collision">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_shaft_collision.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    
-                    <TriangleCollisionModel group="0"/>
-                    <LineCollisionModel group="0"/>
-                    <PointCollisionModel group="0"/>
-                    <RigidMapping input="@.." output="@." index="3"/>
-                </Node>
-                
-                
-                <Node name="Grasper_jaws_up_visu">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_up.obj"  name="loader"/>
-                    <OglModel name="Visual" src="@loader" />
-                    <RigidMapping input="@.." output="@." index="5"/>
-                </Node>
-                
-                <Node name="Grasper_jaws_up_collision">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_up_collision.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    
-                    <TriangleCollisionModel group="0"/>
-                    <LineCollisionModel group="0"/>
-                    <PointCollisionModel group="0"/>
-                    <RigidMapping input="@.." output="@." index="5"/>
-                </Node>
-
-                
-                <Node name="Grasper_jaws_down_visu">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
-                    <OglModel name="Visual" src="@loader" />
-                    <RigidMapping input="@.." output="@." index="4"/>
-                </Node>
-                
-                <Node name="Grasper_jaws_down_collision">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down_collision.obj"  name="loader"/>
-                    <MechanicalObject template="Vec3d" position="@loader.position" />
-                    <MeshTopology src="@loader"/>
-                    
-                    <TriangleCollisionModel group="0"/>
-                    <LineCollisionModel group="0"/>
-                    <PointCollisionModel group="0"/>
-                    <RigidMapping input="@.." output="@." index="4"/>
-                </Node>
-
-            </Node>
-            
-            <ArticulatedHierarchyContainer />
-            <Node name="articulationCenters">
-                <Node name="articulationCenter1">
-                    <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                    <Node name="articulations1">
-                        <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="0" />
-                    </Node>
-                </Node>
-                <Node name="articulationCenter2">
-                    <ArticulationCenter parentIndex="1" childIndex="2" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                    <Node name="articulations2">
-                        <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="1" />
-                    </Node>
-                </Node>
-                
-                <Node name="articulationCenter3">
-                    <ArticulationCenter parentIndex="2" childIndex="3" posOnParent="0 9 0" posOnChild="0 9 0" articulationProcess="0" />
-                    <Node name="articulations3">
-                        <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="2" />
-                        <Articulation translation="1" rotation="0" rotationAxis="0 0 1" articulationIndex="3" />
-                    </Node>
-                </Node>
-                
-                <Node name="articulationCenter4">
-                    <ArticulationCenter parentIndex="3" childIndex="4" posOnParent="0 0 -20" posOnChild="0 0 -20" articulationProcess="0" />
-                    <Node name="articulations4">
-                        <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="4" />                        
-                    </Node>
-                </Node>
-                
-                <Node name="articulationCenter5">
-                    <ArticulationCenter parentIndex="3" childIndex="5" posOnParent="0 0 -20" posOnChild="0 0 -20" articulationProcess="0" />
-                    <Node name="articulations5">
-                        <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="5" />                        
-                    </Node>
-                </Node>
-
-            </Node>
-        </Node>
-
-    </Node>
+    <!-- Include Device driver and 3D model -->
+    <include href="ArticulatedGrasper.xml" />
     
     
+    <!-- Add obstacles -->
     <RegularGridTopology name="grid_2" n="6 6 6" min="50 0 -50" max="150 100 50" />
     <Node name="Cube2">
         <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
-		<SparseLDLSolver />
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
         <MechanicalObject src="@../grid_2" name="Volume" />
         
@@ -191,16 +44,15 @@
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
+        <Hexa2TetraTopologicalMapping input="@../grid_2" output="@Tetra_topo" />
         
-        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_2" output="@Tetra_topo" />
-        
-        <TetrahedralCorotationalFEMForceField name="FEM" youngModulus="100" poissonRatio="0.3" method="large" topology="@Tetra_topo2"/>
-        <UniformMass totalMass="1.0" />
+        <TetrahedronFEMForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large" />
+        <UniformMass totalMass="0.1" />
         <LinearSolverConstraintCorrection />
         
         <Node name="Surface">
-            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
+            <TriangleSetTopologyContainer  name="Container"  />
             <TriangleSetTopologyModifier   name="Modifier" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
@@ -210,8 +62,8 @@
             <PointCollisionModel group="1"/>
             
             <Node name="VisuSurface">
-                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
-                <BarycentricMapping input="@.." output="@Visual" />
+                <OglModel name="Visual" color="green" />
+                <IdentityMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>

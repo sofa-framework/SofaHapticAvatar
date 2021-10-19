@@ -37,7 +37,7 @@ def createDeformableCube(root, nodeName, size3d, min3d, max3d, fixBox):
     
     dCube = grid.addChild("Grid")
     dCube.addObject('EulerImplicitSolver', name="cg_odesolver")
-    dCube.addObject('SparseLDLSolver', name="linear_solver")
+    dCube.addObject('SparseLDLSolver', name="linear_solver", template="CompressedRowSparseMatrixMat3x3d")
     dCube.addObject('MechanicalObject', name="Volume", src="@../grid_1")
     
     # fix positions
