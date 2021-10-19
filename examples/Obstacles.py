@@ -137,3 +137,40 @@ def createDeformableCactus(root, nodeName, translation, size3d, grid3d, fixBox):
     visu.addObject('OglModel', name="VisualModel", color="green")
     visu.addObject('IdentityMapping', name="VisualMapping", input="@..", output="@VisualModel")
 
+
+
+def createLiver(root):
+    liver = root.addChild('Liver')
+    liver.addObject('EulerImplicitSolver', name="cg_odesolver")
+    liver.addObject('SparseLDLSolver', name="linear_solver")
+    
+    # create 3D tetrahedral model
+    liver.addObject('MeshGmshLoader', name="meshLoader", filename="./mesh/liver2.msh", scale3d="100 100 100", rotation="-90 -90 -70", translation="200 50 50")
+    liver.addObject('MechanicalObject', name="dofs", src="@meshLoader")
+    
+    liver.addObject('TetrahedronSetTopologyContainer', name="tetraCon", src="@meshLoader")
+    liver.addObject('TetrahedronSetTopologyModifier', name="tetraMod")
+    liver.addObject('TetrahedronSetGeometryAlgorithms', template="Vec3d", name="tetraGeo")
+    
+    liver.addObject('DiagonalMass', name="Mass", massDensity="0.001")# verifier dimension
+    liver.addObject('FastTetrahedralCorotationalForceField', template="Vec3d", name="FEM", method="large", poissonRatio=0.3, youngModulus=1000)# verifier dimension
+    
+    liver.addObject('BoxROI', name="ROI1", box="180 40 0  230 80 40", drawBoxes="1")
+    liver.addObject('FixedConstraint', name="FixedConstraint", indices="@ROI1.indices")
+    liver.addObject('LinearSolverConstraintCorrection')
+
+    # create surface mesh for collision
+    surf = liver.addChild('LiverSurface')
+    surf.addObject('TriangleSetTopologyContainer', name="triCon")
+    surf.addObject('TriangleSetTopologyModifier', name="triMod")
+    surf.addObject('TriangleSetGeometryAlgorithms', template="Vec3d", name="triGeo")
+    
+    surf.addObject('Tetra2TriangleTopologicalMapping', name="topoMapping", input="@../tetraCon", output="@triCon")
+    surf.addObject('TriangleCollisionModel', name="TModel")
+    surf.addObject('LineCollisionModel', name="LModel")
+    surf.addObject('PointCollisionModel', name="PModel")
+       
+    # map visual model on surface
+    visu = surf.addChild('LiverVisu')
+    visu.addObject('OglModel', name="VisualModel", color="red")
+    visu.addObject('IdentityMapping', name="VisualMapping", input="@../../dofs", output="@VisualModel")
