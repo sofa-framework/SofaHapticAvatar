@@ -72,3 +72,68 @@ def createDeformableCube(root, nodeName, size3d, min3d, max3d, fixBox):
     visu.addObject('OglModel', name="VisualModel", color="green")
     visu.addObject('IdentityMapping', name="VisualMapping", input="@../../Volume", output="@VisualModel")
 
+
+
+def createRigidCactus(root, nodeName, translation, size3d):
+    cactus = root.addChild(nodeName)
+    
+    cactus.addObject('MeshObjLoader', name="loader", filename="./mesh/cactus.obj", translation=translation, scale3d=size3d)
+    cactus.addObject('MechanicalObject', name="CollisModel", position="@loader.position")
+    cactus.addObject('MeshTopology', src='@./loader')
+    
+    cactus.addObject('TriangleCollisionModel', simulated=False, moving=False, bothSide=False, group="1")
+    cactus.addObject('LineCollisionModel', simulated=False, moving=False, group="1")
+    cactus.addObject('PointCollisionModel', simulated=False, moving=False, group="1")
+    
+    # map visual model on surface
+    visu = cactus.addChild('VisuSurface')
+    visu.addObject('OglModel', name="VisualModel")
+    visu.addObject('IdentityMapping', name="VisualMapping", input="@..", output="@VisualModel")
+    
+
+
+def createDeformableCactus(root, nodeName, translation, size3d, grid3d, fixBox):
+    cactus = root.addChild(nodeName)
+    cactus.addObject('MeshObjLoader', name="loader", filename="./mesh/cactus.obj", translation=translation, scale3d=size3d)
+    cactus.addObject('SparseGridRamificationTopology', name="grid", n=grid3d, src='@./loader', nbVirtualFinerLevels=3, finestConnectivity=0)
+        
+    # create 3D tetrahedral model
+    tCactus = cactus.addChild("Mecha")
+    tCactus.addObject('EulerImplicitSolver', name="cg_odesolver")
+    tCactus.addObject('SparseLDLSolver', name="linear_solver", template="CompressedRowSparseMatrixMat3x3d")
+    #tCactus.addObject('CGLinearSolver', name="linear_solver", iterations=30, tolerance="1e-9", threshold="1e-9", template="CompressedRowSparseMatrixMat3x3d")
+    
+    # create 3D tetrahedral model
+    tCactus.addObject('TetrahedronSetTopologyContainer', name="Tetra_topo")
+    tCactus.addObject('TetrahedronSetTopologyModifier', name="Tetra_Modifier")
+    tCactus.addObject('TetrahedronSetGeometryAlgorithms', name="Tetra_GeomAlgo", template="Vec3d")
+    tCactus.addObject('Hexa2TetraTopologicalMapping', name="Hexa2Tetra", input="@../grid", output="@Tetra_topo")
+
+    tCactus.addObject('MechanicalObject', name="Volume", position="@../grid.position")
+    
+    # fix positions
+    tCactus.addObject('BoxROI', name="boxRoi1", box=fixBox, drawBoxes=True)
+    tCactus.addObject('FixedConstraint', name="Fix", indices="@boxRoi1.indices")
+    
+    # mechanical parameters
+    tCactus.addObject('UniformMass', name="Mass", totalMass="1.0")
+    tCactus.addObject('FastTetrahedralCorotationalForceField', template="Vec3d", name="FEM", method="large", poissonRatio=0.3, youngModulus=3000)
+    tCactus.addObject('LinearSolverConstraintCorrection')
+    #cactus.addObject('UncoupledConstraintCorrection')
+
+    
+    # Add surface mesh with barycentric mapping for collision
+    surfCactus = tCactus.addChild("Surface")
+    surfCactus.addObject('MeshTopology', src='@../../loader')
+    surfCactus.addObject('MechanicalObject', name="CollisModel", src="@../../loader")
+    
+    surfCactus.addObject('TriangleCollisionModel', simulated=True, moving=True, bothSide=False, group="1")
+    surfCactus.addObject('LineCollisionModel', simulated=True, moving=True, group="1")
+    surfCactus.addObject('PointCollisionModel', simulated=True, moving=True, group="1")
+    surfCactus.addObject('BarycentricMapping', name="baryMapping", input="@..", output="@.")
+    
+    # map visual model on surface
+    visu = surfCactus.addChild('VisuSurface')
+    visu.addObject('OglModel', name="VisualModel", color="green")
+    visu.addObject('IdentityMapping', name="VisualMapping", input="@..", output="@VisualModel")
+
