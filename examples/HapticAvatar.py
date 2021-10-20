@@ -14,6 +14,11 @@ def createDevice(root):
     root.addObject('HapticAvatar_IBoxController', name="HAIBox", portName=_ibox_portal, printLog="1")
 
 
+def createRigidDevice(root):
+    root.addObject('HapticAvatar_PortalManager', name="Portal_Manager", configFilename="./config/PortalSetup.xml", printLog="1")
+    root.addObject('HapticAvatar_RigidGrasperDeviceController', name="HA_Emulator", portName=_tool_portal, iboxController="@HAIBox", portalManager="@Portal_Manager")
+    root.addObject('HapticAvatar_IBoxController', name="HAIBox", portName=_ibox_portal, printLog="1")
+    
 
 def createArticulatedGrasper(root, toolPosition, toolRotation):
     # articulated grasper
@@ -69,34 +74,34 @@ def createArticulatedGrasper(root, toolPosition, toolRotation):
     dShaftCol.addObject('RigidMapping', input="@..", output="@.", index="3")
     
     
-    dShaftVisu = models.addChild('Grasper_jaws_up_visu')
-    dShaftVisu.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_up.obj")
-    dShaftVisu.addObject('OglModel', name="Visual", src="@loader")
-    dShaftVisu.addObject('RigidMapping', input="@..", output="@.", index="5")
+    dJawUp = models.addChild('Grasper_jaws_up_visu')
+    dJawUp.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_up.obj")
+    dJawUp.addObject('OglModel', name="Visual", src="@loader")
+    dJawUp.addObject('RigidMapping', input="@..", output="@.", index="5")
     
-    dShaftCol = models.addChild('Grasper_jaws_up_collision')
-    dShaftCol.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_up_collision.obj")
-    dShaftCol.addObject('MechanicalObject', template="Vec3d", position="@loader.position")    
-    dShaftCol.addObject('MeshTopology', src="@loader")
-    dShaftCol.addObject('TriangleCollisionModel', group="0")
-    dShaftCol.addObject('LineCollisionModel', group="0")
-    dShaftCol.addObject('PointCollisionModel', group="0")
-    dShaftCol.addObject('RigidMapping', input="@..", output="@.", index="5")
+    dJawUpCol = models.addChild('Grasper_jaws_up_collision')
+    dJawUpCol.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_up_collision.obj")
+    dJawUpCol.addObject('MechanicalObject', template="Vec3d", position="@loader.position")    
+    dJawUpCol.addObject('MeshTopology', src="@loader")
+    dJawUpCol.addObject('TriangleCollisionModel', group="0")
+    dJawUpCol.addObject('LineCollisionModel', group="0")
+    dJawUpCol.addObject('PointCollisionModel', group="0")
+    dJawUpCol.addObject('RigidMapping', input="@..", output="@.", index="5")
     
     
-    dShaftVisu = models.addChild('Grasper_jaws_down_visu')
-    dShaftVisu.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_down.obj")
-    dShaftVisu.addObject('OglModel', name="Visual", src="@loader")
-    dShaftVisu.addObject('RigidMapping', input="@..", output="@.", index="4")
+    dJawDown = models.addChild('Grasper_jaws_down_visu')
+    dJawDown.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_down.obj")
+    dJawDown.addObject('OglModel', name="Visual", src="@loader")
+    dJawDown.addObject('RigidMapping', input="@..", output="@.", index="4")
     
-    dShaftCol = models.addChild('Grasper_jaws_down_collision')
-    dShaftCol.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_down_collision.obj")
-    dShaftCol.addObject('MechanicalObject', template="Vec3d", position="@loader.position")    
-    dShaftCol.addObject('MeshTopology', src="@loader")
-    dShaftCol.addObject('TriangleCollisionModel', group="0")
-    dShaftCol.addObject('LineCollisionModel', group="0")
-    dShaftCol.addObject('PointCollisionModel', group="0")
-    dShaftCol.addObject('RigidMapping', input="@..", output="@.", index="4")
+    dJawDownCol = models.addChild('Grasper_jaws_down_collision')
+    dJawDownCol.addObject('MeshObjLoader', name="loader", filename="./mesh/Haptic_grasper_jaws_down_collision.obj")
+    dJawDownCol.addObject('MechanicalObject', template="Vec3d", position="@loader.position")    
+    dJawDownCol.addObject('MeshTopology', src="@loader")
+    dJawDownCol.addObject('TriangleCollisionModel', group="0")
+    dJawDownCol.addObject('LineCollisionModel', group="0")
+    dJawDownCol.addObject('PointCollisionModel', group="0")
+    dJawDownCol.addObject('RigidMapping', input="@..", output="@.", index="4")
     
     
     articulations.addObject('ArticulatedHierarchyContainer')
@@ -104,26 +109,130 @@ def createArticulatedGrasper(root, toolPosition, toolRotation):
     
     artCt1 = artCenters.addChild('articulationCenter1')
     artCt1.addObject('ArticulationCenter', parentIndex="0", childIndex="1", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
-    arts1 = artCt1.addChild('articulations1')
-    arts1.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="0")
+    arts11 = artCt1.addChild('articulations1')
+    arts11.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="0")
     
     artCt2 = artCenters.addChild('articulationCenter2')
     artCt2.addObject('ArticulationCenter', parentIndex="1", childIndex="2", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
-    arts2 = artCt2.addChild('articulations2')
-    arts2.addObject('Articulation', translation="0", rotation="1", rotationAxis="1 0 0", articulationIndex="1")
+    arts21 = artCt2.addChild('articulations2')
+    arts21.addObject('Articulation', translation="0", rotation="1", rotationAxis="1 0 0", articulationIndex="1")
     
     artCt3 = artCenters.addChild('articulationCenter3')
     artCt3.addObject('ArticulationCenter', parentIndex="2", childIndex="3", posOnParent="0 9 0", posOnChild="0 9 0", articulationProcess="0")
-    arts3 = artCt3.addChild('articulations3')
-    arts3.addObject('Articulation', name="art1", translation="0", rotation="1", rotationAxis="0 0 1", articulationIndex="2")
-    arts3.addObject('Articulation', name="art2", translation="1", rotation="0", rotationAxis="0 0 1", articulationIndex="3")
+    arts31 = artCt3.addChild('articulations3')
+    arts31.addObject('Articulation', name="art1", translation="0", rotation="1", rotationAxis="0 0 1", articulationIndex="2")
+    arts31.addObject('Articulation', name="art2", translation="1", rotation="0", rotationAxis="0 0 1", articulationIndex="3")
     
     artCt4 = artCenters.addChild('articulationCenter4')
     artCt4.addObject('ArticulationCenter', parentIndex="3", childIndex="4", posOnParent="0 0 -20", posOnChild="0 0 -20", articulationProcess="0")
-    arts4 = artCt4.addChild('articulations4')
-    arts4.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="4")
+    arts41 = artCt4.addChild('articulations4')
+    arts41.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="4")
     
     artCt5 = artCenters.addChild('articulationCenter5')
     artCt5.addObject('ArticulationCenter', parentIndex="3", childIndex="5", posOnParent="0 0 -20", posOnChild="0 0 -20", articulationProcess="0")
-    arts5 = artCt5.addChild('articulations5')
-    arts5.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="5")
+    arts51 = artCt5.addChild('articulations5')
+    arts51.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="5")
+
+
+
+def createPortal(root, nodeName, portalId):
+    
+    portalPosition = "@../Portal_Manager.portalPosition" + str(portalId)
+    
+    portal = root.addChild(nodeName)
+    portal.addObject('MeshObjLoader', name="ProtalMesh", filename="./mesh/Portal.obj", handleSeams=True)
+    portal.addObject('MechanicalObject', name="ms", template="Rigid3d", position=portalPosition)
+    
+    portalVisu = portal.addChild('VisuPortal')
+    portalVisu.addObject('OglModel', name="Visual", src="@../ProtalMesh")
+    portalVisu.addObject('RigidMapping', input="@..", output="@Visual")
+
+
+def createRigidGrasper(root, toolPosition, toolRotation):
+    root.addObject('EulerImplicitSolver', name="cg_odesolver", rayleighStiffness=0.1, rayleighMass=0.1)
+    root.addObject('CGLinearSolver', name="solver", tolerance=1e-09, threshold=1e-09, iterations=25)
+    
+    instru = root.addChild('Instrument')
+    instru.addObject('MechanicalObject', name="GrasperDOFs", template="Rigid3d", position="@../HA_Emulator.toolPosition")
+    
+    articulations = root.addChild('Articulation')
+    articulations.addObject('MechanicalObject', name="Articulations", template="Vec1d", position="0 0 0 0 0 0")
+    articulations.addObject('UncoupledConstraintCorrection')
+    
+    tool = articulations.addChild('Tool')
+    tool.addObject('MechanicalObject', name="DOFs", template="Rigid3d", translation=toolPosition, position="0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1    0 0 0  0 0 0 1")
+    tool.addObject('UniformMass', totalMass="100")
+    tool.addObject('LCPForceFeedback', template="Rigid3d", activate="true", forceCoef="0.0005")
+    tool.addObject('RestShapeSpringsForceField', points="0 1 2 3 4 5", external_points='0 1 2 3 4 5', stiffness="100000000 100000000 100000000 100000000 100000000 100000000",
+    angularStiffness='1000000000000 1000000000000 1000000000000 1000000000000 1000000000000 1000000000000', external_rest_shape='@../../Instrument/GrasperDOFs')
+    
+    tool.addObject('ArticulatedSystemMapping', input1="@../Articulations", output="@DOFs")
+
+    # Shaft articulation
+    dBase = tool.addChild('ShaftModel')
+    dBase.addObject('MeshObjLoader', name="loader", filename="./mesh/grasper_shaft_collision_light.obj")
+    dBase.addObject('MeshTopology', name="InstrumentCollisionModel", src="@loader")
+    dBase.addObject('MechanicalObject', name="instrumentCollisionState", src="@loader", tags="toolPosition")
+    dBase.addObject('SphereCollisionModel', name="shaftSphere", radius=2, group=0, tags="toolCollision shaft")
+    dBase.addObject('RigidMapping', input="@..", output="@instrumentCollisionState", index="3")
+
+    dShaftVisu = tool.addChild('Shaft_visu')
+    dShaftVisu.addObject('MeshObjLoader', name="meshLoader_1", filename="./mesh/grasper_shaft.obj", handleSeams="1")
+    dShaftVisu.addObject('OglModel', name="InstrumentVisualModel", src="@meshLoader_1")
+    dShaftVisu.addObject('RigidMapping', input="@..", output="@InstrumentVisualModel", index="3")
+
+    # JawUp articulation
+    jawUp = tool.addChild('JawUp_collision')
+    jawUp.addObject('MeshObjLoader', name="loader", filename="./mesh/grasper_jaws_up_collision_light.obj")
+    jawUp.addObject('MeshTopology', name="InstrumentCollisionModel", src="@loader")
+    jawUp.addObject('MechanicalObject', name="instrumentCollisionState", src="@loader", tags="toolPosition")
+    jawUp.addObject('SphereCollisionModel', name="jawUpSphere", radius=1, group=0, tags="toolCollision jaws")
+    jawUp.addObject('RigidMapping', input="@..", output="@instrumentCollisionState", index="4")
+
+    jawUpVisu = tool.addChild('JawUp_visu')
+    jawUpVisu.addObject('MeshObjLoader', name="meshLoader_1", filename="./mesh/grasper_jaws_up.obj", handleSeams="1")
+    jawUpVisu.addObject('OglModel', name="InstrumentVisualModel", src="@meshLoader_1")
+    jawUpVisu.addObject('RigidMapping', input="@..", output="@InstrumentVisualModel", index="4")
+
+
+    # JawDown articulation
+    jawUp = tool.addChild('JawDown_collision')
+    jawUp.addObject('MeshObjLoader', name="loader", filename="./mesh/grasper_jaws_down_collision_light.obj")
+    jawUp.addObject('MeshTopology', name="InstrumentCollisionModel", src="@loader")
+    jawUp.addObject('MechanicalObject', name="instrumentCollisionState", src="@loader", tags="toolPosition")
+    jawUp.addObject('SphereCollisionModel', name="jawDownSphere", radius=1, group=0, tags="toolCollision jaws")
+    jawUp.addObject('RigidMapping', input="@..", output="@instrumentCollisionState", index="5")
+
+    jawUpVisu = tool.addChild('JawUp_visu')
+    jawUpVisu.addObject('MeshObjLoader', name="meshLoader_1", filename="./mesh/grasper_jaws_down.obj", handleSeams="1")
+    jawUpVisu.addObject('OglModel', name="InstrumentVisualModel", src="@meshLoader_1")
+    jawUpVisu.addObject('RigidMapping', input="@..", output="@InstrumentVisualModel", index="5")
+    
+    
+    tool.addObject('ArticulatedHierarchyContainer')
+    artCenters = tool.addChild('articulationCenters')
+        
+    artCt1 = artCenters.addChild('articulationCenter1')
+    artCt1.addObject('ArticulationCenter', parentIndex="0", childIndex="1", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
+    arts11 = artCt1.addChild('articulations1')
+    arts11.addObject('Articulation', translation="0", rotation="1", rotationAxis="1 0 0", articulationIndex="0")
+    arts12 = artCt1.addChild('articulations2')
+    arts12.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 1 0", articulationIndex="1")
+    arts13 = artCt1.addChild('articulations3')
+    arts13.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 0 1", articulationIndex="2")
+    
+    artCt2 = artCenters.addChild('articulationCenter2')
+    artCt2.addObject('ArticulationCenter', parentIndex="1", childIndex="3", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
+    arts21 = artCt2.addChild('articulations4')
+    arts21.addObject('Articulation', translation="1", rotation="0", rotationAxis="0 1 0", articulationIndex="3")
+    
+    artCt3 = artCenters.addChild('articulationCenter3')
+    artCt3.addObject('ArticulationCenter', parentIndex="3", childIndex="4", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
+    arts31 = artCt3.addChild('articulations5')
+    arts31.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 0 1", articulationIndex="4")
+
+    artCt4 = artCenters.addChild('articulationCenter4')
+    artCt4.addObject('ArticulationCenter', parentIndex="3", childIndex="5", posOnParent="0 0 0", posOnChild="0 0 0", articulationProcess="0")
+    arts41 = artCt4.addChild('articulations6')
+    arts41.addObject('Articulation', translation="0", rotation="1", rotationAxis="0 0 1", articulationIndex="5")
+    

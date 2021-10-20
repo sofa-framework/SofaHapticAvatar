@@ -21,6 +21,9 @@ def main():
     Sofa.Gui.GUIManager.closeGUI()
 
 
+_method = "articulated1d"
+#_method = "articulatedRigid3d"
+
 def createScene(root):
     root.gravity=[0, -9.81, 0]
     root.dt=0.01
@@ -42,13 +45,23 @@ def createScene(root):
     root.addObject('FreeMotionAnimationLoop')
     root.addObject('LCPConstraintSolver', tolerance="0.001", maxIt="10000") #checker mu
  
-    # create device portal and driver
-    HapticAvatar.createDevice(root)
-    
-    # create articulated grasper
-    toolPosition=[0, 0, 0] # origin at the portal rotation
-    toolRotation=[0, -90, -90]
-    HapticAvatar.createArticulatedGrasper(root, toolPosition, toolRotation)
+    if (_method == "articulated1d"):
+        # create device portal and driver
+        HapticAvatar.createDevice(root)
+        
+        # create articulated grasper
+        toolPosition=[0, 0, 0] # origin at the portal rotation
+        toolRotation=[0, -90, -90]
+        HapticAvatar.createArticulatedGrasper(root, toolPosition, toolRotation)
+    elif (_method == "articulatedRigid3d"):
+        # create device portal and driver
+        HapticAvatar.createRigidDevice(root)
+        
+        HapticAvatar.createPortal(root, "Portal_4", 4)
+        
+        toolPosition=[8.8, 194.23, 0] # origin at the portal rotation
+        toolRotation=[0, 0, 0]
+        HapticAvatar.createRigidGrasper(root, toolPosition, toolRotation)
     
     return root
 
