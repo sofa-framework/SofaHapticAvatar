@@ -1,20 +1,26 @@
 <?xml version="1.0"?>
 <Node name="root" gravity="0 0 0" dt="0.01" bbox="-200 -200 -200 200 200 200">
-    <RequiredPlugin name="SofaOpenglVisual"/>
+    <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels" />
+    <DefaultVisualManagerLoop/>
+    
+    <RequiredPlugin name="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LocalMinDistance, UncoupledConstraintCorrection] -->
+    <RequiredPlugin name="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
+    <RequiredPlugin name="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
+    <RequiredPlugin name="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin name="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
+    <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
+    <RequiredPlugin name="SofaRigid"/> <!-- Needed to use components [RigidMapping] -->
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics' />
-    <RequiredPlugin name='SofaSparseSolver'/>
-    <RequiredPlugin name='SofaConstraint'/>
-    <RequiredPlugin name='SofaGeneralRigid'/>
-    <RequiredPlugin name='SofaTopologyMapping'/>
+
     
-	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
-  
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
-    <BruteForceDetection name="detection" />
+    <BruteForceBroadPhase />
+    <BVHNarrowPhase />
     <DefaultContactManager name="response" response="FrictionContact" />
-    <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.1" angleCone="0.0" />
-    <!--<MinProximityIntersection />-->
+    <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
+    <FreeMotionAnimationLoop/>
+    <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
     
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
@@ -22,131 +28,7 @@
     <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
     <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
     
-    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_RigidGrasperDeviceController name="HADevice" portName="//./COM3" printLog="1" portalManager="@portalMgr" 
-    drawDeviceAxis="0" drawDebugForce="1" iboxController="@HAIBox" dumpThreadInfo="0" forceScale="1" />
-    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM5" printLog="1" />
-    
-    <MeshObjLoader name="ProtalMesh" filename="mesh/Portal.obj" handleSeams="1"/>
-    <Node name="Portal_4">
-        <MechanicalObject name="ms" template="Rigid3d" position="@portalMgr.portalPosition4"/>
-        <Node name="VisuPortal">
-            <OglModel name="Visual" src="@../../ProtalMesh" />
-            <RigidMapping input="@.." output="@Visual" index="0"/>
-        </Node>
-    </Node>
-    
-    <Node name="Instrument" >
-        <MechanicalObject name="GrasperDOFs" template="Rigid3d" position="@../HADevice.toolPosition"/>
-    </Node>
-    
-    
-    <Node name="articulation">
-        <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0  0 0 0" />
-        <UncoupledConstraintCorrection />
-       
-        <Node name="model">
-            <MechanicalObject template="Rigid3d" name="DOFs" position="0 0 0  0 0 0 1   0 0 0  0 0 0 1  0 0 0  0 0 0 1  0 0 0  0 0 0 1
-            0 0 0  0 0 0 1     0 0 0  0 0 0 1" translation="8.8 194.23 0"/>
-            
-            <UniformMass name="mass" totalMass="150" />
-            <LCPForceFeedback activate="true" forceCoef="0.001" localHapticConstraintAllFrames="0"/>   
-            <RestShapeSpringsForceField stiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
-            angularStiffness='100000000000000 100000000000000 100000000000000 100000000000000 1000000000000 1000000000000' 
-            external_rest_shape='@../../Instrument/GrasperDOFs' points='0 1 2 3 4 5' external_points='0 1 2 3 4 5' drawSpring="1"
-            />
-            <!--
-            <UniformMass template="Rigid3d" name="mass" totalMass="100" />
-            
-            -->
-            <UncoupledConstraintCorrection />
-
-            <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
-            
-            <Node name="CollisionModel" >
-                <MeshObjLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
-                <SphereCollisionModel name="shaftSphere" radius="2" group="0" tags="toolCollision shaft"/> 
-
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" 
-                index="3"/>
-            </Node>
-            
-            <Node name="Shaft_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="3"/>
-            </Node>
-            
-            <Node name="JawUp_collision" >
-                <MeshObjLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="jawUpSphere" radius="1" group="0" tags="toolCollision jaws" /> 
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="4"/>
-            </Node>
-            
-            <Node name="JawUp_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
-            </Node>
-
-            <Node name="JawDown_collision" >
-                <MeshObjLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
-                <MeshTopology src="@loader" name="InstrumentCollisionModel" />
-                <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
-                <SphereCollisionModel name="jawDownSphere" radius="1" group="0" tags="toolCollision jaws"/> 
-                <RigidMapping name="MM->CM mapping" input="@.." output="@instrumentCollisionState" index="5"/>
-            </Node>     
-            
-            <Node name="JawDown_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
-                <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
-                <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="5"/>
-            </Node>
-        </Node>
-        
-        
-        <ArticulatedHierarchyContainer />        
-        <Node name="articulationCenters1">
-            <Node name="articulationCenter1">
-                <ArticulationCenter parentIndex="0" childIndex="1" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations1">
-                    <Articulation translation="0" rotation="1" rotationAxis="1 0 0" articulationIndex="0" />
-                </Node>
-                <Node name="articulations2">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 1 0" articulationIndex="1" />
-                </Node>
-                <Node name="articulations3">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="2" />
-                </Node>
-            </Node>
-            
-            <Node name="articulationCenter2">
-                <ArticulationCenter parentIndex="1" childIndex="3" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations4">
-                    <Articulation translation="1" rotation="0" rotationAxis="0 1 0" articulationIndex="3" />
-                </Node>
-            </Node>
-            
-            
-            <Node name="articulationCenter3">
-                <ArticulationCenter parentIndex="3" childIndex="4" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations5">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="4" />
-                </Node>
-            </Node>
-            
-            <Node name="articulationCenter4">
-                <ArticulationCenter parentIndex="3" childIndex="5" posOnParent="0 0 0" posOnChild="0 0 0" articulationProcess="0" />
-                <Node name="articulations6">
-                    <Articulation translation="0" rotation="1" rotationAxis="0 0 1" articulationIndex="5" />
-                </Node>
-            </Node>
-        </Node>
-        
-    </Node>
+    <!-- Include Device driver and 3D model -->
+    <include href="ArticulatedRigidGrasper.xml" />
     
 </Node>
