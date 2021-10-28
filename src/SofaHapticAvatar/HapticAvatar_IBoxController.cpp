@@ -48,7 +48,7 @@ HapticAvatar_IBoxController::~HapticAvatar_IBoxController()
 void HapticAvatar_IBoxController::init()
 {
     msg_info() << "HapticAvatar_IBoxController::init()";
-    m_HA_driver = new HapticAvatar_IboxDriver(d_portName.getValue());
+    m_HA_driver = new HapticAvatar_DriverIbox(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected()) {
         msg_error() << "HapticAvatar_IBoxController driver creation failed";
@@ -56,32 +56,37 @@ void HapticAvatar_IBoxController::init()
     }
 
     // get identity
-    std::string identity = m_HA_driver->getIdentity();
+    std::string identity = m_HA_driver->getDeviceType();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatarDeviceController identity: '" << identity << "'" << std::endl;
+    std::cout << "HapticAvatar_IBoxController identity: '" << identity << "'" << std::endl;
 
-	setLoopGain(120000);
+    for (int i = 0; i < IBOX_NUM_CHANNELS; i++) {
+        setLoopGain(i, 4.0f, 0);
+    }
 
     return;
 }
 
-float HapticAvatar_IBoxController::getJawOpeningAngle()
+float HapticAvatar_IBoxController::getJawOpeningAngle(int toolId)
 {
-    sofa::type::fixed_array<float, 4> values = m_HA_driver->getOpeningValues();
-    return values[0];
+    return m_HA_driver->getOpeningValue(toolId);
 }
 
 
-void HapticAvatar_IBoxController::setHandleForces(float upperJawForce, float lowerJawForce)
+void HapticAvatar_IBoxController::setHandleForce(int toolId, float force)
 {
-    return m_HA_driver->setHandleForces(upperJawForce, lowerJawForce);
+    return m_HA_driver->setForce(toolId, force);
 }
 
-void HapticAvatar_IBoxController::setLoopGain(int loopGain)
+void HapticAvatar_IBoxController::setLoopGain(int chan, float loopGainP, float loopGainD)
 {
-	return m_HA_driver->setLoopGain(loopGain);
+    m_HA_driver->setLoopGain(chan, loopGainP, loopGainD);
 }
 
+void HapticAvatar_IBoxController::update()
+{
+    m_HA_driver->update();
+}
 
 void HapticAvatar_IBoxController::clearDevice()
 {

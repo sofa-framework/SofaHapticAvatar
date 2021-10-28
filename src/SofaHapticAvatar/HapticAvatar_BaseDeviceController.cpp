@@ -59,13 +59,13 @@ HapticAvatar_BaseDeviceController::~HapticAvatar_BaseDeviceController()
 void HapticAvatar_BaseDeviceController::init()
 {
     msg_info() << "HapticAvatar_BaseDeviceController::init()";
-    m_HA_driver = new HapticAvatar_Driver(d_portName.getValue());
+    m_HA_driver = new HapticAvatar_DriverPort(d_portName.getValue());
 
     if (!m_HA_driver->IsConnected())
         return;
         
     // get identity
-    std::string identity = m_HA_driver->getIdentity();
+    std::string identity = m_HA_driver->getDeviceType();
     d_hapticIdentity.setValue(identity);
     std::cout << "HapticAvatar_BaseDeviceController identity: '" << identity << "'" << std::endl;
 

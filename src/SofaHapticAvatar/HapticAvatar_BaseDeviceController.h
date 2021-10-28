@@ -14,7 +14,7 @@
 #include <SofaUserInteraction/Controller.h>
 #include <SofaHaptics/LCPForceFeedback.h>
 
-#include <SofaHapticAvatar/HapticAvatar_Driver.h>
+#include <SofaHapticAvatar/HapticAvatar_DriverPort.h>
 #include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
 
 
@@ -114,6 +114,7 @@ public:
         sofa::type::fixed_array<float, 4> anglesAndLength;
         sofa::type::fixed_array<float, 4> motorValues;
         sofa::type::fixed_array<float, 3> collisionForces;
+        int toolId;
         float jawOpening;
     };
 
@@ -131,7 +132,7 @@ public:
 
 protected:
     /// Pointer to the internal Driver for device API communication
-    HapticAvatar_Driver * m_HA_driver;
+    HapticAvatar_DriverPort * m_HA_driver;
     /// Pointer to the portal manager to get information from the current portal
     HapticAvatar_PortalManager * m_portalMgr;
     

@@ -49,7 +49,7 @@
             <BoxROI name="boxRoi1" box="-1 -1 -101  201 50 101" drawBoxes="1"/>
             <FixedConstraint indices="@boxRoi1.indices" />
             
-            <TetrahedronFEMForceField name="FEM" youngModulus="3000" poissonRatio="0.3" method="large" />
+            <TetrahedronFEMForceField name="FEM" youngModulus="4500" poissonRatio="0.3" method="large" />
             <UniformMass totalMass="1.0" />
             <LinearSolverConstraintCorrection />
             
