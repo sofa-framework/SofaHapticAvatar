@@ -131,7 +131,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     ctime_t summedLoopDuration = 0;
 	
 	//log file
-	std::ofstream logFile("HapticAvatarLog.txt");
+	//std::ofstream logFile("HapticAvatarLog.txt");
 	bool contact = false;
     while (!terminate)
     {
@@ -196,7 +196,9 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
                 std::cout << "Average haptic loop frequency " << std::to_string(int(updateFreq)) << std::endl;
                 summedLoopDuration = 0;
             }
-
+            if (cptLoop % 30000 == 0) {
+                _driver->printStatus();
+            }
 
         }
         else
@@ -240,7 +242,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             duration = endTime - startTime;
         }
     }
-	logFile.close();
+	//logFile.close();
 
     // ensure no force
     _driver->releaseForce();

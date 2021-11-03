@@ -59,6 +59,7 @@ namespace sofa::HapticAvatar
         bool getToolInserted();
         float getBoardTemp();
         float getBatteryVoltage();
+        float getChargingCurrent();
         sofa::type::fixed_array<int, 4> getRawEncoderValues(); // in counts
         sofa::type::fixed_array<float, 4> getEncoderScalingValues(); // radians/counts
         bool getYawPitchCalibrated();
@@ -85,7 +86,7 @@ namespace sofa::HapticAvatar
         */
         sofa::type::fixed_array<float, 4> getMotorScalingValues();
 
-
+        int getStatus();
 
 
         /** Set the force and torque output per motor.
@@ -117,6 +118,10 @@ namespace sofa::HapticAvatar
         void setManualPWM(float rotTorque, float pitchTorque, float zforce, float yawTorque);
 
         //void setManual_Force_and_Torques(float rotTorque, float pitchTorque, float zforce, float yawTorque);
+
+        float getPartTemperature(int part);
+
+        void printStatus() override;
 
     protected:
         /// Internal method to get the enum id for reset command. To be overwritten by child
@@ -189,5 +194,13 @@ namespace sofa::HapticAvatar
             ALWAYS_LAST
         };
 
+        // Enums for the thermal simulation in the device. The motor winding temperatures are the most interesting.
+        enum PortThermalSimPart {
+            RMotorWinding = 0, PMotorWinding, ZMotorWinding, YMotorWinding,
+            HeatSink, RStruct, PStruct, ZStruct, YStruct, Cover, CoolingAir, Ambient, NumParts
+        };
+        //enum PortPart {RMotorWinding = 0, PMotorWinding, ZMotorWinding, YMotorWinding,
+        //    HeatSink, RStruct, PStruct, ZStruct, YStruct, Cover, CoolingAir, Ambient, NumParts
+        //};
     };
 } // namespace sofa::HapticAvatar

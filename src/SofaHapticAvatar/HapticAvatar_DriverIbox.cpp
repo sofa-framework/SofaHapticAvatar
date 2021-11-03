@@ -73,6 +73,7 @@ namespace sofa::HapticAvatar
         num_return_vals[(int)CmdIBox::SET_HANDLE_LED] = 0;
         num_return_vals[(int)CmdIBox::GET_OPTO_VOLTAGES] = IBOX_NUM_CHANNELS;
         num_return_vals[(int)CmdIBox::SET_TO_CALIBRATE] = 0;
+        num_return_vals[(int)CmdIBox::GET_PART_TEMPERATURES] = 11;
         num_return_vals[(int)CmdIBox::SET_MAX_USB_CHARGE_CURRENT] = 0;
         num_return_vals[(int)CmdIBox::GET_USB_CHARGING_CURRENT] = 1;
         num_return_vals[(int)CmdIBox::GET_CONNECTION_STATES] = 1;
@@ -117,6 +118,7 @@ namespace sofa::HapticAvatar
         subscribeTo((int)CmdIBox::GET_BOARD_TEMP, 10007);
         subscribeTo((int)CmdIBox::GET_BATTERY_VOLTAGE, 10009);
         subscribeTo((int)CmdIBox::GET_USB_CHARGING_CURRENT, 10037);
+        subscribeTo((int)CmdIBox::GET_PART_TEMPERATURES, 10039);
     }
 
     float HapticAvatar_DriverIbox::getOpeningValue(int toolId)
@@ -175,6 +177,15 @@ namespace sofa::HapticAvatar
     {
         return getInt((int)CmdIBox::GET_SERIAL_NUM);
     }
+    float HapticAvatar_DriverIbox::getChargingCurrent()
+    {
+        return getFloat((int)CmdIBox::GET_USB_CHARGING_CURRENT);
+    }
+    float HapticAvatar_DriverIbox::getPartTemperature(int part)
+    {
+        return getFloat((int)CmdIBox::GET_PART_TEMPERATURES, int(part));
+    }
+
 
 
 
@@ -242,4 +253,59 @@ namespace sofa::HapticAvatar
         }
     }
 */
+    void HapticAvatar_DriverIbox::printStatus()
+    {
+        std::cout << "Status for Ibox device S/N " << getSerialNumber() << " at " << getPortName() << std::endl;
+        std::cout << "--------------------------------------------" << std::endl;
+
+        std::cout << "  Amplifier board temperature " << getBoardTemp() << "°C" << std::endl;
+        std::cout << "  Battery voltage " << getBatteryVoltage() << "V" << std::endl;
+        std::cout << "  Charging current " << getChargingCurrent() << "A  (USB draw)" << std::endl;
+        unsigned int status = (unsigned int)getStatus();
+        //std::cout << "  Yaw calibrated: ";
+        //if (status & 0x08 > 0)
+        //    std::cout << "Yes     ";
+        //else
+        //    std::cout << "No      ";
+        //std::cout << "Pitch calibrated: ";
+        //if (status & 0x02 > 0)
+        //    std::cout << "Yes ";
+        //else
+        //    std::cout << "No  ";
+        //std::cout << std::endl;
+        //if (status & 0x80 > 0)
+        //    std::cout << "  Yaw Amplifier temperature warning!" << std::endl;
+        //if (status & 0x20 > 0)
+        //    std::cout << "  Pitch Amplifier temperature warning!" << std::endl;
+        //if (status & 0x10 > 0)
+        //    std::cout << "  Z or Rot Amplifier temperature warning!" << std::endl;
+        //if (status & 0x800 > 0)
+        //    std::cout << "  Yaw Amplifier undervoltage warning!" << std::endl;
+        //if (status & 0x200 > 0)
+        //    std::cout << "  Pitch Amplifier undervoltage warning!" << std::endl;
+        //if (status & 0x100 > 0)
+        //    std::cout << "  Z or Rot Amplifier undervoltage warning!" << std::endl;
+
+        float temp = getPartTemperature((int)IboxThermalSimPart::MotorWinding0);
+        std::cout << "  Handle Red winding temperature " << temp << " °C";
+        if (temp > 85)
+            std::cout << " HIGH, output reduced!";
+        std::cout << std::endl;
+        temp = getPartTemperature((int)IboxThermalSimPart::MotorWinding1);
+        std::cout << "  Handle Orange winding temperature " << temp << " °C";
+        if (temp > 85)
+            std::cout << " HIGH, output reduced!";
+        std::cout << std::endl;
+        temp = getPartTemperature((int)IboxThermalSimPart::MotorWinding2);
+        std::cout << "  Handle Yellow winding temperature " << temp << " °C";
+        if (temp > 85)
+            std::cout << " HIGH, output reduced!";
+        std::cout << std::endl;
+        temp = getPartTemperature((int)IboxThermalSimPart::MotorWinding3);
+        std::cout << "  Handle Green winding temperature " << temp << " °C";
+        if (temp > 85)
+            std::cout << " HIGH, output reduced!";
+        std::cout << std::endl << std::endl;
+
+    }
 }

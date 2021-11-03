@@ -95,6 +95,10 @@ void HapticAvatar_DriverPort::setupNumReturnVals()
     num_return_vals[(int)CmdPort::GET_BUILD_DATE] = 1;
     num_return_vals[(int)CmdPort::SET_CHARGE_ENABLE] = 0;
     num_return_vals[(int)CmdPort::GET_TIP_LENGTH] = 1;
+    num_return_vals[(int)CmdPort::GET_PART_TEMPERATURES] = 12;
+    num_return_vals[(int)CmdPort::SET_MAX_USB_CHARGE_CURRENT] = 0;
+    num_return_vals[(int)CmdPort::GET_USB_CHARGING_CURRENT] = 1;
+    num_return_vals[(int)CmdPort::SET_DEADBAND_PWM_WIDTH] = 1;
 
     // Set all scale factor to 1.0 to begin with ...
     for (int i = 0; i < (int)CmdPort::ALWAYS_LAST; i++)
@@ -131,6 +135,8 @@ void HapticAvatar_DriverPort::setupNumReturnVals()
     scale_factor[(int)CmdPort::GET_BATTERY_VOLTAGE] = 10000.0f;
     scale_factor[(int)CmdPort::GET_AMPLIFIERS_STATUS] = 10000.0f;
     scale_factor[(int)CmdPort::GET_TIP_LENGTH] = 10000.0f;
+    scale_factor[(int)CmdPort::GET_PART_TEMPERATURES] = 10.0f;
+    scale_factor[(int)CmdPort::GET_USB_CHARGING_CURRENT] = 10000.0f;
 
     device_num_cmds = (int)CmdPort::ALWAYS_LAST;
 }
@@ -149,6 +155,7 @@ void HapticAvatar_DriverPort::setupCmdLists()
     subscribeTo((int)CmdPort::GET_STATUS, 1009);
     subscribeTo((int)CmdPort::GET_CALIBRATION_STATUS, 1013);
     subscribeTo((int)CmdPort::GET_USB_CHARGING_CURRENT, 10037);
+    subscribeTo((int)CmdPort::GET_PART_TEMPERATURES, 10039);
 }
 
 
@@ -203,6 +210,10 @@ sofa::type::fixed_array<float, 4> HapticAvatar_DriverPort::getMotorScalingValues
     return getFloat4((int)CmdPort::GET_MOTOR_SCALING_VALUES);
 }
 
+int HapticAvatar_DriverPort::getStatus()
+{
+    return getInt((int)CmdPort::GET_STATUS);
+}
 
 void HapticAvatar_DriverPort::setMotorForceAndTorques(float rot, float pitch, float z, float yaw)
 {
@@ -271,6 +282,71 @@ void HapticAvatar_DriverPort::setManualPWM(float rotTorque, float pitchTorque, f
 int HapticAvatar_DriverPort::getSerialNumber()
 {
     return getInt((int)CmdPort::GET_SERIAL_NUM);
+}
+float HapticAvatar_DriverPort::getPartTemperature(int part)
+{
+    return getFloat((int)CmdPort::GET_PART_TEMPERATURES, part);
+}
+
+float HapticAvatar_DriverPort::getChargingCurrent()
+{
+    return getFloat((int)CmdPort::GET_USB_CHARGING_CURRENT);
+}
+
+void HapticAvatar_DriverPort::printStatus()
+{
+    std::cout << "Status for Port device S/N " << getSerialNumber() << " at " << getPortName() << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
+
+    std::cout << "  Amplifier board temperature " << getBoardTemp() << "°C" << std::endl;
+    std::cout << "  Battery voltage " << getBatteryVoltage() << "V" << std::endl;
+    std::cout << "  Charging current " << getChargingCurrent() << "A  (USB draw)" << std::endl;
+    unsigned int status = (unsigned int) getStatus();
+    std::cout << "  Yaw calibrated: ";
+    if ((status & 0x08) > 0)
+        std::cout << "Yes     ";
+    else
+        std::cout << "No      ";
+    std::cout << "Pitch calibrated: ";
+    if ((status & 0x02) > 0)
+        std::cout << "Yes ";
+    else
+        std::cout << "No  ";
+    std::cout << std::endl;
+    if ((status & 0x80) > 0)
+        std::cout << "  Yaw Amplifier temperature warning!" << std::endl;
+    if ((status & 0x20) > 0)
+        std::cout << "  Pitch Amplifier temperature warning!" << std::endl;
+    if ((status & 0x10) > 0)
+        std::cout << "  Z or Rot Amplifier temperature warning!" << std::endl;
+    if ((status & 0x800) > 0)
+        std::cout << "  Yaw Amplifier undervoltage warning!" << std::endl;
+    if ((status & 0x200) > 0)
+        std::cout << "  Pitch Amplifier undervoltage warning!" << std::endl;
+    if ((status & 0x100) > 0)
+        std::cout << "  Z or Rot Amplifier undervoltage warning!" << std::endl;
+
+    float temp = getPartTemperature((int)PortThermalSimPart::YMotorWinding);
+    std::cout << "  Yaw motor winding temperature " << temp << " °C";
+    if (temp > 135)
+        std::cout << " HIGH, output reduced!";
+    std::cout << std::endl;
+    temp = getPartTemperature((int)PortThermalSimPart::PMotorWinding);
+    std::cout << "  Pitch motor winding temperature " << temp << " °C";
+    if (temp > 135)
+        std::cout << " HIGH, output reduced!";
+    std::cout << std::endl;
+    temp = getPartTemperature((int)PortThermalSimPart::ZMotorWinding);
+    std::cout << "  Z motor winding temperature " << temp << " °C";
+    if (temp > 105)
+        std::cout << " HIGH, output reduced!";
+    std::cout << std::endl;
+    temp = getPartTemperature((int)PortThermalSimPart::RMotorWinding);
+    std::cout << "  Rot motor winding temperature " << temp << " °C";
+    if (temp > 85)
+        std::cout << " HIGH, output reduced!";
+    std::cout << std::endl << std::endl;
+
 }
 
 } // namespace sofa::HapticAvatar

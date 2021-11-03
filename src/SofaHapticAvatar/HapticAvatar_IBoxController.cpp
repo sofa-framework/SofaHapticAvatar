@@ -61,7 +61,7 @@ void HapticAvatar_IBoxController::init()
     std::cout << "HapticAvatar_IBoxController identity: '" << identity << "'" << std::endl;
 
     for (int i = 0; i < IBOX_NUM_CHANNELS; i++) {
-        setLoopGain(i, 4.0f, 0);
+        setLoopGain(i, 2.5f, 0);
     }
 
     return;

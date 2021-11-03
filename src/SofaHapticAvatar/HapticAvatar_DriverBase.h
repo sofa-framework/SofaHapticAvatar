@@ -74,7 +74,9 @@ namespace sofa::HapticAvatar
         /// Read data from device and send new commands to device
         void update();
 
+        virtual void printStatus() = 0;
   
+        std::string getPortName() { return m_portName; }
     protected:
         /// Internal method to connect to device
         void connectDevice();

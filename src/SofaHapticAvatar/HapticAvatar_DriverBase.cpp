@@ -431,7 +431,7 @@ namespace sofa::HapticAvatar
     float HapticAvatar_DriverBase::getFloat(int cmd, int channel)
     {
         updateIfUnsubscribed(cmd);
-        if (channel >= 0)
+        if (channel >= 0 && channel < RESULT_SIZEY)
             return result_table[cmd][channel];
         else
             return 0;
@@ -446,7 +446,7 @@ namespace sofa::HapticAvatar
     int HapticAvatar_DriverBase::getInt(int cmd, int channel)
     {
         updateIfUnsubscribed(cmd);
-        if (channel >= 0)
+        if (channel >= 0 && channel < RESULT_SIZEY)
             return (int)result_table[cmd][channel];
         else
             return 0;

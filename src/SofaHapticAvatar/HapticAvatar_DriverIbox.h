@@ -56,9 +56,15 @@ namespace sofa::HapticAvatar
         void setZeroForce(int toolId);
         float getPosVoltage(int toolId);
         int getSerialNumber() override;
+        float getChargingCurrent();
 
 
         //void setHandleForces(float upperJawForce, float lowerJawForce);
+
+        virtual void printStatus();
+
+
+        float getPartTemperature(int part);
 
 
 
@@ -114,6 +120,7 @@ namespace sofa::HapticAvatar
             SET_HANDLE_LED,
             GET_OPTO_VOLTAGES,
             SET_TO_CALIBRATE,
+            GET_PART_TEMPERATURES,
             SET_MAX_USB_CHARGE_CURRENT,
             GET_USB_CHARGING_CURRENT,
             GET_CONNECTION_STATES,
@@ -121,6 +128,11 @@ namespace sofa::HapticAvatar
             SET_FORCE_OFFSET,     // use this for making a handle open itself as if it was a spring
             ALWAYS_LAST
         };
-    };
 
+        enum IboxThermalSimPart {
+            MotorWinding0 = 0, MotorWinding1, MotorWinding2, MotorWinding3,
+            MotorHousing0, MotorHousing1, MotorHousing2, MotorHousing3,
+            HeatSink, CoolingAir, Ambient, NumParts
+        };
+    };
 }
