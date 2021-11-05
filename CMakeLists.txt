@@ -12,6 +12,7 @@ set(HEADER_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverBase.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverPort.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverIbox.h
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverScope.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h
@@ -31,6 +32,7 @@ set(SOURCE_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverBase.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverPort.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverIbox.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverScope.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
