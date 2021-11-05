@@ -39,9 +39,6 @@ namespace sofa::HapticAvatar
         {
             msg_error("HapticAvatar_DriverBase") << "## Device Not Connected at port: " << m_portName;
         }
-
-        //setupNumReturnVals();  // needs to be implemented in each device driver
-        //setupCmdLists();   // needs to be implemented in each device driver
     }
 
 
@@ -74,6 +71,10 @@ namespace sofa::HapticAvatar
 
         int res = std::atoi(incomingData);
         return res;
+
+        setupNumReturnVals();  // needs to be implemented in each device driver
+        setupCmdLists();   // needs to be implemented in each device driver
+
     }
 
     bool HapticAvatar_DriverBase::sendCommandToDevice(int commandId, const std::string& arguments, char* result)
@@ -472,24 +473,31 @@ namespace sofa::HapticAvatar
     }
 
 
-    void HapticAvatar_DriverBase::appendWithChan(int cmd, int chan, float value)
+    void HapticAvatar_DriverBase::appendIntFloat(int cmd, int chan, float value)
     {
         std::string arguments;
-        arguments = std::to_string(chan) + " " + std::to_string(int(value * scale_factor[cmd])) + " ";
+        arguments = std::to_string(chan) + " " + 
+            std::to_string(int(value * scale_factor[cmd])) + " ";
         appendCmd(cmd, arguments.c_str());
     }
-    void HapticAvatar_DriverBase::appendWithChan(int cmd, int chan, float value1, float value2)
+    void HapticAvatar_DriverBase::appendIntFloat(int cmd, int chan, float value1, float value2)
     {
         std::string arguments;
-        arguments = std::to_string(chan) + " " + std::to_string(int(value1 * scale_factor[cmd])) + " " + std::to_string(int(value2 * scale_factor[cmd])) + " ";
+        arguments = std::to_string(chan) + " " + 
+            std::to_string(int(value1 * scale_factor[cmd])) + " " + 
+            std::to_string(int(value2 * scale_factor[cmd])) + " ";
         appendCmd(cmd, arguments.c_str());
     }
-    void HapticAvatar_DriverBase::appendWithChan(int cmd, int chan, int value)
+    void HapticAvatar_DriverBase::appendIntFloat(int cmd, int value, sofa::type::fixed_array<float, 3> values)
     {
         std::string arguments;
-        arguments = std::to_string(chan) + " " + std::to_string(value) + " ";
+        arguments = std::to_string(value) + " " +
+            std::to_string(int(values[0] * scale_factor[cmd])) + " " +
+            std::to_string(int(values[1] * scale_factor[cmd])) + " " +
+            std::to_string(int(values[2] * scale_factor[cmd])) + " ";
         appendCmd(cmd, arguments.c_str());
     }
+
     void HapticAvatar_DriverBase::appendInt(int cmd, int value)
     {
         std::string arguments;
@@ -497,7 +505,21 @@ namespace sofa::HapticAvatar
         appendCmd(cmd, arguments.c_str());
     }
 
-    void HapticAvatar_DriverBase::appendFloat4(int cmd, sofa::type::fixed_array<float, 4> values)
+    void HapticAvatar_DriverBase::appendInt(int cmd, int value1, int value2)
+    {
+        std::string arguments;
+        arguments = std::to_string(value1) + " " +
+            std::to_string(value2) + " ";
+        appendCmd(cmd, arguments.c_str());
+    }
+
+    void HapticAvatar_DriverBase::appendFloat(int cmd, float value)
+    {
+        std::string arguments;
+        arguments = std::to_string(value) + " ";
+        appendCmd(cmd, arguments.c_str());
+    }
+    void HapticAvatar_DriverBase::appendFloat(int cmd, sofa::type::fixed_array<float, 4> values)
     {
         std::string arguments;
         for (unsigned int i = 0; i < values.size(); i++)
@@ -508,7 +530,7 @@ namespace sofa::HapticAvatar
 
         appendCmd(cmd, arguments.c_str());
     }
-    void HapticAvatar_DriverBase::appendFloat4(int cmd, float f1, float f2, float f3, float f4)
+    void HapticAvatar_DriverBase::appendFloat(int cmd, float f1, float f2, float f3, float f4)
     {
         std::string arguments;
         arguments = std::to_string(int(f1 * scale_factor[cmd])) + " " +
@@ -518,7 +540,7 @@ namespace sofa::HapticAvatar
         appendCmd(cmd, arguments.c_str());
     }
 
-    void HapticAvatar_DriverBase::appendFloat6(int cmd, sofa::type::fixed_array<float, 6> values)
+    void HapticAvatar_DriverBase::appendFloat(int cmd, sofa::type::fixed_array<float, 6> values)
     {
         std::string arguments;
         for (unsigned int i = 0; i < values.size(); i++)

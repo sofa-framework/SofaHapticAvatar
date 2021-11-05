@@ -48,16 +48,22 @@ namespace sofa::HapticAvatar
 
         bool IsConnected() { return m_connected; }
 
+        std::string getPortName() { return m_portName; }
 
         /** Reset encoders, motor outputs, calibration flags, collision objects.
-        * Command: RESET
         * @param {int} mode: specify what to reset. See doc.
         */
         int resetDevice(int mode);
+
+        /** Get the unique serial number. All devices in the Haptic Avatar family will need to implement this function.
+        * @returns {int} typically a 7-digit number.
+        */
         virtual int getSerialNumber() = 0;
+
+        /** Get the device type. This is the same command to all device in the Haptic Avatar family.
+        * @returns {string} e.g. "HapticDevice", "InstrumentBox", "Scope".
+        */
         std::string getDeviceType();
-
-
 
         /** Generic method which will format the command and send it to the device using HapticAvatar::Cmd and list of arguments given as input. Result will be stored in input char* result if not null.
         * @param {HapticAvatar::Cmd} command: the command enum to be sent.
@@ -67,21 +73,19 @@ namespace sofa::HapticAvatar
         */
         bool sendCommandToDevice(int commandId, const std::string& arguments, char* result);
 
-
-        /// Will convert a char* array response into std::string while removing end of line and space at end.
-        std::string convertSingleData(char* buffer, bool forceRemoveEoL = false);
-
         /// Read data from device and send new commands to device
         void update();
 
         virtual void printStatus() = 0;
   
-        std::string getPortName() { return m_portName; }
+
     protected:
         /// Internal method to connect to device
         void connectDevice();
 
-        /** Internal method to really to get response from the device. Will be looping while calling @sa ReadDataImplLooping with a security of 10k loop.
+        void updateReceive();
+
+        /** Internal method to get response from the device. Will be looping while calling @sa ReadDataImplLooping with a security of 10k loop.
         * @param {char *} buffer: array to store the response.
         * @param {bool} do_flush: to flush after getting response.
         */
@@ -101,8 +105,11 @@ namespace sofa::HapticAvatar
         */
         bool writeDataImpl(char* buffer, unsigned int nbChar);
 
-        void updateReceive();
+        /// Will convert a char* array response into std::string while removing end of line and space at end.
+        std::string convertSingleData(char* buffer, bool forceRemoveEoL = false);
 
+
+        int device_type = 0;
         int device_num_cmds = 0;  // must be set
         int num_return_vals[RESULT_SIZEX] = { 0 }; // Shall be initialized with the number of return values from each request command
         float scale_factor[RESULT_SIZEX] = { 1.0f }; // Data from devices are sent as integers. This array shall be initialized with the convertion factors back to float.
@@ -111,14 +118,13 @@ namespace sofa::HapticAvatar
         
         char incomingData[INCOMING_DATA_LEN];
 
-        int cmd_appended[100];  // A list of commands that is appended based on events in the simulation, such as forces, turning force feedback on/off etc.
+        int cmd_appended[1000];  // A list of commands that is appended based on events in the simulation, such as forces, turning force feedback on/off etc.
         int cmd_appended_size = 0;
         int cmd_appended_num_return_vals = 0;
         std::string cmd_appended_str; 
 
-        int cmd_send_list[100];  // the list of all commands to be sent
+        int cmd_send_list[1000];  // the list of all commands to be sent
         int cmd_send_list_size = 0;
-        //std::string send_string;
         int expected_num_return_vals = 0;
         int send_counter = 0; // 
 
@@ -138,17 +144,23 @@ namespace sofa::HapticAvatar
         sofa::type::fixed_array<int, 4> getInt4(int cmd);
         sofa::type::fixed_array<int, 6> getInt6(int cmd);
 
-        void appendWithChan(int cmd, int chan, float value);
-        void appendWithChan(int cmd, int chan, float value1, float value2);
-        void appendWithChan(int cmd, int chan, int value);
-        void appendInt(int cmd, int value);
-        void appendFloat4(int cmd, sofa::type::fixed_array<float, 4> values);
-        void appendFloat4(int cmd, float f1, float f2, float f3, float f4);
-        void appendFloat6(int cmd, sofa::type::fixed_array<float, 6> values);
+        void appendIntFloat(int cmd, int chan, float value);
+        void appendIntFloat(int cmd, int chan, float value1, float value2);
+        void appendIntFloat(int cmd, int chan, sofa::type::fixed_array<float, 3> values);
 
-        int device_type = 0;
+        void appendInt(int cmd, int value);
+        void appendInt(int cmd, int value1, int value2);
+        void appendFloat(int cmd, float f1);
+        void appendFloat(int cmd, sofa::type::fixed_array<float, 4> values);
+        void appendFloat(int cmd, float f1, float f2, float f3, float f4);
+        void appendFloat(int cmd, sofa::type::fixed_array<float, 6> values);
+
+
+        virtual void setupNumReturnVals() = 0;
+        virtual void setupCmdLists() = 0;
 
     private:
+
         //Connection status
         bool m_connected;
 

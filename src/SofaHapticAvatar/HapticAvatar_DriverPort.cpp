@@ -217,7 +217,7 @@ int HapticAvatar_DriverPort::getStatus()
 
 void HapticAvatar_DriverPort::setMotorForceAndTorques(float rot, float pitch, float z, float yaw)
 {
-    appendFloat4((int)CmdPort::SET_MOTOR_FORCE_AND_TORQUES, rot/1000, pitch/1000, z, yaw/1000);
+    appendFloat((int)CmdPort::SET_MOTOR_FORCE_AND_TORQUES, rot/1000, pitch/1000, z, yaw/1000);
 }
 
 //void HapticAvatar_DriverPort::setTipForceAndRotTorque(int rot, int pitch, int z, int yaw)
@@ -227,7 +227,17 @@ void HapticAvatar_DriverPort::setMotorForceAndTorques(float rot, float pitch, fl
 
 void HapticAvatar_DriverPort::setDeadBandPWMWidth(float rot, float pitch, float z, float yaw)
 {
-    appendFloat4((int)CmdPort::SET_DEADBAND_PWM_WIDTH, rot, pitch, z, yaw);
+    appendFloat((int)CmdPort::SET_DEADBAND_PWM_WIDTH, rot, pitch, z, yaw);
+}
+
+void HapticAvatar_DriverPort::setForceFeedbackEnable(bool on)
+{
+    appendInt((int)CmdPort::SET_FF_ENABLE, (int)on);
+}
+
+float  HapticAvatar_DriverPort::getCurrentDeltaT()
+{
+    return getFloat((int)CmdPort::GET_CURRENT_DELTA_T);
 }
 
 int cptF = 0;
@@ -240,42 +250,9 @@ void HapticAvatar_DriverPort::releaseForce()
 }
 
 
-void HapticAvatar_DriverPort::setManualPWM(float rotTorque, float pitchTorque, float zforce, float yawTorque)
+void HapticAvatar_DriverPort::setManualPWM(int rot, int pitch, int z, int yaw)
 {
-    sofa::type::fixed_array<int, 4> values;     
-    values[0] = int(-17.56 * rotTorque); // RotPWM
-    values[1] = int(2.34 * pitchTorque); // PitchPWM
-    values[2] = int(-82.93 * zforce); // ZPWM
-    values[3] = int(3.41 * yawTorque); // YawPWM
-
-    if (cptF == 100)
-    {
-        std::cout << "zForce: " << values[2]
-            << " | pitchTorque: " << values[1]
-            << " | yawTorque: " << values[3]
-            << " | toolTorque: " << values[0]
-            << std::endl;
-
-        cptF = 0;
-    }
-    // cptF++;
-
-    int maxPWM = 2000;
-    for (int i = 0; i < 4; i++)
-    {
-        if (values[i] < -maxPWM)
-            values[i] = -maxPWM;
-        else if (values[i] > maxPWM)
-            values[i] = maxPWM;
-    }
-
-    std::string args;
-    args = std::to_string(values[0])
-        + " " + std::to_string(values[1])
-        + " " + std::to_string(values[2])
-        + " " + std::to_string(values[3]) + " ";
- 
-    appendCmd((int)CmdPort::SET_MANUAL_PWM, args.c_str());
+    appendFloat((int)CmdPort::SET_MANUAL_PWM, rot, pitch, z, yaw);
 }
 
 
@@ -347,6 +324,165 @@ void HapticAvatar_DriverPort::printStatus()
         std::cout << " HIGH, output reduced!";
     std::cout << std::endl << std::endl;
 
+}
+
+
+void HapticAvatar_DriverPort::setInstrumentData(float shaft_diameter, float jaw1_diameter, float jaw2_diameter, float jaw_length)
+{
+    appendFloat((int)CmdPort::SET_TOOL_DATA, shaft_diameter, jaw1_diameter, jaw2_diameter, jaw_length);
+}
+
+void HapticAvatar_DriverPort::setJawOpeningAngle(float ang)
+{
+    appendFloat((int)CmdPort::SET_TOOL_JAW_OPENING_ANGLE, ang);
+}
+float HapticAvatar_DriverPort::getJawTorque()
+{
+    return getFloat((int)CmdPort::GET_TOOL_JAW_TORQUE);
+}
+
+int HapticAvatar_DriverPort::reserveNextPrimitiveIndex()
+{
+    int retval = -1;
+    for (int i = 0; i < MAX_NUM_PRIMITIVES; i++)
+    {
+        if (!primitive_index_used[i]) {
+            primitive_index_used[i] = true;
+            retval = i;
+            break;
+        }
+    }
+    return retval;
+}
+int HapticAvatar_DriverPort::addSphere(sofa::type::fixed_array<float, 3> pos, float radius, float stiffness, float damping, float friction)
+{
+    int index = reserveNextPrimitiveIndex();
+    if (index >= 0) {
+        sofa::type::fixed_array<float, 3> v0 = { 1, 0, 0 };
+        sofa::type::fixed_array<float, 3> n = { 0, 0, 1 };
+        appendPrimitive(index, (int)CoType::CO_SPHERE, true, pos, v0, n, 0, radius, 0, 0, stiffness, friction, damping);
+    }
+    return index;
+}
+
+int HapticAvatar_DriverPort::addCapsule(sofa::type::fixed_array<float, 3> pos, sofa::type::fixed_array<float, 3> ori, float radius, float length, float stiffness, float damping, float friction)
+{
+    int index = reserveNextPrimitiveIndex();
+    if (index >= 0) {
+        sofa::type::fixed_array<float, 3> n = { 0, 0, 1 };
+        appendPrimitive(index, (int)CoType::CO_CYLINDER, true, pos, ori, n, 0, radius, length, 0, stiffness, friction, damping);
+    }
+    return index;
+}
+
+int HapticAvatar_DriverPort::addTorus(sofa::type::fixed_array<float, 3> pos, sofa::type::fixed_array<float, 3> ori, float major_radius, float minor_radius, float stiffness, float damping, float friction)
+{
+    int index = reserveNextPrimitiveIndex();
+    if (index >= 0) {
+        sofa::type::fixed_array<float, 3> n = { 0, 0, 1 };
+        appendPrimitive(index, (int)CoType::CO_CYLINDER, true, pos, ori, n, 0, major_radius, minor_radius, 0, stiffness, friction, damping);
+    }
+    return index;
+}
+
+void HapticAvatar_DriverPort::deletePrimitive(int index)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendInt((CmdPort::SET_COLLISION_OBJECT_ACTIVE), index, 0);
+        primitive_index_used[index] = false;
+    }
+}
+void HapticAvatar_DriverPort::deleteAllPrimitives()
+{
+    for (int i = 0; i < MAX_NUM_PRIMITIVES; i++) {
+        deletePrimitive(i);
+    }
+}
+
+void HapticAvatar_DriverPort::setActive(int index, bool active)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendInt((CmdPort::SET_COLLISION_OBJECT_ACTIVE), index, (int) active);
+    }
+}
+void HapticAvatar_DriverPort::updatePosition(int index, sofa::type::fixed_array<float, 3> new_pos)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_P0), index, new_pos);
+    }
+}
+void HapticAvatar_DriverPort::updateOrientation(int index, sofa::type::fixed_array<float, 3> new_ori)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_V0), index, new_ori);
+    }
+}
+void HapticAvatar_DriverPort::updateRadius1(int index, float radius)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_R), index, radius);
+    }
+}
+void HapticAvatar_DriverPort::updateRadius2(int index, float radius)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_Q), index, radius);
+    }
+}
+void HapticAvatar_DriverPort::updateLength(int index, float length)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_T), index, length);
+    }
+}
+void HapticAvatar_DriverPort::updateStiffness(int index, float stiffness)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_STIFFNESS), index, stiffness);
+    }
+}
+void HapticAvatar_DriverPort::updateDamping(int index, float damping)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_DAMPING), index, damping);
+    }
+}
+void HapticAvatar_DriverPort::updateFriction(int index, float friction)
+{
+    if (index >= 0 && index < MAX_NUM_PRIMITIVES) {
+        appendIntFloat((CmdPort::SET_COLLISION_OBJECT_FRICTION), index, friction);
+    }
+}
+
+void HapticAvatar_DriverPort::appendPrimitive(int index, int type, int active,
+    sofa::type::fixed_array<float, 3> p0,
+    sofa::type::fixed_array<float, 3> v0,
+    sofa::type::fixed_array<float, 3> n,
+    float q, float r, float s, float t, float stiffness, float friction, float damping)
+{
+    int cmd = (int)CmdPort::SET_COLLISION_OBJECT;
+    std::string arguments;
+    arguments = std::to_string(index) + " " +
+        std::to_string(type) + " " +
+        std::to_string(active) + " " +
+        std::to_string(int(p0[0] * scale_factor[cmd])) + " " +
+        std::to_string(int(p0[1] * scale_factor[cmd])) + " " +
+        std::to_string(int(p0[2] * scale_factor[cmd])) + " " +
+        std::to_string(int(v0[0] * scale_factor[cmd])) + " " +
+        std::to_string(int(v0[1] * scale_factor[cmd])) + " " +
+        std::to_string(int(v0[2] * scale_factor[cmd])) + " " +
+        std::to_string(int(n[0] * scale_factor[cmd])) + " " +
+        std::to_string(int(n[1] * scale_factor[cmd])) + " " +
+        std::to_string(int(n[2] * scale_factor[cmd])) + " " +
+        std::to_string(int(q * scale_factor[cmd])) + " " +
+        std::to_string(int(r * scale_factor[cmd])) + " " +
+        std::to_string(int(s * scale_factor[cmd])) + " " +
+        std::to_string(int(t * scale_factor[cmd])) + " " +
+        std::to_string(int(stiffness * scale_factor[cmd])) + " " +
+        std::to_string(int(friction * scale_factor[cmd])) + " " +
+        std::to_string(int(damping * scale_factor[cmd])) + " ";
+
+    appendCmd((int)CmdPort::SET_COLLISION_OBJECT, arguments.c_str());
 }
 
 } // namespace sofa::HapticAvatar

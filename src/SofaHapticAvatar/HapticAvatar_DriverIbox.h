@@ -39,9 +39,12 @@ namespace sofa::HapticAvatar
     public:
         HapticAvatar_DriverIbox(const std::string& portName);
 
+        // Functions that are typically used at initialization, see also the base class
+        // ------------------------------------------------------------------
+        void setLoopGain(int chan, float loopGainP, float loopGainD);
+        void setForceFeedbackEnable(bool on);
+        int getSerialNumber() override;
 
-        /**  TODO check if returning a Vec4 is the best to do
-        */
         float getOpeningValue(int toolId);
         void setForce(int toolId, float force);
         int getStatus();
@@ -49,13 +52,20 @@ namespace sofa::HapticAvatar
         float getBatteryVoltage();
         float getBoardTemp();
         int getLastPWM(int toolId);
-        void setForceFeedbackEnable(bool on);
+
+
+
+
+        // Functions that are typically used only for statistics, diagnostics and debugging
+        // --------------------------------------------------------------------------------
+
+        /** Get the loop time inside the device. Typically around 0.05ms.
+        * @returns {float}, the loop time in ms.
+        */
         float getCurrentDeltaT();
-        void setLoopGain(int chan, float loopGainP, float loopGainD);
         float getSensedForce(int toolId);
         void setZeroForce(int toolId);
         float getPosVoltage(int toolId);
-        int getSerialNumber() override;
         float getChargingCurrent();
 
 
@@ -85,8 +95,8 @@ namespace sofa::HapticAvatar
         int getStatusCommandId() override { return CmdIBox::GET_IBOX_STATUS; }
         */
 
-        void setupNumReturnVals();
-        void setupCmdLists();
+        void setupNumReturnVals() override;
+        void setupCmdLists() override;
 
     private:
         enum CmdIBox

@@ -127,7 +127,7 @@ namespace sofa::HapticAvatar
     }
     void HapticAvatar_DriverIbox::setForce(int toolId, float force)
     {
-        appendWithChan((int)CmdIBox::SET_CHAN_FORCE, convertToolIdToChannel(toolId), force);
+        appendIntFloat((int)CmdIBox::SET_CHAN_FORCE, convertToolIdToChannel(toolId), force);
     }
     int HapticAvatar_DriverIbox::getStatus()
     {
@@ -159,7 +159,7 @@ namespace sofa::HapticAvatar
     }
     void HapticAvatar_DriverIbox::setLoopGain(int chan, float loopGainP, float loopGainD)
     {
-        appendWithChan((int)CmdIBox::SET_LOOP_GAIN, chan, loopGainP, loopGainD);
+        appendIntFloat((int)CmdIBox::SET_LOOP_GAIN, chan, loopGainP, loopGainD);
     }
     float HapticAvatar_DriverIbox::getSensedForce(int toolId)
     {
