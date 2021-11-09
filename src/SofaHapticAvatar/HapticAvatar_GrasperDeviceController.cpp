@@ -72,8 +72,16 @@ void HapticAvatar_GrasperDeviceController::initImpl()
     }
 
 
-    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    // Retrieve ForceFeedback component pointer
+    if (l_forceFeedback.empty())
+    {
+        simulation::Node* context = dynamic_cast<simulation::Node*>(this->getContext()); // access to current node
+        m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
+    }
+    else
+    {
+        m_forceFeedback = l_forceFeedback.get();
+    }
 
     m_HA_driver->setDeadBandPWMWidth(100, 0, 0, 0);
     if (m_forceFeedback == nullptr)

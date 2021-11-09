@@ -35,6 +35,9 @@ public:
     /// Pointer to the ForceFeedback component
     LCPForceFeedback::SPtr m_forceFeedback;
 
+    // link to the forceFeedBack component, if not set will search through graph and take first one encountered
+    SingleLink<HapticAvatar_ArticulatedDeviceController, LCPForceFeedback, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_forceFeedback;
+
 };
 
 } // namespace sofa::HapticAvatar
