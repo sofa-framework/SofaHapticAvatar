@@ -1,20 +1,19 @@
 <Node name="Group"> 
-    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
-    <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM6" iboxController="@HAIBox" portalManager="@portalMgr" forceFeedBack="@Tool/Articulation/LCPFF"/>
-    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM7" printLog="1" />
+    <HapticAvatar_GrasperDeviceController name="HA_Device2" portName="//./COM5" 
+    iboxController="@HAIBox" portalManager="@portalMgr" forceFeedBack="@Tool2/Articulation/LCPFF2"/>
 
-    <Node name="Tool">
-        <MechanicalObject name="bati" template="Rigid3d" position="-60 0 250  0 0 0 1" rotation="-20 0 0"/>
+    <Node name="Tool2">
+        <MechanicalObject name="bati" template="Rigid3d" position="60 0 250  0 0 0 1" rotation="-20 0 0"/>
         
         <Node name="Articulation">
             <EulerImplicitSolver name="cg_odesolver"  />
             <SparseLUSolver name="linear solver" tolerance="1e-09" />  
             
-            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
+            <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Device2.toolPosition"/>
             <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="true"/>
             <UniformMass totalMass="1"/>
             <LinearSolverConstraintCorrection />
-            <LCPForceFeedback name="LCPFF" template="Vec1d" activate="true" forceCoef="0.0005"/>
+            <LCPForceFeedback name="LCPFF2" template="Vec1d" activate="true" forceCoef="0.0005"/>
             
             <Node name="Models">
                 <MechanicalObject template="Rigid3d" name="DOFs" 
