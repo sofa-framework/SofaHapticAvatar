@@ -28,6 +28,7 @@ public:
     /// Default constructor
     HapticAvatar_ArticulatedDeviceController();
 
+    const VecCoord& getToolPositionCopy() { return m_toolPositionCopy; }
 public:
     /// output data position of the tool
     Data<VecCoord> d_toolPosition;
@@ -38,6 +39,8 @@ public:
     // link to the forceFeedBack component, if not set will search through graph and take first one encountered
     SingleLink<HapticAvatar_ArticulatedDeviceController, LCPForceFeedback, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_forceFeedback;
 
+protected:
+    VecCoord m_toolPositionCopy;
 };
 
 } // namespace sofa::HapticAvatar

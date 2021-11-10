@@ -44,7 +44,7 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
     m_toolRot.identity();
 
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations.resize(6);
     articulations[0] = 0;
     articulations[1] = 0;
@@ -53,7 +53,7 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
     articulations[4] = 0;
     articulations[5] = 0;
-    d_toolPosition.endEdit();
+    m_toolPositionCopy = articulations;
 }
 
 
@@ -163,7 +163,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         // Force feedback computation
         if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
         {
-            const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->d_toolPosition.getValue();
+            const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->getToolPositionCopy();
             _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
 
             /// ** resForces: **             
@@ -299,7 +299,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     // get info from simuData
     sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
@@ -309,8 +309,9 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     float _OpeningAngle = m_simuData.jawOpening * d_MaxOpeningAngle.getValue() * 0.01f;
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
-
-    d_toolPosition.endEdit();
+    
+    // copy into an non Data variable for haptic thread acces.
+    m_toolPositionCopy = articulations;
 }
 
 

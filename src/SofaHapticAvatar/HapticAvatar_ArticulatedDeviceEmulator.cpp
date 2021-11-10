@@ -34,7 +34,7 @@ HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
 {
     this->f_listening.setValue(true);
     
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations.resize(6);
     articulations[0] = 0;
     articulations[1] = 0;
@@ -43,7 +43,6 @@ HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
 
     articulations[4] = 0;
     articulations[5] = 0;
-    d_toolPosition.endEdit();
 
     //articulations[0] = dofV[Dof::YAW];
     //articulations[1] = -dofV[Dof::PITCH];
@@ -74,7 +73,7 @@ void HapticAvatar_ArticulatedDeviceEmulator::updatePositionImpl()
     // get info from simuData
     sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
@@ -84,45 +83,38 @@ void HapticAvatar_ArticulatedDeviceEmulator::updatePositionImpl()
     float _OpeningAngle = m_simuData.jawOpening * 60.0f * 0.01f;
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
-
-    d_toolPosition.endEdit();
 }
 
 void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe1(Coord value)
 {
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations[0] += value;
-    d_toolPosition.endEdit();
 }
 
 void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe2(Coord value)
 {
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations[1] += value;
-    d_toolPosition.endEdit();
 }
 
 void HapticAvatar_ArticulatedDeviceEmulator::moveRotationAxe3(Coord value)
 {
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations[2] += value;
-    d_toolPosition.endEdit();
 }
 
 void HapticAvatar_ArticulatedDeviceEmulator::moveTranslationAxe1(Coord value)
 {
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations[3] += value;
-    d_toolPosition.endEdit();
 }
 
 
 void HapticAvatar_ArticulatedDeviceEmulator::openJaws(Coord value)
 {
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations[4] += value;
     articulations[5] -= value;
-    d_toolPosition.endEdit();
 }
 
 
