@@ -31,7 +31,7 @@
 namespace sofa::HapticAvatar
 {
 class HapticAvatar_HapticThreadManager;
-class HapticAvatar_BaseDeviceController;
+class HapticAvatar_ArticulatedDeviceController;
 class HapticAvatar_IBoxController;
 
 /// Static singleton of HapticThreadManager
@@ -56,7 +56,7 @@ public:
     /** Method to register a new device inside the vector @m_devices
     * Will check to avoid redundencies and call @sa createHapticThreads
     */
-    void registerDevice(HapticAvatar_BaseDeviceController* device);
+    void registerDevice(HapticAvatar_ArticulatedDeviceController* device);
 
     /// Method to register the Ibox. Assume only one per scene ?
     void registerIBox(HapticAvatar_IBoxController* ibox);
@@ -74,7 +74,7 @@ private:
 
     bool hapticLoopStarted = false;
 
-    sofa::type::vector< HapticAvatar_BaseDeviceController*> m_devices;
+    sofa::type::vector< HapticAvatar_ArticulatedDeviceController*> m_devices;
     HapticAvatar_IBoxController* m_IBox = nullptr;
 };
 

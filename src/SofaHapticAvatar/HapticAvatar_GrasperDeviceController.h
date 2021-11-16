@@ -14,7 +14,6 @@ namespace sofa::HapticAvatar
 
 using namespace sofa::defaulttype;
 
-
 /**
 * Haptic Avatar driver
 */
@@ -29,15 +28,14 @@ public:
     /// handleEvent component method to catch collision info
     void handleEvent(core::objectmodel::Event *) override;
     
-    /// General Haptic thread methods
-    void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
-
     /// Thread methods to cpy data from m_hapticData to m_simuData
     void CopyData(std::atomic<bool>& terminate, void * p_this);
 
-    bool hasIBox = false;
 
-    float getJawOpeningAngle();
+    void haptic_updateArticulations(HapticAvatar_IBoxController* _IBoxCtrl) override;
+
+    void haptic_updateForceFeedback(HapticAvatar_IBoxController* _IBoxCtrl) override;
+
 
 protected:
     /// Internal method to init specific collision components
@@ -53,15 +51,9 @@ protected:
     void drawImpl(const sofa::core::visual::VisualParams*) override {}
 
 public:
-    /// link to the IBox controller component 
-    SingleLink<HapticAvatar_GrasperDeviceController, HapticAvatar_IBoxController, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_iboxCtrl;
-
+    Data<bool> d_useIBox;
     /// Max opening angle of the Jaws
     Data<SReal> d_MaxOpeningAngle;
-
-protected:
-    /// Pointer to the IBoxController component
-    HapticAvatar_IBoxController * m_iboxCtrl;
 };
 
 } // namespace sofa::HapticAvatar

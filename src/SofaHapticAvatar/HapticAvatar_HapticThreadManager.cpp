@@ -122,37 +122,13 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
         for (auto device : m_devices) // mutex?
         {
             HapticAvatar_DriverPort* _driver = device->getHapticDriver();
-            device->m_hapticData.anglesAndLength = _driver->getAnglesAndLength();
-            device->m_hapticData.toolId = _driver->getToolID();
 
-            if (m_IBox != nullptr) // TODO: improve to check if device need ibox info to avoid unncessary calls
-            {
-                device->m_hapticData.jawOpening = m_IBox->getJawOpeningAngle(device->m_hapticData.toolId);
-            }
+            device->haptic_updateArticulations(m_IBox);
 
             // Force feedback computation
-            HapticAvatar_ArticulatedDeviceController* articulatedDevice = dynamic_cast<HapticAvatar_ArticulatedDeviceController*>(device);
-            
-            if (articulatedDevice->m_simulationStarted && articulatedDevice->m_forceFeedback)
+            if (device->m_simulationStarted)
             {
-                auto resForces = articulatedDevice->computeForce();
-
-                /// ** resForces: ** 
-                /// articulations[0] => dofV[Dof::YAW];
-                /// articulations[1] => -dofV[Dof::PITCH];
-                /// articulations[2] => dofV[Dof::ROT];
-                /// articulations[3] => dofV[Dof::Z];
-                /// articulations[4] => Grasper up
-                /// articulations[5] => Grasper Down 
-                _driver->setMotorForceAndTorques(-resForces[2][0], resForces[1][0], resForces[3][0], -resForces[0][0]);
-
-                if (m_IBox != nullptr)
-                {
-                    float jaw_momentum_arm = 25.0f * sin(0.38f + device->m_hapticData.jawOpening);
-                    float handleForce = (resForces[4][0] - resForces[5][0]) / jaw_momentum_arm; // in Newtons
-
-                    m_IBox->setHandleForce(device->m_hapticData.toolId, handleForce * 3);
-                }
+                device->haptic_updateForceFeedback(m_IBox);
             }
 
             _driver->update();
@@ -192,7 +168,7 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
 
 
 
-void HapticAvatar_HapticThreadManager::registerDevice(HapticAvatar_BaseDeviceController* device)
+void HapticAvatar_HapticThreadManager::registerDevice(HapticAvatar_ArticulatedDeviceController* device)
 {
     bool found = false;
     for (auto _device : m_devices)

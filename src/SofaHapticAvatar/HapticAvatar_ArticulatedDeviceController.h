@@ -13,6 +13,8 @@ namespace sofa::HapticAvatar
 
 using namespace sofa::defaulttype;
 
+class HapticAvatar_IBoxController;
+
 /**
 * Haptic Avatar driver
 */
@@ -20,17 +22,20 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_ArticulatedDeviceController : public Ha
 {
 public:
     SOFA_CLASS(HapticAvatar_ArticulatedDeviceController, HapticAvatar_BaseDeviceController);
-    typedef Vec1Types::Coord Coord;
-    typedef Vec1Types::VecCoord VecCoord;
-    typedef Vec1Types::VecDeriv VecDeriv;
-    typedef sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes> LCPForceFeedback;
+
+    using Coord = Vec1Types::Coord;
+    using VecCoord = Vec1Types::VecCoord;
+    using VecDeriv = Vec1Types::VecDeriv;
+    using LCPForceFeedback = sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes>;
+    using ArticulationSize = unsigned int;
 
     /// Default constructor
     HapticAvatar_ArticulatedDeviceController();
 
-    const VecCoord& getToolPositionCopy() { return m_toolPositionCopy; }
+    virtual void haptic_updateArticulations(HapticAvatar_IBoxController* _iBox) { SOFA_UNUSED(_iBox); }
 
-    VecDeriv computeForce();
+    virtual void haptic_updateForceFeedback(HapticAvatar_IBoxController* _iBox) { SOFA_UNUSED(_iBox); }
+
 public:
     /// output data position of the tool
     Data<VecCoord> d_toolPosition;
@@ -43,6 +48,8 @@ public:
 
 protected:
     VecCoord m_toolPositionCopy;
+    VecDeriv m_resForces;
+    ArticulationSize m_nbArticulations;
 };
 
 } // namespace sofa::HapticAvatar
