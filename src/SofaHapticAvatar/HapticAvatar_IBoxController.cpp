@@ -23,30 +23,14 @@ int HapticAvatar_IBoxControllerClass = core::RegisterObject("Driver allowing int
 
 //constructeur
 HapticAvatar_IBoxController::HapticAvatar_IBoxController()
-    : d_portName(initData(&d_portName, std::string("//./COM5"), "portName", "position of the base of the part of the device"))
-    , d_hapticIdentity(initData(&d_hapticIdentity, "hapticIdentity", "position of the base of the part of the device"))
-    , m_HA_driver(nullptr)
-    , m_deviceReady(false)    
+    : HapticAvatar_BaseDeviceController()
 {
-    this->f_listening.setValue(true);
-    
-    
-}
-
-
-HapticAvatar_IBoxController::~HapticAvatar_IBoxController()
-{
-    clearDevice();
-    if (m_HA_driver)
-    {
-        delete m_HA_driver;
-        m_HA_driver = nullptr;
-    }
+    this->f_listening.setValue(false);
 }
 
 
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatar_IBoxController::init()
+void HapticAvatar_IBoxController::initDevice()
 {
     msg_info() << "HapticAvatar_IBoxController::init()";
     m_HA_driver = new HapticAvatar_DriverIbox(d_portName.getValue());
@@ -68,6 +52,7 @@ void HapticAvatar_IBoxController::init()
     // connect to main thread
     auto threadMgr = HapticAvatar_HapticThreadManager::getInstance();
     threadMgr->registerIBox(this);
+    threadMgr->logThread = f_printLog.getValue();
 
     return;
 }
@@ -95,8 +80,12 @@ void HapticAvatar_IBoxController::update()
 
 void HapticAvatar_IBoxController::clearDevice()
 {
-    msg_info() << "HapticAvatar_IBoxController::clearDevice()";
-   
+    std::cout << "HapticAvatar_IBoxController::clearDevice()" << std::endl;
+    if (m_HA_driver)
+    {
+        delete m_HA_driver;
+        m_HA_driver = nullptr;
+    }
 }
 
 
