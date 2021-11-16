@@ -25,6 +25,10 @@ HapticAvatar_ArticulatedDeviceController::HapticAvatar_ArticulatedDeviceControll
     m_toolRot.identity();
 }
 
+HapticAvatar_ArticulatedDeviceController::~HapticAvatar_ArticulatedDeviceController()
+{
+    clearDevice();
+}
 
 void HapticAvatar_ArticulatedDeviceController::initDevice()
 {
@@ -116,7 +120,9 @@ void HapticAvatar_ArticulatedDeviceController::clearDevice()
 void HapticAvatar_ArticulatedDeviceController::simulation_updateData()
 {
     // update virtual device position from haptic information
-    updatePosition();
+    //updatePosition();
+    // For the moment squeeze the portal position. 
+    updatePositionImpl();
 }
 
 

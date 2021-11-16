@@ -11,12 +11,6 @@
 
 #include <sofa/core/ObjectFactory.h>
 
-
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-#include <sofa/simulation/CollisionEndEvent.h>
-#include <sofa/core/collision/DetectionOutput.h>
-
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
 #include <iomanip>
@@ -150,19 +144,6 @@ void HapticAvatar_GrasperDeviceController::haptic_updateForceFeedback(HapticAvat
         float handleForce = (m_resForces[4][0] - m_resForces[5][0]) / jaw_momentum_arm; // in Newtons
 
         _IBoxCtrl->setHandleForce(m_hapticData.toolId, handleForce * 3);
-    }
-}
-
-
-void HapticAvatar_GrasperDeviceController::handleEvent(core::objectmodel::Event *event)
-{
-    if (!m_deviceReady)
-        return;
-
-    if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
-    {
-        HapticAvatar_HapticThreadManager::getInstance()->setSimulationStarted();
-        updatePositionImpl();
     }
 }
 

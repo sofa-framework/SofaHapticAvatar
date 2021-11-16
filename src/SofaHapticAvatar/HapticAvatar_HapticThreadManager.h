@@ -61,22 +61,26 @@ public:
     /// Method to register the Ibox. Assume only one per scene ?
     void registerIBox(HapticAvatar_IBoxController* ibox);
 
+    /// Method to notify that simulation is running
     void setSimulationStarted() { m_simulationStarted = true; }
 
     bool logThread = true;
 private:
     HapticAvatar_HapticThreadManager();
-
     ~HapticAvatar_HapticThreadManager();
 
+    /// Internal method to create the haptic thread only once. Will be called each time a device is successfully registered
     void createHapticThreads();
 
+    /// haptic thread c++ object
     std::thread haptic_thread;
 
-    bool hapticLoopStarted = false;
-    bool m_simulationStarted;
+    bool hapticLoopStarted = false; ///< Bool to store the information is haptic thread is running or not.
+    bool m_simulationStarted = false; ///< Bool to store the information that the simulation is running or not.
 
+    /// Vector of registered device to be updated in the haptic thread loop.
     sofa::type::vector< HapticAvatar_ArticulatedDeviceController*> m_devices;
+    /// Pointer to the iBox controller.
     HapticAvatar_IBoxController* m_IBox = nullptr;
 };
 

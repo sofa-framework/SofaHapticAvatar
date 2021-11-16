@@ -8,7 +8,7 @@
 
 #include <SofaHapticAvatar/config.h>
 #include <sofa/type/Vec.h>
-
+#include <SofaHapticAvatar/HapticAvatar_DriverBase.h>
 #include <SofaUserInteraction/Controller.h>
 
 namespace sofa::HapticAvatar
@@ -41,6 +41,8 @@ public:
     void handleEvent(core::objectmodel::Event *) override;
     void draw(const sofa::core::visual::VisualParams* vparams) override;
     ///}
+
+    virtual HapticAvatar_DriverBase* getBaseDriver() = 0;
     
 protected:
     /// Internal method to init specific info. Called by init

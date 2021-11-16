@@ -33,13 +33,19 @@ public:
     /// Default constructor
     HapticAvatar_ArticulatedDeviceController();
 
+    ~HapticAvatar_ArticulatedDeviceController();
+
+    /// SOFA api method called after all components have been init
     void bwdInit() override;
     
+    /// Method to be overriden by device specialisation to update the articulations from haptic information
     virtual void haptic_updateArticulations(HapticAvatar_IBoxController* _iBox) { SOFA_UNUSED(_iBox); }
 
+    /// Method to be overriden by device specialisation to compute and update the force feedback given the articulations
     virtual void haptic_updateForceFeedback(HapticAvatar_IBoxController* _iBox) { SOFA_UNUSED(_iBox); }
 
-    HapticAvatar_DriverPort* getHapticDriver() { return m_HA_driver; }
+
+    HapticAvatar_DriverBase* getBaseDriver() override { return m_HA_driver; }
 
 protected:
     /// HapticAvatar_BaseDeviceController api override
@@ -49,7 +55,7 @@ protected:
     void simulation_updateData() override;
     ///}
 
-    /// Main method to start haptic threads
+    /// Main method to start haptic threads. To be overriden by device specialization
     virtual bool createHapticThreads() = 0;
 
     /// Main method to update the tool device from haptic information. 
@@ -108,7 +114,6 @@ protected:
     ArticulationSize m_nbArticulations;
     /// Id of the port returned by portalManager
     int m_portId = -1;
-
 
     sofa::type::Mat3x3f m_toolRot;
     sofa::type::Mat3x3f m_toolRotInv;

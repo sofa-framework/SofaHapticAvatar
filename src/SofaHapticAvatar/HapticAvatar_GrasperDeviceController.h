@@ -24,10 +24,7 @@ public:
 
     /// Default constructor
     HapticAvatar_GrasperDeviceController();
-
-    /// handleEvent component method to catch collision info
-    void handleEvent(core::objectmodel::Event *) override;
-    
+  
     /// Thread methods to cpy data from m_hapticData to m_simuData
     void CopyData(std::atomic<bool>& terminate, void * p_this);
 

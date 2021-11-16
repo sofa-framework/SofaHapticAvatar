@@ -43,10 +43,6 @@ HapticAvatar_HapticThreadManager* HapticAvatar_HapticThreadManager::getInstance(
     {
         s_hapticThread = new HapticAvatar_HapticThreadManager();
     }
-    else if (s_hapticThread->logThread)
-    {
-        std::cout << "singleton already created!" << std::endl;
-    }
 
     return s_hapticThread;
 }
@@ -120,9 +116,7 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
 
         // loop over the devices
         for (auto device : m_devices) // mutex?
-        {
-            HapticAvatar_DriverPort* _driver = device->getHapticDriver();
-
+        {            
             device->haptic_updateArticulations(m_IBox);
 
             // Force feedback computation
@@ -131,6 +125,7 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
                 device->haptic_updateForceFeedback(m_IBox);
             }
 
+            HapticAvatar_DriverBase* _driver = device->getBaseDriver();
             _driver->update();
 
             if (m_IBox != nullptr)
