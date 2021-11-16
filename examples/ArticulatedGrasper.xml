@@ -1,7 +1,7 @@
 <Node name="Group"> 
-    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="1" />
+    <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="0" />
     <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM6" iboxController="@HAIBox" portalManager="@portalMgr" forceFeedBack="@Tool/Articulation/LCPFF"/>
-    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM7" printLog="1" />
+    <HapticAvatar_IBoxController name="HAIBox" portName="//./COM7" printLog="0" />
 
     <Node name="Tool">
         <MechanicalObject name="bati" template="Rigid3d" position="-60 0 250  0 0 0 1" rotation="-20 0 0"/>

@@ -32,14 +32,14 @@
     
     
     <!-- Add obstacles -->
-    <RegularGridTopology name="grid_2" n="6 6 6" min="50 0 -50" max="150 100 50" />
+    <RegularGridTopology name="grid_2" n="7 7 7" min="-60 140 0" max="60 260 120" />
     <Node name="Cube2">
         <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
         <MechanicalObject src="@../grid_2" name="Volume" />
         
-        <BoxROI name="boxRoi1" box="-1 -1 -51  151 1 101" drawBoxes="1"/>
+        <BoxROI name="boxRoi1" box="-100 100 -1  100 300 1" drawBoxes="1"/>
         <FixedConstraint indices="@boxRoi1.indices" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
@@ -62,7 +62,7 @@
             <PointCollisionModel group="1"/>
             
             <Node name="VisuSurface">
-                <OglModel name="Visual" color="green" />
+                <OglModel name="Visual"  />
                 <IdentityMapping input="@.." output="@Visual" />
             </Node>
         </Node>
