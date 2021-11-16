@@ -32,9 +32,6 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_BaseDeviceController : public Controlle
 {
 public:
     SOFA_CLASS(HapticAvatar_BaseDeviceController, Controller);
-    typedef RigidTypes::Coord RigidCoord;
-    typedef SolidTypes<double>::Transform Transform;
-    typedef sofa::type::Quat<SReal> Quat;
 
     /// default constructor
     HapticAvatar_BaseDeviceController();
@@ -49,6 +46,7 @@ public:
     void handleEvent(core::objectmodel::Event *) override;
     void draw(const sofa::core::visual::VisualParams* vparams) override;
     ///}
+
 
     HapticAvatar_DriverPort* getHapticDriver() { return m_HA_driver; }
 protected:
@@ -83,18 +81,7 @@ public:
     /// Data to store Information received by HW device
     Data<std::string> d_hapticIdentity;
 
-    /// Default scale applied to the Phantom Coordinates
-    Data<SReal> d_scale; 
-    /// Scale to apply to the forcefeedback. //TODO: check if this is still needed
-    Data<SReal> m_forceScale;
 
-    /// position of the base of the device
-    Data<RigidCoord> d_posDevice;
-
-
-    /// Parameter to dump thread info. //TODO: check if this should not be removed...
-    Data<bool> d_dumpThreadInfo;
-    
     /// Data parameter to draw dof axis
     Data<bool> d_drawDeviceAxis;
     /// Data parameter to draw debug information
@@ -145,7 +132,6 @@ protected:
     /// Id of the port returned by portalManager
     int m_portId;
     
-    std::thread haptic_thread;
     std::thread copy_thread;
 
 
