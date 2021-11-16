@@ -52,6 +52,8 @@ HapticAvatar_BaseDeviceController::~HapticAvatar_BaseDeviceController()
         delete m_HA_driver;
         m_HA_driver = nullptr;
     }
+
+    HapticAvatar_HapticThreadManager::kill();
 }
 
 
@@ -95,8 +97,9 @@ void HapticAvatar_BaseDeviceController::clearDevice()
     msg_info() << "HapticAvatar_BaseDeviceController::clearDevice()";
     if (m_terminate == false && m_deviceReady)
     {
+        std::cout << "clear device: " << this->getName() << std::endl;
         m_terminate = true;
-        haptic_thread.join();
+    //    haptic_thread.join();
         copy_thread.join();
     }
 }

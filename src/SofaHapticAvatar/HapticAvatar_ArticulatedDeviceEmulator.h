@@ -39,7 +39,7 @@ protected:
     void initImpl() override;
 
     /// override method to create the different threads
-    bool createHapticThreads() override;
+    bool createHapticThreads();
 
     /// override method to update specific tool position
     void updatePositionImpl() override;

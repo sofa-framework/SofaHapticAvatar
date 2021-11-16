@@ -69,6 +69,8 @@ void HapticAvatar_GrasperDeviceController::initImpl()
         {
             msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
         }
+
+        hasIBox = true;
     }
 
 
@@ -93,20 +95,29 @@ void HapticAvatar_GrasperDeviceController::initImpl()
 
 bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
-    m_terminate = false;
-    haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
-    copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
+    std::cout << "HapticAvatar_GrasperDeviceController::createHapticThreads()" << std::endl;
 
+    auto threadMgr = HapticAvatar_HapticThreadManager::getInstance();
+    threadMgr->registerDevice(this);
+
+    m_terminate = false;
+//    haptic_thread = std::thread(&HapticAvatar_GrasperDeviceController::Haptics, this, std::ref(this->m_terminate), this, m_HA_driver);
+    copy_thread = std::thread(&HapticAvatar_GrasperDeviceController::CopyData, this, std::ref(this->m_terminate), this);
     return true;
 }
 
+float HapticAvatar_GrasperDeviceController::getJawOpeningAngle()
+{
+    return m_iboxCtrl->getJawOpeningAngle(m_HA_driver->getToolID());
+}
 
 void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
 { 
-    std::cout << "Haptics thread" << std::endl;
-
     HapticAvatar_GrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_GrasperDeviceController*>(p_this);
     HapticAvatar_DriverPort* _driver = static_cast<HapticAvatar_DriverPort*>(p_driver);
+    
+    std::string deviceName = _deviceCtrl->getName();
+    std::cout << "Haptics thread created for device named: " << deviceName << " with Port: " << _driver->getPortName() << std::endl;
 
     if (_deviceCtrl == nullptr)
     {
@@ -121,7 +132,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
     }
 
     /// Pointer to the IBoxController component
-    HapticAvatar_IBoxController * _iboxCtrl = _deviceCtrl->m_iboxCtrl;
+    HapticAvatar_IBoxController* _iboxCtrl = _deviceCtrl->m_iboxCtrl;
 
     // Loop Timer
     long targetSpeedLoop = 1; // Target loop speed: 1ms
@@ -148,34 +159,33 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
         ctime_t startTime = CTime::getRefTime();
         summedLoopDuration += (startTime - startTimePrev);
         startTimePrev = startTime;
-
+        
         // Get all info from devices
         _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAnglesAndLength();
         _deviceCtrl->m_hapticData.toolId = _driver->getToolID();
         //_deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-
-         if (_iboxCtrl)
+        
+        
+        if (_deviceCtrl->hasIBox)
         {
-            float angle = _iboxCtrl->getJawOpeningAngle(_deviceCtrl->m_hapticData.toolId);
+            float angle = _deviceCtrl->getJawOpeningAngle();// _iboxCtrl->getJawOpeningAngle(_deviceCtrl->m_hapticData.toolId);
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
-
+         
         // Force feedback computation
         if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
         {
             const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->getToolPositionCopy();
             _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
-
-            /// ** resForces: **             
+            
+            /// ** resForces: ** 
             /// articulations[0] => dofV[Dof::YAW];
             /// articulations[1] => -dofV[Dof::PITCH];
             /// articulations[2] => dofV[Dof::ROT];
             /// articulations[3] => dofV[Dof::Z];
-
             /// articulations[4] => Grasper up
             /// articulations[5] => Grasper Down 
 
-            //_driver->setManualPWM(float(-resForces[2][0]), float(-resForces[1][0]), float(resForces[3][0]), float(-resForces[0][0]));
             _driver->setMotorForceAndTorques(-resForces[2][0], resForces[1][0], resForces[3][0], -resForces[0][0]);
 
             if (_iboxCtrl)
@@ -185,23 +195,12 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
                 float handleForce = (resForces[4][0] - resForces[5][0]) / jaw_momentum_arm; // in Newtons
 
                 _iboxCtrl->setHandleForce(_deviceCtrl->m_hapticData.toolId, handleForce*3);
-                //if (cptLoop == 50)
-                //{
-                //    std::cout << "handleForce (toolId=" << _deviceCtrl->m_hapticData.toolId << ") " << handleForce << std::endl;
-                //    cptLoop = 0;
-                //}
             }
-
-            //if (cptLoop == 50)
-            //{
-            //    std::cout << "resForces: " << resForces << std::endl;
-            //    cptLoop = 0;
-            //}
 
             cptLoop++;
             if (cptLoop % 1000 == 0) {
                 float updateFreq = 1000*1000 / ((float)summedLoopDuration / (float) refTicksPerMs); // in Hz
-                std::cout << "Average haptic loop frequency " << std::to_string(int(updateFreq)) << std::endl;
+                std::cout << "DeviceName: "<< deviceName << " | Iteration: " << cptLoop << " | Average haptic loop frequency " << std::to_string(int(updateFreq)) << std::endl;
                 summedLoopDuration = 0;
             }
             if (cptLoop % 30000 == 0) {
@@ -213,7 +212,11 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
             _driver->releaseForce();
 
         _driver->update();
-        _iboxCtrl->update();
+
+        if (_iboxCtrl)
+        {
+            _iboxCtrl->update();
+        }
 
         ctime_t endTime = CTime::getRefTime();
         ctime_t duration = endTime - startTime;
@@ -243,7 +246,7 @@ void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate,
 
 		
         // If loop is quicker than the target loop speed. Wait here.
-        //duration = 0;
+        duration = 0;
         while (duration < targetTicksPerLoop)
         {
             endTime = CTime::getRefTime();

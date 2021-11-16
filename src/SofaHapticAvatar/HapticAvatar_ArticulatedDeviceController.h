@@ -29,6 +29,8 @@ public:
     HapticAvatar_ArticulatedDeviceController();
 
     const VecCoord& getToolPositionCopy() { return m_toolPositionCopy; }
+
+    VecDeriv computeForce();
 public:
     /// output data position of the tool
     Data<VecCoord> d_toolPosition;

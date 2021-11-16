@@ -22,5 +22,15 @@ HapticAvatar_ArticulatedDeviceController::HapticAvatar_ArticulatedDeviceControll
     this->f_listening.setValue(true);
 }
 
+HapticAvatar_ArticulatedDeviceController::VecDeriv HapticAvatar_ArticulatedDeviceController::computeForce()
+{
+    VecDeriv resForces;
+    resForces.resize(6);
+    const VecCoord& articulations = this->getToolPositionCopy();
+    m_forceFeedback->computeForce(articulations, resForces);
+
+    return resForces;
+}
+
 
 } // namespace sofa::HapticAvatar

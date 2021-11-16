@@ -6,6 +6,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
+#include <SofaHapticAvatar/HapticAvatar_HapticThreadManager.h>
 
 #include <sofa/core/ObjectFactory.h>
 
@@ -63,6 +64,10 @@ void HapticAvatar_IBoxController::init()
     for (int i = 0; i < IBOX_NUM_CHANNELS; i++) {
         setLoopGain(i, 2.5f, 0);
     }
+
+    // connect to main thread
+    auto threadMgr = HapticAvatar_HapticThreadManager::getInstance();
+    threadMgr->registerIBox(this);
 
     return;
 }

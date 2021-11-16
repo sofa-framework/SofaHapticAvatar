@@ -30,10 +30,14 @@ public:
     void handleEvent(core::objectmodel::Event *) override;
     
     /// General Haptic thread methods
-    static void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
+    void Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver);
 
     /// Thread methods to cpy data from m_hapticData to m_simuData
-    static void CopyData(std::atomic<bool>& terminate, void * p_this);
+    void CopyData(std::atomic<bool>& terminate, void * p_this);
+
+    bool hasIBox = false;
+
+    float getJawOpeningAngle();
 
 protected:
     /// Internal method to init specific collision components

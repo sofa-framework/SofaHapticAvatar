@@ -16,6 +16,7 @@
 
 #include <SofaHapticAvatar/HapticAvatar_DriverPort.h>
 #include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
+#include <SofaHapticAvatar/HapticAvatar_HapticThreadManager.h>
 
 
 namespace sofa::HapticAvatar
@@ -49,6 +50,7 @@ public:
     void draw(const sofa::core::visual::VisualParams* vparams) override;
     ///}
 
+    HapticAvatar_DriverPort* getHapticDriver() { return m_HA_driver; }
 protected:
     /// Internal method to init specific info. Called by init
     virtual void initImpl() {}
@@ -73,8 +75,7 @@ protected:
     virtual void drawImpl(const sofa::core::visual::VisualParams*) {};
 
     /// Internal method to bo overriden by child class to draw debug information. Called by @sa draw if d_drawDebug is true
-    virtual void drawDebug(const sofa::core::visual::VisualParams* vparams);
-
+    virtual void drawDebug(const sofa::core::visual::VisualParams* vparams);    
 
 public:
     /// Name of the port for this device
