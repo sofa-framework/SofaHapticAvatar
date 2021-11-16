@@ -36,13 +36,14 @@ public:
 
 protected:    
     /// Internal method to init specific collision components
-    void initImpl() override;
+    void initDevice() override;
 
     /// override method to create the different threads
-    bool createHapticThreads();
+    bool createHapticThreads() override;
 
     /// override method to update specific tool position
     void updatePositionImpl() override;
+
 };
 
 }

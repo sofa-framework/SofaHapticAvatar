@@ -126,7 +126,7 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
             device->haptic_updateArticulations(m_IBox);
 
             // Force feedback computation
-            if (device->m_simulationStarted)
+            if (m_simulationStarted)
             {
                 device->haptic_updateForceFeedback(m_IBox);
             }

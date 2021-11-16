@@ -38,17 +38,12 @@ public:
 
 
 protected:
-    /// Internal method to init specific collision components
-    void initImpl() override;
 
     /// override method to create the different threads
     bool createHapticThreads() override;
 
     /// override method to update specific tool position
     void updatePositionImpl() override;
-
-    /// Internal method to draw specific informations
-    void drawImpl(const sofa::core::visual::VisualParams*) override {}
 
 public:
     Data<bool> d_useIBox;

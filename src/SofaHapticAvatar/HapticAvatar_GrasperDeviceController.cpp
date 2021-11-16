@@ -6,11 +6,12 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_GrasperDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_HapticThreadManager.h>
 #include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <sofa/core/ObjectFactory.h>
 
-#include <sofa/simulation/Node.h>
+
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/CollisionEndEvent.h>
@@ -38,10 +39,6 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     , d_useIBox(initData(&d_useIBox, bool(true), "useIBox", "Set to true if this device is linked to an ibox"))
     , d_MaxOpeningAngle(initData(&d_MaxOpeningAngle, SReal(60.0f), "MaxOpeningAngle", "Max jaws opening angle"))
 {
-    this->f_listening.setValue(true);
-    
-    d_hapticIdentity.setReadOnly(true);
-
     m_toolRot.identity();
 
     m_nbArticulations = 6;
@@ -52,29 +49,6 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
     m_toolPositionCopy = articulations;
     m_resForces.resize(m_nbArticulations);
-}
-
-
-
-//executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatar_GrasperDeviceController::initImpl()
-{
-    // Retrieve ForceFeedback component pointer
-    if (l_forceFeedback.empty())
-    {
-        simulation::Node* context = dynamic_cast<simulation::Node*>(this->getContext()); // access to current node
-        m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-    }
-    else
-    {
-        m_forceFeedback = l_forceFeedback.get();
-    }
-
-    m_HA_driver->setDeadBandPWMWidth(100, 0, 0, 0);
-    if (m_forceFeedback == nullptr)
-    {
-        msg_warning() << "ForceFeedback not found";
-    }
 }
 
 
@@ -187,7 +161,7 @@ void HapticAvatar_GrasperDeviceController::handleEvent(core::objectmodel::Event 
 
     if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
     {
-        m_simulationStarted = true;
+        HapticAvatar_HapticThreadManager::getInstance()->setSimulationStarted();
         updatePositionImpl();
     }
 }

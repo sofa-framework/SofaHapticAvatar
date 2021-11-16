@@ -54,7 +54,7 @@ HapticAvatar_ArticulatedDeviceEmulator::HapticAvatar_ArticulatedDeviceEmulator()
 }
 
 
-void HapticAvatar_ArticulatedDeviceEmulator::initImpl()
+void HapticAvatar_ArticulatedDeviceEmulator::initDevice()
 {
     
 }

@@ -61,6 +61,7 @@ public:
     /// Method to register the Ibox. Assume only one per scene ?
     void registerIBox(HapticAvatar_IBoxController* ibox);
 
+    void setSimulationStarted() { m_simulationStarted = true; }
 
     bool logThread = true;
 private:
@@ -73,6 +74,7 @@ private:
     std::thread haptic_thread;
 
     bool hapticLoopStarted = false;
+    bool m_simulationStarted;
 
     sofa::type::vector< HapticAvatar_ArticulatedDeviceController*> m_devices;
     HapticAvatar_IBoxController* m_IBox = nullptr;
