@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<Node dt="0.01" gravity="0 0 0" name="root">
+<Node dt="0.03" gravity="0 0 -9" name="root">
     <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels" />
     <DefaultVisualManagerLoop/>
 
@@ -34,40 +34,62 @@
 
 
     <!-- Add obstacles -->
-    <RegularGridTopology name="grid_2" n="6 6 6" min="-50 -50 0" max="50 50 100" />
-    <Node name="Cube2">
-        <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
-		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
-
-        <MechanicalObject src="@../grid_2" name="Volume" />
-        
-        <BoxROI name="boxRoi1" box="-100 -100 -1  100 100 1" drawBoxes="1"/>
-        <FixedConstraint indices="@boxRoi1.indices" />
+    <RegularGridTopology name="grid_1" n="6 6 2" min="-200 -100 10" max="200 300 30" />
+    <Node name="Floor">
+        <MechanicalObject src="@../grid_1" name="Volume" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
-        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" />
-        <Hexa2TetraTopologicalMapping input="@../grid_2" output="@Tetra_topo" />
+        <TetrahedronSetGeometryAlgorithms name="GeomAlgo" template="Vec3d" drawEdges="0" drawScaleTetrahedra="0.8"/>
         
-        <TetrahedronFEMForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large" />
-        <UniformMass totalMass="0.1" />
-        <LinearSolverConstraintCorrection />
+        <Hexa2TetraTopologicalMapping name="default28" input="@../grid_1" output="@Tetra_topo" />
         
         <Node name="Surface">
-            <TriangleSetTopologyContainer  name="Container"  />
+            <TriangleSetTopologyContainer  name="Container"  fileTopology="" tags=" " />
             <TriangleSetTopologyModifier   name="Modifier" />
             <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" drawTriangles="0"/>
             <Tetra2TriangleTopologicalMapping input="@../Tetra_topo" output="@Container" />
 
-            <TriangleCollisionModel bothSide="false" group="1"/>
-            <LineCollisionModel group="1" />
-            <PointCollisionModel group="1"/>
+            <TriangleCollisionModel simulated="0" moving="0" bothSide="false" group="0"/>
+            <LineCollisionModel simulated="0" moving="0" group="0" />
+            <PointCollisionModel simulated="0" moving="0" group="0"/>
             
             <Node name="VisuSurface">
-                <OglModel name="Visual" texturename="textures/colorMap.png" />
+                <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
+                <BarycentricMapping input="@.." output="@Visual" />
+            </Node>
+        </Node>
+    </Node>
+    
+    
+    <Node name="Torus">
+        <EulerImplicitSolver rayleighMass="0.1" /> 
+		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
+
+        <MeshGmshLoader filename="./mesh/torus_low_res.msh" name="meshLoader" scale3d="10 10 10" rotation="90 0 0" translation="0 100 40"/>
+        <MechanicalObject name="dofs" src="@meshLoader" />
+		<TetrahedronSetTopologyContainer name="TetraContainer" src="@meshLoader" />
+        <TetrahedronSetTopologyModifier name="Modifier" />
+        <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
+               
+        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="3000" poissonRatio="0.3" method="large"/>
+        <DiagonalMass totalMass="10" />
+        <LinearSolverConstraintCorrection />
+        
+        <Node name="Surface">
+            <TriangleSetTopologyContainer  name="Container" />
+            <TriangleSetTopologyModifier   name="Modifier" />
+            <TriangleSetGeometryAlgorithms name="GeomAlgo"   template="Vec3d" />
+            <Tetra2TriangleTopologicalMapping input="@../TetraContainer" output="@Container" />
+
+            <TriangleCollisionModel bothSide="false" group="2"/>
+            <LineCollisionModel group="2" />
+            <PointCollisionModel group="2"/>
+            
+            <Node name="VisuSurface">
+                <OglModel name="Visual" color="red" />
                 <IdentityMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>
-
 </Node>
