@@ -32,8 +32,7 @@ public:
 
     /// Default constructor
     HapticAvatar_ArticulatedDeviceController();
-
-    ~HapticAvatar_ArticulatedDeviceController();
+    ~HapticAvatar_ArticulatedDeviceController() override;
 
     /// SOFA api method called after all components have been init
     void bwdInit() override;

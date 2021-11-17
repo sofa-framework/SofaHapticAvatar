@@ -24,6 +24,8 @@ public:
 
     /// Default constructor
     HapticAvatar_GrasperDeviceController();
+
+    virtual ~HapticAvatar_GrasperDeviceController() {}
   
     /// Thread methods to cpy data from m_hapticData to m_simuData
     void CopyData(std::atomic<bool>& terminate, void * p_this);

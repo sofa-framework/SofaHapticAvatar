@@ -29,17 +29,6 @@ HapticAvatar_BaseDeviceController::HapticAvatar_BaseDeviceController()
 }
 
 
-HapticAvatar_BaseDeviceController::~HapticAvatar_BaseDeviceController()
-{
-    clearImpl();
-    HapticAvatar_HapticThreadManager::kill();
-}
-
-void HapticAvatar_BaseDeviceController::clearImpl()
-{
-    clearDevice();
-}
-
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
 void HapticAvatar_BaseDeviceController::init()
 {

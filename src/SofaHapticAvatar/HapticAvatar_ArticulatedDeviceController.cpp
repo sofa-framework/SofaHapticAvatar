@@ -6,6 +6,7 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_ArticulatedDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_HapticThreadManager.h>
 #include <sofa/simulation/Node.h>
 
 namespace sofa::HapticAvatar
@@ -27,6 +28,7 @@ HapticAvatar_ArticulatedDeviceController::HapticAvatar_ArticulatedDeviceControll
 
 HapticAvatar_ArticulatedDeviceController::~HapticAvatar_ArticulatedDeviceController()
 {
+    HapticAvatar_HapticThreadManager::kill();
     clearDevice();
 }
 
@@ -102,17 +104,16 @@ void HapticAvatar_ArticulatedDeviceController::bwdInit()
 void HapticAvatar_ArticulatedDeviceController::clearDevice()
 {
     msg_info() << "HapticAvatar_ArticulatedDeviceController::clearDevice()";
+    if (m_terminate == false && m_deviceReady)
+    {
+        m_terminate = true;
+        copy_thread.join();
+    }
+
     if (m_HA_driver)
     {
         delete m_HA_driver;
         m_HA_driver = nullptr;
-    }
-
-    if (m_terminate == false && m_deviceReady)
-    {
-        std::cout << "clear device: " << this->getName() << std::endl;
-        m_terminate = true;
-        copy_thread.join();
     }
 }
 

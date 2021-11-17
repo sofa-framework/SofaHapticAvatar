@@ -32,9 +32,6 @@ public:
     /// default constructor
     HapticAvatar_BaseDeviceController();
 
-    /// default destructor
-	virtual ~HapticAvatar_BaseDeviceController();
-
     /// Component API 
     ///{
     void init() override;
@@ -49,7 +46,7 @@ protected:
     virtual void initDevice() = 0;
     
     /// Main method to clear the device
-    virtual void clearDevice() = 0;
+    virtual void clearDevice() {};
 
     /// Main method from the SOFA simulation call at each simulation step begin.
     virtual void simulation_updateData() = 0;
@@ -60,9 +57,6 @@ protected:
 
     /// Internal method to bo overriden by child class to draw debug information. Called by @sa draw if d_drawDebug is true
     virtual void drawDebug(const sofa::core::visual::VisualParams* vparams) { SOFA_UNUSED(vparams); }
-
-    /// Internal metod called by destructor to clear object.
-    void clearImpl();
 
 public:
     /// Name of the port for this device

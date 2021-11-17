@@ -30,6 +30,7 @@ public:
     SOFA_CLASS(HapticAvatar_IBoxController, HapticAvatar_BaseDeviceController);
 
     HapticAvatar_IBoxController();
+    ~HapticAvatar_IBoxController() override;
 
     float getJawOpeningAngle(int toolId);
 

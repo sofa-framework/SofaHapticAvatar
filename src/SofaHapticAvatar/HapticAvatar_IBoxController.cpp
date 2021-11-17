@@ -29,6 +29,13 @@ HapticAvatar_IBoxController::HapticAvatar_IBoxController()
 }
 
 
+HapticAvatar_IBoxController::~HapticAvatar_IBoxController()
+{
+    HapticAvatar_HapticThreadManager::kill();
+    clearDevice();    
+}
+
+
 //executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
 void HapticAvatar_IBoxController::initDevice()
 {
@@ -80,7 +87,6 @@ void HapticAvatar_IBoxController::update()
 
 void HapticAvatar_IBoxController::clearDevice()
 {
-    std::cout << "HapticAvatar_IBoxController::clearDevice()" << std::endl;
     if (m_HA_driver)
     {
         delete m_HA_driver;
