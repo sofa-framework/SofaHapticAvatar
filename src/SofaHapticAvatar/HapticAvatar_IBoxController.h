@@ -7,7 +7,7 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <SofaHapticAvatar/HapticAvatar_Driver.h>
+#include <SofaHapticAvatar/HapticAvatar_DriverIbox.h>
 
 #include <SofaUserInteraction/Controller.h>
 
@@ -37,17 +37,19 @@ public:
     Data<std::string> d_portName;
     Data<std::string> d_hapticIdentity;
 
-    float getJawOpeningAngle();
+    float getJawOpeningAngle(int toolId);
 
-    void setHandleForces(float upperJawForce, float lowerJawForce);
+    void setHandleForce(int toolId, float force);
 
-	void setLoopGain(int loopGain);
+	void setLoopGain(int chan, float loopGainP, float loopGainD);
+
+    void update();
 
 private:
     void clearDevice();
 
 private:
-    HapticAvatar_IboxDriver * m_HA_driver;
+    HapticAvatar_DriverIbox * m_HA_driver;
     bool m_deviceReady;
 };
 

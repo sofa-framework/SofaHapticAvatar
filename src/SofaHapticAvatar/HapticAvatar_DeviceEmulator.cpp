@@ -95,7 +95,7 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
 { 
     std::cout << "Haptics Emulator thread" << std::endl;
     HapticAvatar_DeviceEmulator* _deviceCtrl = static_cast<HapticAvatar_DeviceEmulator*>(p_this);
-    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
+    HapticAvatar_DriverPort* _driver = static_cast<HapticAvatar_DriverPort*>(p_driver);
    
     if (_deviceCtrl == nullptr)
     {
@@ -134,12 +134,13 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
         ctime_t startTime = CTime::getRefTime();
 
         // Get all info from devices
-        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
-        _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
+        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAnglesAndLength();
+        _deviceCtrl->m_hapticData.toolId = _driver->getToolID();
+        //_deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
 
         if (_deviceCtrl->m_iboxCtrl)
         {
-            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle(_deviceCtrl->m_hapticData.toolId);
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
@@ -176,7 +177,7 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
                     }
                     floorPosition[1] = height;
                     Vector3 force = damping * (floorPosition - tipPosition);
-                    _driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force);
+                    // Later ... _driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force);
                     contact = true;
                     hasContact = true;
                 }
@@ -192,17 +193,17 @@ void HapticAvatar_DeviceEmulator::HapticsEmulated(std::atomic<bool>& terminate, 
 
                 Vector3 force = damping * (_targetPosition - tipPosition);
                 if (testMode == 2)
-                    _driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force, true);
+                    // Later ..._driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force, true);
                 if (testMode == 3)
                     //_driver->setManualForceVector(_deviceCtrl->m_toolRotInv *force, false);
-                    _driver->setTipForceVector(_deviceCtrl->m_toolRotInv *force);
+                    // Later ... _driver->setTipForceVector(_deviceCtrl->m_toolRotInv *force);
 
                 contact = true;
                 hasContact = true;
             }
             else if (testMode == 4)
             {
-                _driver->setManual_PWM(_deviceCtrl->m_roughForce[0], _deviceCtrl->m_roughForce[1], _deviceCtrl->m_roughForce[2], _deviceCtrl->m_roughForce[3]);
+                _driver->setManualPWM(_deviceCtrl->m_roughForce[0], _deviceCtrl->m_roughForce[1], _deviceCtrl->m_roughForce[2], _deviceCtrl->m_roughForce[3]);
                 contact = true;
                 hasContact = true;
             }

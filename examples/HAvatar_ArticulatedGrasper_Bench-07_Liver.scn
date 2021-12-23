@@ -45,7 +45,7 @@
         <BoxROI name="boxRoi1" box="80 0 -40  150 50 40" drawBoxes="1"/>
         <FixedConstraint indices="@boxRoi1.indices" />
         
-        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="1000" poissonRatio="0.3" method="large"/>
+        <FastTetrahedralCorotationalForceField name="FEM" youngModulus="2000" poissonRatio="0.3" method="large"/>
         <DiagonalMass massDensity="0.001" />
         <LinearSolverConstraintCorrection />
         

@@ -96,7 +96,7 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
     std::cout << "Haptics thread" << std::endl;
 
     HapticAvatar_RigidGrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_RigidGrasperDeviceController*>(p_this);
-    HapticAvatar_Driver* _driver = static_cast<HapticAvatar_Driver*>(p_driver);
+    HapticAvatar_DriverPort* _driver = static_cast<HapticAvatar_DriverPort*>(p_driver);
 
     if (_deviceCtrl == nullptr)
     {
@@ -134,15 +134,14 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
         ctime_t startTime = CTime::getRefTime();
 
         // Get all info from devices
-        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAngles_AndLength();
+        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAnglesAndLength();
         _deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-        //_deviceCtrl->m_hapticData.collisionForces = _driver->getLastCollisionForce();
+        _deviceCtrl->m_hapticData.toolId = _driver->getToolID();
 
         // get info regarding jaws
-        //float jtorq = _driver->getJawTorque();
         if (_deviceCtrl->m_iboxCtrl)
         {
-            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle();
+            float angle = _deviceCtrl->m_iboxCtrl->getJawOpeningAngle(_deviceCtrl->m_hapticData.toolId);
             _deviceCtrl->m_hapticData.jawOpening = angle;
         }
 
@@ -246,7 +245,7 @@ void HapticAvatar_RigidGrasperDeviceController::Haptics(std::atomic<bool>& termi
             //pitchTorque = 0.0;
                 
             //yawTorque = 0.0;
-            _driver->setManual_PWM(float(toolTorque), float(pitchTorque * 50), float(zforce), float(yawTorque * 50));
+            _driver->setManualPWM(float(toolTorque), float(pitchTorque * 50), float(zforce), float(yawTorque * 50));
         }
         else
             _driver->releaseForce();
