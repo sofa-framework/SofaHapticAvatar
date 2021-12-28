@@ -149,7 +149,7 @@ void HapticAvatar_BaseDeviceController::updatePosition()
     // compute portal and tool rotation matrices
     const sofa::type::Mat4x4f& portalMtx = m_portalMgr->getPortalTransform(m_portId);
     sofa::type::Quatf rotRot = sofa::type::Quatf::fromEuler(0.0f, dofV[Dof::ROT], 0.0f);
-    sofa::type::Mat4x4f T_insert = sofa::type::Mat4x4f::transformTranslation(Vec3f(0.0f, dofV[Dof::Z], 0.0f));
+    sofa::type::Mat4x4f T_insert = sofa::type::Mat4x4f::transformTranslation(type::Vec3f(0.0f, dofV[Dof::Z], 0.0f));
     sofa::type::Mat4x4f R_rot = sofa::type::Mat4x4f::transformRotation(rotRot);
     m_instrumentMtx = portalMtx * R_rot * T_insert;
 

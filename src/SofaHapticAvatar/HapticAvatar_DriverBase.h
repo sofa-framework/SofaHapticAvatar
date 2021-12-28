@@ -23,7 +23,7 @@
 
 #include <SofaHapticAvatar/config.h>
 //#include <SofaHapticAvatar/HapticAvatar_Defines.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <string>
 
 namespace sofa::HapticAvatar

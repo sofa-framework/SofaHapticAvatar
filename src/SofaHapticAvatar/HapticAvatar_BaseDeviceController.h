@@ -9,7 +9,7 @@
 #include <SofaHapticAvatar/config.h>
 
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 
 #include <SofaUserInteraction/Controller.h>
 #include <SofaHaptics/LCPForceFeedback.h>
