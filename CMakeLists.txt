@@ -5,6 +5,7 @@ project(SofaHapticAvatar VERSION 0.1)
 find_package(SofaBase REQUIRED)
 find_package(SofaOpenglVisual REQUIRED)
 find_package(SofaConstraint REQUIRED)
+find_package(SofaHaptics REQUIRED)
 sofa_find_package(TinyXML REQUIRED)
 
 set(SOFAHAPTICAVATAR_SRC_DIR src/SofaHapticAvatar)
