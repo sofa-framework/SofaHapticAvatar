@@ -95,6 +95,4 @@ jobs:
           tag_name: release-${{ github.ref_name }}
           fail_on_unmatched_files: true
           files: |
-            artifacts/SofaHapticAvatar_*_Linux.zip
             artifacts/SofaHapticAvatar_*_Windows.zip
-            artifacts/SofaHapticAvatar_*_macOS.zip
