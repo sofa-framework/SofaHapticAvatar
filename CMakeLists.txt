@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 project(SofaHapticAvatar VERSION 0.1)
 
-find_package(SofaGeneral REQUIRED)
-find_package(SofaHaptics REQUIRED)
+
+find_package(SofaBase REQUIRED)
+find_package(SofaOpenglVisual REQUIRED)
+find_package(SofaConstraint REQUIRED)
 sofa_find_package(TinyXML REQUIRED)
 
 set(SOFAHAPTICAVATAR_SRC_DIR src/SofaHapticAvatar)
