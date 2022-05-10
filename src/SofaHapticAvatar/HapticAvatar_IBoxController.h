@@ -16,7 +16,6 @@ namespace sofa::HapticAvatar
 {
 
 using namespace sofa::simulation;
-using namespace sofa::defaulttype;
 using namespace sofa::component::controller;
 
 

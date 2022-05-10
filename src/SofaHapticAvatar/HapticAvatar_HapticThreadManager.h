@@ -22,7 +22,7 @@
 #pragma once
 
 #include <SofaHapticAvatar/config.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <sofa/type/SVector.h>
 
 #include <string>

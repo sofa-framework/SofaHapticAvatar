@@ -12,8 +12,6 @@
 namespace sofa::HapticAvatar
 {
 
-using namespace sofa::defaulttype;
-
 /**
 * Haptic Avatar driver
 */
