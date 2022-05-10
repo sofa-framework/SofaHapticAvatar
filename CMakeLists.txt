@@ -56,6 +56,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_SOFAHAPTICAVATA
 
 # Link the plugin library to its dependencies (other libraries).
 target_link_libraries(${PROJECT_NAME} PUBLIC SofaConstraint SofaHaptics Sofa.GL)
+target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml) # Private because not exported in API
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>")
