@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(SofaHapticAvatar VERSION 0.1)
 
-find_package(SofaOpenglVisual REQUIRED)
+find_package(Sofa.GL REQUIRED)
 find_package(SofaConstraint REQUIRED)
 find_package(SofaHaptics REQUIRED)
 sofa_find_package(TinyXML REQUIRED)
@@ -52,19 +52,18 @@ add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILE
 target_compile_definitions(${PROJECT_NAME} PRIVATE "-DSOFA_BUILD_SOFAHAPTICAVATAR")
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} PUBLIC SofaConstraint SofaHaptics SofaOpenglVisual)
-target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml) # Private because not exported in API
+target_link_libraries(${PROJECT_NAME} PUBLIC SofaConstraint SofaHaptics Sofa.GL)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
 ## Install rules for the library; CMake package configurations files
-sofa_generate_package(
-    NAME ${PROJECT_NAME}
-    TARGETS ${PROJECT_NAME}
-    VERSION ${PROJECT_VERSION}
-    INCLUDE_SOURCE_DIR ${SOFAHAPTICAVATAR_SRC_DIR}
+sofa_create_package_with_targets(
+    PACKAGE_NAME ${PROJECT_NAME}
+    PACKAGE_VERSION ${PROJECT_VERSION}
+    TARGETS ${PROJECT_NAME} AUTO_SET_TARGET_PROPERTIES
+    INCLUDE_SOURCE_DIR "src"
     INCLUDE_INSTALL_DIR ${PROJECT_NAME}
     RELOCATABLE "plugins"
-    )
+    )    
