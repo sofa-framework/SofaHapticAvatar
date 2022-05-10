@@ -59,18 +59,12 @@ void HapticAvatar_Portal::portalSetup()
     if (m_flipAngle == 180) // TODO: remove this hack. FIX problem in fromEuler sign in SOFA for extrem angles.
         m_rootOrientation[0] *= -1;
 
-    //std::cout << "m_flipAngle: " << m_flipAngle << std::endl;
-    //std::cout << "m_tiltAngle: " << m_tiltAngle << std::endl;
-    //std::cout << "orientation: " << orientation << std::endl;
     m_portalPosition.getCenter() = m_rootPosition;
     m_portalPosition.getOrientation() = m_rootOrientation;
 }
 
 void HapticAvatar_Portal::updatePostion(float yawAngle, float pitchAngle)
 {
-   // std::cout << "yawAngle: " << yawAngle << std::endl;
-    //std::cout << "pitchAngle: " << pitchAngle << std::endl;
-
     m_yawAngle = yawAngle;
     m_pitchAngle = pitchAngle;
     m_hasMoved = true;
@@ -84,7 +78,6 @@ sofa::type::Mat4x4f MatFromTranslation(sofa::type::Vec3f trans)
     mat.identity();
     for (unsigned int i = 0; i < 3; ++i)
         mat[i][0] = trans[i];
-    std::cout << "MatFromTranslation: " << mat << std::endl;
 
     return mat;
 }
@@ -99,7 +92,7 @@ sofa::type::Mat4x4f MatFromRotation(sofa::type::Quatf rot)
     for (unsigned int i = 0; i < 3; i++)
         for (unsigned int j = 0; j < 3; j++)
             mat[i][j] = rotM[i][j];
-    std::cout << "MatFromRotation: " << mat << std::endl;
+
     return mat;
 }
 
@@ -159,15 +152,12 @@ const HapticAvatar_Portal::Coord& HapticAvatar_Portal::getPortalPosition()
     //Vec3f T_gear = Vec3f(8.8f, 0.0f, 0.0f);
     //Vec3f translation = m_rootPosition + T_gear;
     
-
-    
     
     /*rot.toMatrix(rotM);
 
     for (unsigned int i = 0; i < 3; i++)
         for (unsigned int j = 0; j < 3; j++)
             mat[i][j] = rotM[i][j];*/
-
 
 
     //m_portalPosition.getCenter() = translation;

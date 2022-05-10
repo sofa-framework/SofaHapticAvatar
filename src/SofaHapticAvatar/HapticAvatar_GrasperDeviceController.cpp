@@ -99,7 +99,7 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
     sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
-    //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
+
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
     articulations[2] = dofV[Dof::ROT];
