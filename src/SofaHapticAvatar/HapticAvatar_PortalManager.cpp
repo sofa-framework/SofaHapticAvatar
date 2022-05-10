@@ -57,7 +57,7 @@ void HapticAvatar_PortalManager::init()
   /*  HapticAvatar_PortalManager::VecCoord & pos = *m_portalsPosition.beginEdit();
     pos.resize(m_portals.size());
     m_portalsPosition.endEdit();*/
-    printInfo();
+    //printInfo();
 }
 
 
@@ -89,8 +89,8 @@ int HapticAvatar_PortalManager::getPortalId(std::string comStr)
 
         cpt++;
     }
-
-    msg_error() << "Portal ID not found for name: " << comStr;
+    
+    msg_error() << "Portal ID corresponding to Port '" << comStr << "' not found in file: " << m_configFilename.getFullPath();
     return res;
 }
 

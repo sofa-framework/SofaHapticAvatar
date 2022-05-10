@@ -16,8 +16,10 @@ set(HEADER_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverScope.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.h
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.h    
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h
     
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_HapticThreadManager.h    
+
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.h    
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_BaseDeviceController.h
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_ArticulatedDeviceController.h
     
@@ -31,9 +33,10 @@ set(SOURCE_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverIbox.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_DriverScope.cpp
 	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_PortalManager.cpp
-	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp    
-    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
+	${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_Portal.cpp        
     
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_HapticThreadManager.cpp
+    ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_IBoxController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_BaseDeviceController.cpp
     ${SOFAHAPTICAVATAR_SRC_DIR}/HapticAvatar_ArticulatedDeviceController.cpp
     

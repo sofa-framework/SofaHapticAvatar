@@ -2,7 +2,7 @@
 <Node dt="0.01" gravity="0 0 0" name="root">
     <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels" />
     <DefaultVisualManagerLoop/>
-    
+
     <RequiredPlugin name="SofaBoundaryCondition"/> <!-- Needed to use components [FixedConstraint] -->
     <RequiredPlugin name="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LinearSolverConstraintCorrection, LocalMinDistance] -->
     <RequiredPlugin name="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
@@ -29,17 +29,19 @@
 
     <!-- Include Device driver and 3D model -->
     <include href="ArticulatedGrasper.xml" />
-    
-    
+
+    <include href="ArticulatedGrasper2.xml" />
+
+
     <!-- Add obstacles -->
-    <RegularGridTopology name="grid_2" n="7 7 7" min="-60 140 0" max="60 260 120" />
+    <RegularGridTopology name="grid_2" n="6 6 6" min="-50 -50 0" max="50 50 100" />
     <Node name="Cube2">
         <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
         <MechanicalObject src="@../grid_2" name="Volume" />
         
-        <BoxROI name="boxRoi1" box="-100 100 -1  100 300 1" drawBoxes="1"/>
+        <BoxROI name="boxRoi1" box="-100 -100 -1  100 100 1" drawBoxes="1"/>
         <FixedConstraint indices="@boxRoi1.indices" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
@@ -62,9 +64,10 @@
             <PointCollisionModel group="1"/>
             
             <Node name="VisuSurface">
-                <OglModel name="Visual"  />
+                <OglModel name="Visual" texturename="textures/colorMap.png" />
                 <IdentityMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>
+
 </Node>

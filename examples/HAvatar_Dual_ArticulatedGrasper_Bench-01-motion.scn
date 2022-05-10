@@ -25,4 +25,6 @@
     <!-- Include Device driver and 3D model -->
     <include href="ArticulatedGrasper.xml" />
 
+    <include href="ArticulatedGrasper2.xml" />
+
 </Node>

@@ -6,14 +6,10 @@
 ******************************************************************************/
 
 #include <SofaHapticAvatar/HapticAvatar_GrasperDeviceController.h>
+#include <SofaHapticAvatar/HapticAvatar_HapticThreadManager.h>
+#include <SofaHapticAvatar/HapticAvatar_IBoxController.h>
 
 #include <sofa/core/ObjectFactory.h>
-
-#include <sofa/simulation/Node.h>
-#include <sofa/simulation/AnimateBeginEvent.h>
-#include <sofa/simulation/AnimateEndEvent.h>
-#include <sofa/simulation/CollisionEndEvent.h>
-#include <sofa/core/collision/DetectionOutput.h>
 
 #include <sofa/core/visual/VisualParams.h>
 #include <chrono>
@@ -34,219 +30,32 @@ int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver all
 //constructeur
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     : HapticAvatar_ArticulatedDeviceController()
+    , d_useIBox(initData(&d_useIBox, bool(true), "useIBox", "Set to true if this device is linked to an ibox"))
     , d_MaxOpeningAngle(initData(&d_MaxOpeningAngle, SReal(60.0f), "MaxOpeningAngle", "Max jaws opening angle"))
-    , l_iboxCtrl(initLink("iboxController", "link to IBoxController"))
-    , m_iboxCtrl(nullptr)
 {
-    this->f_listening.setValue(true);
-    
-    d_hapticIdentity.setReadOnly(true);
-
     m_toolRot.identity();
 
-    VecCoord & articulations = *d_toolPosition.beginEdit();
-    articulations.resize(6);
-    articulations[0] = 0;
-    articulations[1] = 0;
-    articulations[2] = 0;
-    articulations[3] = 0;
+    m_nbArticulations = 6;
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
+    articulations.resize(m_nbArticulations);
+    for (auto i = 0; i < m_nbArticulations; ++i)
+        articulations[i] = 0;
 
-    articulations[4] = 0;
-    articulations[5] = 0;
-    d_toolPosition.endEdit();
-}
-
-
-
-//executed once at the start of Sofa, initialization of all variables excepts haptics-related ones
-void HapticAvatar_GrasperDeviceController::initImpl()
-{
-    // get ibox if one
-    if (!l_iboxCtrl.empty())
-    {
-        m_iboxCtrl = l_iboxCtrl.get();
-        if (m_iboxCtrl != nullptr)
-        {
-            msg_info() << "Device " << d_hapticIdentity.getValue() << " connected with IBox: " << m_iboxCtrl->d_hapticIdentity.getValue();
-        }
-    }
-
-
-    simulation::Node *context = dynamic_cast<simulation::Node *>(this->getContext()); // access to current node
-    m_forceFeedback = context->get<LCPForceFeedback>(this->getTags(), sofa::core::objectmodel::BaseContext::SearchRoot);
-
-    m_HA_driver->setDeadBandPWMWidth(100, 0, 0, 0);
-    if (m_forceFeedback == nullptr)
-    {
-        msg_warning() << "ForceFeedback not found";
-    }
+    m_toolPositionCopy = articulations;
+    m_resForces.resize(m_nbArticulations);
 }
 
 
 bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
+    std::cout << "HapticAvatar_GrasperDeviceController::createHapticThreads()" << std::endl;
+
+    auto threadMgr = HapticAvatar_HapticThreadManager::getInstance();
+    threadMgr->registerDevice(this);
+
     m_terminate = false;
-    haptic_thread = std::thread(Haptics, std::ref(this->m_terminate), this, m_HA_driver);
-    copy_thread = std::thread(CopyData, std::ref(this->m_terminate), this);
-
+    copy_thread = std::thread(&HapticAvatar_GrasperDeviceController::CopyData, this, std::ref(this->m_terminate), this);
     return true;
-}
-
-
-void HapticAvatar_GrasperDeviceController::Haptics(std::atomic<bool>& terminate, void * p_this, void * p_driver)
-{ 
-    std::cout << "Haptics thread" << std::endl;
-
-    HapticAvatar_GrasperDeviceController* _deviceCtrl = static_cast<HapticAvatar_GrasperDeviceController*>(p_this);
-    HapticAvatar_DriverPort* _driver = static_cast<HapticAvatar_DriverPort*>(p_driver);
-
-    if (_deviceCtrl == nullptr)
-    {
-        msg_error("Haptics Thread: HapticAvatar_GrasperDeviceController cast failed");
-        return;
-    }
-
-    if (_driver == nullptr)
-    {
-        msg_error("Haptics Thread: HapticAvatar_Driver cast failed");
-        return;
-    }
-
-    /// Pointer to the IBoxController component
-    HapticAvatar_IBoxController * _iboxCtrl = _deviceCtrl->m_iboxCtrl;
-
-    // Loop Timer
-    long targetSpeedLoop = 1; // Target loop speed: 1ms
-
-    // Use computer tick for timer
-    ctime_t refTicksPerMs = CTime::getRefTicksPerSec() / 1000;
-    ctime_t targetTicksPerLoop = targetSpeedLoop * refTicksPerMs;
-
-	auto startSimulationTime = std::chrono::high_resolution_clock::now();
-
-    VecDeriv resForces;
-    resForces.resize(6);
-    int cptLoop = 0;
-    ctime_t startTimePrev = CTime::getRefTime();
-    ctime_t summedLoopDuration = 0;
-	
-	//log file
-	//std::ofstream logFile("HapticAvatarLog.txt");
-	bool contact = false;
-    while (!terminate)
-    {
-        //auto t1 = std::chrono::high_resolution_clock::now();
-        
-        ctime_t startTime = CTime::getRefTime();
-        summedLoopDuration += (startTime - startTimePrev);
-        startTimePrev = startTime;
-
-        // Get all info from devices
-        _deviceCtrl->m_hapticData.anglesAndLength = _driver->getAnglesAndLength();
-        _deviceCtrl->m_hapticData.toolId = _driver->getToolID();
-        //_deviceCtrl->m_hapticData.motorValues = _driver->getLastPWM();
-
-         if (_iboxCtrl)
-        {
-            float angle = _iboxCtrl->getJawOpeningAngle(_deviceCtrl->m_hapticData.toolId);
-            _deviceCtrl->m_hapticData.jawOpening = angle;
-        }
-
-        // Force feedback computation
-        if (_deviceCtrl->m_simulationStarted && _deviceCtrl->m_forceFeedback)
-        {
-            const HapticAvatar_GrasperDeviceController::VecCoord& articulations = _deviceCtrl->d_toolPosition.getValue();
-            _deviceCtrl->m_forceFeedback->computeForce(articulations, resForces);
-
-            /// ** resForces: **             
-            /// articulations[0] => dofV[Dof::YAW];
-            /// articulations[1] => -dofV[Dof::PITCH];
-            /// articulations[2] => dofV[Dof::ROT];
-            /// articulations[3] => dofV[Dof::Z];
-
-            /// articulations[4] => Grasper up
-            /// articulations[5] => Grasper Down 
-
-            //_driver->setManualPWM(float(-resForces[2][0]), float(-resForces[1][0]), float(resForces[3][0]), float(-resForces[0][0]));
-            _driver->setMotorForceAndTorques(-resForces[2][0], resForces[1][0], resForces[3][0], -resForces[0][0]);
-
-            if (_iboxCtrl)
-            {
-                // TODO: implement Grasper ForceFeedback here, should be a conversion from 1D angular constraint into force
-                float jaw_momentum_arm = 25.0f * sin(0.38f + _deviceCtrl->m_hapticData.jawOpening);
-                float handleForce = (resForces[4][0] - resForces[5][0]) / jaw_momentum_arm; // in Newtons
-
-                _iboxCtrl->setHandleForce(_deviceCtrl->m_hapticData.toolId, handleForce*3);
-                //if (cptLoop == 50)
-                //{
-                //    std::cout << "handleForce (toolId=" << _deviceCtrl->m_hapticData.toolId << ") " << handleForce << std::endl;
-                //    cptLoop = 0;
-                //}
-            }
-
-            //if (cptLoop == 50)
-            //{
-            //    std::cout << "resForces: " << resForces << std::endl;
-            //    cptLoop = 0;
-            //}
-
-            cptLoop++;
-            if (cptLoop % 1000 == 0) {
-                float updateFreq = 1000*1000 / ((float)summedLoopDuration / (float) refTicksPerMs); // in Hz
-                std::cout << "Average haptic loop frequency " << std::to_string(int(updateFreq)) << std::endl;
-                summedLoopDuration = 0;
-            }
-            if (cptLoop % 30000 == 0) {
-                _driver->printStatus();
-            }
-
-        }
-        else
-            _driver->releaseForce();
-
-        _driver->update();
-        _iboxCtrl->update();
-
-        ctime_t endTime = CTime::getRefTime();
-        ctime_t duration = endTime - startTime;
-		
-		//contact = false;
-		//for (int i = 0; i < 6; i++)
-		//{
-		//	if (resForces[i][0] != 0.0)
-		//	{
-		//		contact = true;
-		//		break;
-		//	}
-		//}
-		//if (contact)
-		//{
-		//	auto currentTime = std::chrono::high_resolution_clock::now();
-		//	auto timeSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startSimulationTime);
-
-		//	if (logFile.is_open())
-		//	{
-		//		logFile << timeSinceStart.count() << " ";
-		//		logFile << contact << " "; 
-		//		logFile << duration * 1000 / refTicksPerMs << " ";
-		//		logFile << resForces << std::endl;
-		//	}
-		//}
-
-		
-        // If loop is quicker than the target loop speed. Wait here.
-        //duration = 0;
-        while (duration < targetTicksPerLoop)
-        {
-            endTime = CTime::getRefTime();
-            duration = endTime - startTime;
-        }
-    }
-	//logFile.close();
-
-    // ensure no force
-    _driver->releaseForce();
-    std::cout << "Haptics thread END!!" << std::endl;
 }
 
 
@@ -286,12 +95,10 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     if (!m_HA_driver)
         return;
 
-    //std::cout << "updatePositionImpl" << std::endl;
-
     // get info from simuData
     sofa::type::fixed_array<float, 4> dofV = m_simuData.anglesAndLength;
 
-    VecCoord & articulations = *d_toolPosition.beginEdit();
+    sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     //std::cout << "YAW: " << dofV[Dof::YAW] << " | PITCH: " << dofV[Dof::PITCH] << " | ROT: " << dofV[Dof::ROT] << " | Z: " << dofV[Dof::Z] << std::endl;
     articulations[0] = dofV[Dof::YAW];
     articulations[1] = -dofV[Dof::PITCH];
@@ -301,20 +108,42 @@ void HapticAvatar_GrasperDeviceController::updatePositionImpl()
     float _OpeningAngle = m_simuData.jawOpening * d_MaxOpeningAngle.getValue() * 0.01f;
     articulations[4] = _OpeningAngle;
     articulations[5] = -_OpeningAngle;
-
-    d_toolPosition.endEdit();
+    
+    // copy into an non Data variable for haptic thread acces.
+    m_toolPositionCopy = articulations;
 }
 
 
-void HapticAvatar_GrasperDeviceController::handleEvent(core::objectmodel::Event *event)
+void HapticAvatar_GrasperDeviceController::haptic_updateArticulations(HapticAvatar_IBoxController* _IBoxCtrl)
 {
-    if (!m_deviceReady)
+    // Update info from device hardware
+    // update angles and length
+    m_hapticData.anglesAndLength = m_HA_driver->getAnglesAndLength();
+
+    // Get tool Id // TODO check if this is needed at each haptic thread?
+    m_hapticData.toolId = m_HA_driver->getToolID();
+
+    if (d_useIBox.getValue() && _IBoxCtrl != nullptr)
+    {
+        m_hapticData.jawOpening = _IBoxCtrl->getJawOpeningAngle(m_hapticData.toolId);
+    }
+}
+
+
+void HapticAvatar_GrasperDeviceController::haptic_updateForceFeedback(HapticAvatar_IBoxController* _IBoxCtrl)
+{
+    if (m_forceFeedback == nullptr)
         return;
 
-    if (dynamic_cast<sofa::simulation::AnimateBeginEvent *>(event))
+    m_forceFeedback->computeForce(m_toolPositionCopy, m_resForces);
+
+    m_HA_driver->setMotorForceAndTorques(-m_resForces[2][0], m_resForces[1][0], m_resForces[3][0], -m_resForces[0][0]);
+    if (d_useIBox.getValue() && _IBoxCtrl != nullptr)
     {
-        m_simulationStarted = true;
-        updatePositionImpl();
+        float jaw_momentum_arm = 25.0f * sin(0.38f + m_hapticData.jawOpening);
+        float handleForce = (m_resForces[4][0] - m_resForces[5][0]) / jaw_momentum_arm; // in Newtons
+
+        _IBoxCtrl->setHandleForce(m_hapticData.toolId, handleForce * 3);
     }
 }
 
