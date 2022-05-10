@@ -48,7 +48,7 @@ HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
 
 bool HapticAvatar_GrasperDeviceController::createHapticThreads()
 {   
-    std::cout << "HapticAvatar_GrasperDeviceController::createHapticThreads()" << std::endl;
+    msg_info() << "HapticAvatar_GrasperDeviceController::createHapticThreads()";
 
     auto threadMgr = HapticAvatar_HapticThreadManager::getInstance();
     threadMgr->registerDevice(this);
@@ -70,7 +70,7 @@ void HapticAvatar_GrasperDeviceController::CopyData(std::atomic<bool>& terminate
     double speedTimerMs = 1000 / double(CTime::getRefTicksPerSec());
 
     ctime_t lastTime = CTime::getRefTime();
-    std::cout << "refTicksPerMs: " << refTicksPerMs << " targetTicksPerLoop: " << targetTicksPerLoop << std::endl;
+    
     int cptLoop = 0;
     // Haptics Loop
     while (!terminate)

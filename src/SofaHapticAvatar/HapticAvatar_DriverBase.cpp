@@ -90,8 +90,6 @@ namespace sofa::HapticAvatar
             return false;
         }
 
-        std::cout << "call from sendCommandToDevice " << std::endl;
-
         // request data
         if (result != nullptr)
             getDataImpl(result, false);
@@ -321,7 +319,7 @@ namespace sofa::HapticAvatar
                 unsigned int outlen = send_string.size(); // (unsigned int)(strlen(outgoingData));
                 bool write_success = writeDataImpl(outgoingData, outlen);
                 if (!write_success) {
-                    std::cout << "Write to device type " << std::to_string(device_type) << " failed." << std::endl;
+                    msg_warning("HapticAvatar_DriverBase") << "Write to device type " << std::to_string(device_type) << " failed.";
                 }
             }
 
