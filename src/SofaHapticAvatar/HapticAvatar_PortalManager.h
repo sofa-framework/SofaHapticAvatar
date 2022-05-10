@@ -82,6 +82,8 @@ protected:
 private:
     sofa::type::vector<HapticAvatar_Portal* > m_portals;
 
+    std::string m_procedureName = "";
+
     Coord m_defaultPosition;
 };
 
