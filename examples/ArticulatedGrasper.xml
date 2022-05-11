@@ -1,6 +1,6 @@
 <Node name="Group"> 
     <HapticAvatar_PortalManager name="portalMgr" configFilename="./config/PortalSetup.xml" printLog="0" />
-    <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM6" iboxController="@HAIBox" portalManager="@portalMgr" forceFeedBack="@Tool/Articulation/LCPFF"/>
+    <HapticAvatar_GrasperDeviceController name="HA_Emulator" portName="//./COM6" portalManager="@portalMgr" forceFeedBack="@Tool/Articulation/LCPFF"/>
     <HapticAvatar_IBoxController name="HAIBox" portName="//./COM7" printLog="0" />
 
     <Node name="Tool">
@@ -11,7 +11,7 @@
             <SparseLUSolver name="linear solver" tolerance="1e-09" />  
             
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
-            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="true"/>
+            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="false"/>
             <UniformMass totalMass="1"/>
             <LinearSolverConstraintCorrection />
             <LCPForceFeedback name="LCPFF" template="Vec1d" activate="true" forceCoef="0.0005"/>

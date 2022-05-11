@@ -10,7 +10,7 @@
             <SparseLUSolver name="linear solver" tolerance="1e-09" />  
             
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Device2.toolPosition"/>
-            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="true"/>
+            <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="false"/>
             <UniformMass totalMass="1"/>
             <LinearSolverConstraintCorrection />
             <LCPForceFeedback name="LCPFF2" template="Vec1d" activate="true" forceCoef="0.0005"/>
