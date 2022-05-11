@@ -18,7 +18,7 @@
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <DefaultContactManager name="response" response="FrictionContactConstraint" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -28,7 +28,7 @@
     
     
     <!-- Add obstacles -->
-    <RegularGridTopology name="grid_1" n="6 2 6" min="-100 -20 -100" max="100 0 100" />
+    <RegularGridTopology name="grid_1" n="6 6 2" min="-100 -50 20" max="100 150 40" />
     <Node name="Cube">
         <MechanicalObject src="@../grid_1" name="Volume" />
         
@@ -50,7 +50,7 @@
             
             <Node name="VisuSurface">
                 <OglModel name="Visual" color="1.000 1.000 1.000 1.0" />
-                <BarycentricMapping input="@.." output="@Visual" />
+                <IdentityMapping input="@.." output="@Visual" />
             </Node>
         </Node>
     </Node>

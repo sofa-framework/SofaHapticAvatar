@@ -22,7 +22,7 @@
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <DefaultContactManager name="response" response="FrictionContactConstraint" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -32,7 +32,7 @@
     
     
     <!-- Add obstacles -->
-    <RegularGridTopology name="grid_2" n="7 7 7" min="-60 140 0" max="60 260 120" />
+    <RegularGridTopology name="grid_2" n="7 7 7" min="-60 120 0" max="60 240 120" />
     <Node name="Cube2">
         <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
