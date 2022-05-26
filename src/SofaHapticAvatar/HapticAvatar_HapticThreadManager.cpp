@@ -157,7 +157,10 @@ void HapticAvatar_HapticThreadManager::Haptics(std::atomic<bool>& terminate, voi
         }
     }
 
-    std::cout << "Haptics thread END!!" << std::endl;
+    if (logThread)
+    {
+        std::cout << "Haptics thread END!!" << std::endl;
+    }
 }
 
 

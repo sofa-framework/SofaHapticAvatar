@@ -250,8 +250,8 @@ bool HapticAvatar_PortalManager::parseConfigFile()
         return false;
     }
 
-    const char* procedureName = hRoot->Attribute("Name");
-    std::cout << "procedureName: " << procedureName << std::endl;
+    // store procedureName. Not used for the moment
+    m_procedureName = hRoot->Attribute("Name");
 
     // get portals child node:
     const TiXmlNode* pChild = hRoot->FirstChild("Portals");

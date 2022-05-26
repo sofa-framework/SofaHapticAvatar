@@ -80,7 +80,7 @@ namespace sofa::HapticAvatar
     bool HapticAvatar_DriverBase::sendCommandToDevice(int commandId, const std::string& arguments, char* result)
     {
         std::string fullCommand = std::to_string(commandId) + " " + arguments + " \n";
-        //std::cout << "fullCommand: '" << fullCommand << "'" << std::endl;
+
         char outgoingData[OUTGOING_DATA_LEN];
         strcpy(outgoingData, fullCommand.c_str());
 
@@ -89,8 +89,6 @@ namespace sofa::HapticAvatar
         if (!write_success) {
             return false;
         }
-
-        std::cout << "call from sendCommandToDevice " << std::endl;
 
         // request data
         if (result != nullptr)
@@ -313,15 +311,11 @@ namespace sofa::HapticAvatar
                 // Send the total command string to the device.
                 char outgoingData[OUTGOING_DATA_LEN];
                 strcpy(outgoingData, send_string.c_str());
-                //std::cout << "Call from update 2. Device type " << std::to_string(device_type) << " string length (" << send_string.size() << ") " << send_string << std::endl;
-                
-                //if (device_type == 2)
-                //    std::cout << "Call from update. Device type " << std::to_string(device_type) << " string length (" << send_string.size() << ") " << outgoingData << "END" << std::endl;
 
                 unsigned int outlen = send_string.size(); // (unsigned int)(strlen(outgoingData));
                 bool write_success = writeDataImpl(outgoingData, outlen);
                 if (!write_success) {
-                    std::cout << "Write to device type " << std::to_string(device_type) << " failed." << std::endl;
+                    msg_warning("HapticAvatar_DriverBase") << "Write to device type " << std::to_string(device_type) << " failed.";
                 }
             }
 
@@ -337,8 +331,6 @@ namespace sofa::HapticAvatar
     {
         if (expected_num_return_vals > 0) {  // expected_num_return_vals is determined from the previous sent command set.
             getDataImpl(incomingData, false);
-            //if (device_type == 1)
-                //std::cout << "Received data from device " << std::to_string(device_type) << ": " << incomingData << std::endl;
             parseMessage();
         }
         // now that the previous command is parsed, we can clear it
@@ -354,14 +346,8 @@ namespace sofa::HapticAvatar
         for (int k = 0; k < cmd_send_list_size; k++) {
             for (int i = 0; i < num_return_vals[cmd_send_list[k]]; i++) {
                 result_table[cmd_send_list[k]][i] = std::strtof(pEnd, &pEnd) / scale_factor[cmd_send_list[k]];
-                //if (device_type == 1)
-                    //std::cout << "Port receive data " << std::to_string(result_table[cmd_send_list[k]][i]); 
-
             }
         }
-        //if (device_type == 1)
-        //    std::cout << std::endl;
-
     }
 
     void HapticAvatar_DriverBase::appendCmd(int cmd, const char* args)

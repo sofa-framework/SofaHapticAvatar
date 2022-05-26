@@ -43,7 +43,7 @@ void HapticAvatar_ArticulatedDeviceController::initDevice()
     // get identity
     std::string identity = m_HA_driver->getDeviceType();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatar_BaseDeviceController identity: '" << identity << "'" << std::endl;
+    msg_info() << "HapticAvatar_BaseDeviceController identity: '" << identity << "'";
 
     // get access to portalMgr
     if (l_portalMgr.empty())

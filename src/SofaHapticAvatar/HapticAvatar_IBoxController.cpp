@@ -50,7 +50,7 @@ void HapticAvatar_IBoxController::initDevice()
     // get identity
     std::string identity = m_HA_driver->getDeviceType();
     d_hapticIdentity.setValue(identity);
-    std::cout << "HapticAvatar_IBoxController identity: '" << identity << "'" << std::endl;
+    msg_info() << "HapticAvatar_IBoxController identity: '" << identity << "'";
 
     for (int i = 0; i < IBOX_NUM_CHANNELS; i++) {
         setLoopGain(i, 2.5f, 0);
