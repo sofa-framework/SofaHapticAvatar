@@ -22,7 +22,7 @@ namespace sofa::HapticAvatar
 
 using namespace sofa::helper::system::thread;
 
-int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
+const int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver allowing interfacing with Haptic Avatar device.")
     .add< HapticAvatar_GrasperDeviceController >()
     ;
 
@@ -31,14 +31,14 @@ int HapticAvatar_GrasperDeviceControllerClass = core::RegisterObject("Driver all
 HapticAvatar_GrasperDeviceController::HapticAvatar_GrasperDeviceController()
     : HapticAvatar_ArticulatedDeviceController()
     , d_useIBox(initData(&d_useIBox, bool(true), "useIBox", "Set to true if this device is linked to an ibox"))
-    , d_MaxOpeningAngle(initData(&d_MaxOpeningAngle, SReal(60.0f), "MaxOpeningAngle", "Max jaws opening angle"))
+    , d_MaxOpeningAngle(initData(&d_MaxOpeningAngle, 60.0f, "MaxOpeningAngle", "Max jaws opening angle"))
 {
     m_toolRot.identity();
 
     m_nbArticulations = 6;
     sofa::helper::WriteOnlyAccessor < Data<VecCoord> > articulations = d_toolPosition;
     articulations.resize(m_nbArticulations);
-    for (auto i = 0; i < m_nbArticulations; ++i)
+    for (unsigned int i = 0; i < m_nbArticulations; ++i)
         articulations[i] = 0;
 
     m_toolPositionCopy = articulations;
@@ -137,11 +137,11 @@ void HapticAvatar_GrasperDeviceController::haptic_updateForceFeedback(HapticAvat
 
     m_forceFeedback->computeForce(m_toolPositionCopy, m_resForces);
 
-    m_HA_driver->setMotorForceAndTorques(-m_resForces[2][0], m_resForces[1][0], m_resForces[3][0], -m_resForces[0][0]);
+    m_HA_driver->setMotorForceAndTorques(-float(m_resForces[2][0]), float(m_resForces[1][0]), float(m_resForces[3][0]), -float(m_resForces[0][0]));
     if (d_useIBox.getValue() && _IBoxCtrl != nullptr)
     {
         float jaw_momentum_arm = 25.0f * sin(0.38f + m_hapticData.jawOpening);
-        float handleForce = (m_resForces[4][0] - m_resForces[5][0]) / jaw_momentum_arm; // in Newtons
+        float handleForce = float(m_resForces[4][0] - m_resForces[5][0]) / jaw_momentum_arm; // in Newtons
 
         _IBoxCtrl->setHandleForce(m_hapticData.toolId, handleForce * 3);
     }

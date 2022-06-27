@@ -312,7 +312,7 @@ namespace sofa::HapticAvatar
                 char outgoingData[OUTGOING_DATA_LEN];
                 strcpy(outgoingData, send_string.c_str());
 
-                unsigned int outlen = send_string.size(); // (unsigned int)(strlen(outgoingData));
+                auto outlen = (unsigned int)(send_string.size());
                 bool write_success = writeDataImpl(outgoingData, outlen);
                 if (!write_success) {
                     msg_warning("HapticAvatar_DriverBase") << "Write to device type " << std::to_string(device_type) << " failed.";

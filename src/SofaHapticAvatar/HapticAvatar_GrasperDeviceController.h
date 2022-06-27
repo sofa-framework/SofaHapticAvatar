@@ -45,7 +45,7 @@ protected:
 public:
     Data<bool> d_useIBox;
     /// Max opening angle of the Jaws
-    Data<SReal> d_MaxOpeningAngle;
+    Data<float> d_MaxOpeningAngle;
 };
 
 } // namespace sofa::HapticAvatar

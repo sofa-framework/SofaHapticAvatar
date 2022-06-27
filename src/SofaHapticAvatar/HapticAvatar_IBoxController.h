@@ -10,7 +10,7 @@
 #include <SofaHapticAvatar/HapticAvatar_DriverIbox.h>
 #include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
 
-#include <SofaUserInteraction/Controller.h>
+#include <sofa/component/controller/Controller.h>
 
 namespace sofa::HapticAvatar
 {

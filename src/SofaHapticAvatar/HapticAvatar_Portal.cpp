@@ -55,7 +55,7 @@ void HapticAvatar_Portal::portalSetup()
         m_rootPosition[1] = 194.23f; //mm
     }
 
-    m_rootOrientation = sofa::type::Quatf::fromEuler(0.0f, m_flipAngle*EULER_TO_RAD, m_tiltAngle*EULER_TO_RAD);
+    m_rootOrientation = sofa::type::Quatf::fromEuler(0.0f, float(m_flipAngle*EULER_TO_RAD), float(m_tiltAngle*EULER_TO_RAD));
     if (m_flipAngle == 180) // TODO: remove this hack. FIX problem in fromEuler sign in SOFA for extrem angles.
         m_rootOrientation[0] *= -1;
 
