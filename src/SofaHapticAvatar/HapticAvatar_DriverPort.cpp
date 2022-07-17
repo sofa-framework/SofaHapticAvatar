@@ -245,14 +245,14 @@ int cptF = 0;
 
 void HapticAvatar_DriverPort::releaseForce()
 {
-    setManualPWM(0, 0, 0, 0);
+    setManualPWM(0.f, 0.f, 0.f, 0.f);
     //sendCommandToDevice(CmdPort::SET_MANUAL_PWM, "0 0 0 0", nullptr);
 }
 
 
-void HapticAvatar_DriverPort::setManualPWM(int rot, int pitch, int z, int yaw)
+void HapticAvatar_DriverPort::setManualPWM(float rot, float pitch, float z, float yaw)
 {
-    appendFloat((int)CmdPort::SET_MANUAL_PWM, rot, pitch, z, yaw);
+    appendFloat(int(CmdPort::SET_MANUAL_PWM), rot, pitch, z, yaw);
 }
 
 

@@ -9,7 +9,7 @@
 #include <SofaHapticAvatar/HapticAvatar_BaseDeviceController.h>
 #include <SofaHapticAvatar/HapticAvatar_DriverPort.h>
 #include <SofaHapticAvatar/HapticAvatar_PortalManager.h>
-#include <SofaHaptics/LCPForceFeedback.h>
+#include <sofa/component/haptics/LCPForceFeedback.h>
 
 
 namespace sofa::HapticAvatar
@@ -27,7 +27,7 @@ class SOFA_HAPTICAVATAR_API HapticAvatar_ArticulatedDeviceController : public Ha
 public:
     SOFA_CLASS(HapticAvatar_ArticulatedDeviceController, HapticAvatar_BaseDeviceController);
 
-    using LCPForceFeedback = sofa::component::controller::LCPForceFeedback<sofa::defaulttype::Vec1dTypes>;
+    using LCPForceFeedback = sofa::component::haptics::LCPForceFeedback<sofa::defaulttype::Vec1dTypes>;
     using ArticulationSize = unsigned int;
 
     /// Default constructor

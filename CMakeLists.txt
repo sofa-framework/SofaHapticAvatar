@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.12)
 project(SofaHapticAvatar VERSION 0.1)
 
 find_package(Sofa.GL REQUIRED)
-find_package(SofaConstraint REQUIRED)
-find_package(SofaHaptics REQUIRED)
+find_package(Sofa.Component.Constraint.Projective REQUIRED)
+find_package(Sofa.Component.Controller REQUIRED)
+find_package(Sofa.Component.Haptics REQUIRED)
 sofa_find_package(TinyXML REQUIRED)
 
 set(SOFAHAPTICAVATAR_SRC_DIR "src/SofaHapticAvatar")
@@ -52,7 +53,7 @@ set(README_FILES Readme.txt)
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES})
 
 # Link the plugin library to its dependencies (other libraries).
-target_link_libraries(${PROJECT_NAME} PUBLIC SofaConstraint SofaHaptics Sofa.GL)
+target_link_libraries(${PROJECT_NAME} PUBLIC Sofa.Component.Constraint.Projective Sofa.Component.Haptics Sofa.Component.Controller Sofa.GL)
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml) # Private because not exported in API
 
 ## Install rules for the library; CMake package configurations files

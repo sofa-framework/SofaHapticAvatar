@@ -115,7 +115,7 @@ namespace sofa::HapticAvatar
         * @param {z} is the insertion force (pwm-units, -2000 to +2000), i.e. the twist torque of the shaft
         * @param {yaw} is the yaw torque (pwm-units, -2000 to +2000), i.e. the side-to-side torque
         */
-        void setManualPWM(int rot, int pitch, int z, int yaw);
+        void setManualPWM(float rot, float pitch, float z, float yaw);
 
 
         // Functions for collision primitives
