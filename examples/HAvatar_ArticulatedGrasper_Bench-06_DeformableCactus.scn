@@ -22,7 +22,7 @@
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <DefaultContactManager name="response" response="FrictionContactConstraint" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -33,7 +33,7 @@
     
     <!-- Add obstacles -->    
     <Node name="Cactus">
-        <MeshObjLoader name="loader" filename="./mesh/cactus.obj" translation="100 80 1" scale3d="1 1 1"/>
+        <MeshObjLoader name="loader" filename="./mesh/cactus.obj" translation="0 130 100" rotation="90 0 0" scale3d="1.2 1.2 1.2"/>
         <SparseGridRamificationTopology name="grid" n="10 10 10" src="@./loader" nbVirtualFinerLevels="3" finestConnectivity="0"/>
             
         <Node name="Cactus">
@@ -46,10 +46,10 @@
             <TetrahedronSetGeometryAlgorithms name="Tetra_GeomAlgo" template="Vec3d" />
             <Hexa2TetraTopologicalMapping input="@../grid" output="@Tetra_topo" />
 
-            <BoxROI name="boxRoi1" box="-1 -1 -101  201 50 101" drawBoxes="1"/>
+            <BoxROI name="boxRoi1" box="-100 100 20  100 200 80" drawBoxes="1"/>
             <FixedConstraint indices="@boxRoi1.indices" />
             
-            <TetrahedronFEMForceField name="FEM" youngModulus="4500" poissonRatio="0.3" method="large" />
+            <TetrahedronFEMForceField name="FEM" youngModulus="3500" poissonRatio="0.3" method="large" />
             <UniformMass totalMass="1.0" />
             <LinearSolverConstraintCorrection />
             

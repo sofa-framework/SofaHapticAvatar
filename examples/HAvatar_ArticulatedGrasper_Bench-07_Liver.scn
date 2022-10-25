@@ -22,7 +22,7 @@
     <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <DefaultContactManager name="response" response="FrictionContactConstraint" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -33,20 +33,20 @@
     
     <!-- Add obstacles -->  
     <Node name="Liver">
-        <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
+        <EulerImplicitSolver rayleighStiffness="0.01" rayleighMass="0.0" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
-        <MeshGmshLoader filename="./mesh/liver2.msh" name="meshLoader" scale3d="100 100 100" rotation="-90 -90 -70" translation="200 50 50"/>
+        <MeshGmshLoader filename="./mesh/liver2.msh" name="meshLoader" scale3d="100 100 100" rotation="-80 30 180" translation="-30 0 50"/>
         <MechanicalObject name="dofs" src="@meshLoader" />
 		<TetrahedronSetTopologyContainer name="TetraContainer" src="@meshLoader" />
         <TetrahedronSetTopologyModifier name="Modifier" />
         <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
         
-        <BoxROI name="boxRoi1" box="80 0 -40  150 50 40" drawBoxes="1"/>
+        <BoxROI name="boxRoi1" box="0 -25 0  50 25 60" drawBoxes="1"/>
         <FixedConstraint indices="@boxRoi1.indices" />
         
         <FastTetrahedralCorotationalForceField name="FEM" youngModulus="2000" poissonRatio="0.3" method="large"/>
-        <DiagonalMass massDensity="0.001" />
+        <DiagonalMass massDensity="0.1" />
         <LinearSolverConstraintCorrection />
         
         <Node name="Surface">
