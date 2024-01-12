@@ -47,7 +47,7 @@ set(SOURCE_FILES
     ${SOFAHAPTICAVATAR_SRC_DIR}/initSofaHapticAvatarPlugin.cpp
 )
 
-set(README_FILES Readme.txt)
+set(README_FILES Readme.md)
 
 # Create the plugin library.
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${README_FILES})
