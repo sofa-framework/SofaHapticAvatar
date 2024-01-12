@@ -1,1 +1,0 @@
-Sofa plugin for Haptic Avatar device
