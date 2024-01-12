@@ -1,6 +1,6 @@
 # SOFA plugin for Haptic Avatar device
 
-[![Documentation](https://img.shields.io/badge/doc-on_website-green.svg)](https://github.com/sofa-framework/SofaHapticAvatar/blob/master/doc/SofaHapticAvatar%20plugin%20documentation.pdf)
+[![Documentation](https://img.shields.io/badge/doc-in_pdf-green.svg)](https://github.com/sofa-framework/SofaHapticAvatar/blob/master/doc/SofaHapticAvatar%20plugin%20documentation.pdf)
 [![Support](https://img.shields.io/badge/support-on_GitHub_Discussions-blue.svg)](https://github.com/sofa-framework/sofa/discussions)
 [![Gitter](https://img.shields.io/badge/chat-on_Gitter-ff69b4.svg)](https://app.gitter.im/#/room/#sofa-framework:gitter.im)
 [![Follou](https://img.shields.io/badge/Follou-to_website-red.svg)](https://www.follou-haptics.com/)
@@ -19,13 +19,15 @@ Very quickly, during the simulation, in addition to the simulation thread. A fir
 Then a second thread running as well at high frequency is used to copy the tool information into a data set which will be used by the simulation thread.
 <img align="center" width="60%" height="auto" src="./doc/HAvatar_Articulated_Nodes.png">
 <br>
+<br>
 
+Quick Description: 
 - Compatible with SOFA v21.12, v22.06 on Windows only. 
 - Support multiple tools
 - Multiple demo scenes for 1 and 2 devices in XML and python
 - Full documentation in [./doc](https://github.com/sofa-framework/SofaHapticAvatar/blob/master/doc/SofaHapticAvatar%20plugin%20documentation.pdf)
 
-![HapticAvatar_demo](./doc/HapticAvatar_dual_tool.gif)
+<img align="center" width="60%" height="auto" src="./doc/HapticAvatar_dual_tool.gif">
 
 
 ## Installation
