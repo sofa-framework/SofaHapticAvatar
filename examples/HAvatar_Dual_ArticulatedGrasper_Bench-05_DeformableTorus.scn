@@ -19,10 +19,10 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics'/>
     
-    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <CollisionResponse name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>

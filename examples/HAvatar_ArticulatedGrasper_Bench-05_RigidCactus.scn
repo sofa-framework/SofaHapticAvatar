@@ -14,10 +14,10 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics'/>
     
-    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContactConstraint" />
+    <CollisionResponse name="response" response="FrictionContactConstraint" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -28,7 +28,7 @@
     
     <!-- Add obstacles -->
     <Node name="Cactus">
-        <MeshObjLoader name="loader" filename="./mesh/cactus.obj" translation="0 130 100" rotation="90 0 0" scale3d="1.2 1.2 1.2"/>
+        <MeshOBJLoader name="loader" filename="./mesh/cactus.obj" translation="0 130 100" rotation="90 0 0" scale3d="1.2 1.2 1.2"/>
         <MechanicalObject name="CollisModel" position="@loader.position" />
         <MeshTopology src="@loader"/>
         

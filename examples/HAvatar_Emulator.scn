@@ -6,9 +6,9 @@
     <RequiredPlugin name='SofaSparseSolver'/>
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
   
-    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceDetection name="detection" />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <CollisionResponse name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="0.15" contactDistance="0.05" angleCone="0.0" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="1000"/>
@@ -50,7 +50,7 @@
             <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
             
             <Node name="CollisionModel" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
+                <MeshOBJLoader filename="./mesh/grasper_shaft_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  dy="0" rz="0" dz="0" tags="toolPosition"/> 
                 <SphereCollisionModel name="instrumentPoint" radius="2" contactStiffness="10" group="0"/> 
@@ -60,13 +60,13 @@
             </Node>
             
             <Node name="Shaft_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
+                <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_shaft.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="3"/>
             </Node>
             
             <Node name="JawUp_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
+                <MeshOBJLoader filename="./mesh/grasper_jaws_up_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
                 <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
@@ -75,13 +75,13 @@
             </Node>
             
             <Node name="JawUp_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
+                <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_jaws_up.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="4"/>
             </Node>
 
             <Node name="JawDown_collision" tags="toolCollision">
-                <MeshObjLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
+                <MeshOBJLoader filename="./mesh/grasper_jaws_down_collision_light.obj"  name="loader"/>
                 <MeshTopology src="@loader" name="InstrumentCollisionModel" />
                 <MechanicalObject src="@loader" name="instrumentCollisionState"  ry="0" rz="0" dy="0" /> 
                 <SphereCollisionModel name="instrumentPoint" radius="1" group="0" contactStiffness="100000"/> 
@@ -90,7 +90,7 @@
             </Node>     
             
             <Node name="JawDown_visu" >
-                <MeshObjLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
+                <MeshOBJLoader name="meshLoader_1" filename="./mesh/grasper_jaws_down.obj" handleSeams="1" />
                 <OglModel name="InstrumentVisualModel" src="@meshLoader_1"/>
                 <RigidMapping name="MM->VM mapping" input="@.." output="@InstrumentVisualModel" index="5"/>
             </Node>

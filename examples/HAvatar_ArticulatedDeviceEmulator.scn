@@ -7,8 +7,8 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     
     <BruteForceDetection />
-    <DefaultContactManager />
-    <DefaultPipeline />
+    <CollisionResponse />
+    <CollisionPipeline />
     <MinProximityIntersection alarmDistance="1" contactDistance="0.2"/>
     <VisualStyle displayFlags="showVisualModels showBehaviorModels showCollisionModels" />
     
@@ -38,7 +38,7 @@
                 <ArticulatedSystemMapping input1="@../Articulations" output="@DOFs" />
                 
                 <Node name="Device_base">
-                    <MeshObjLoader filename="./mesh/Haptic_device_base.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_device_base.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
 
@@ -51,7 +51,7 @@
                 
                 
                 <Node name="Device_head">
-                    <MeshObjLoader filename="./mesh/Haptic_device_head.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_device_head.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
                     <RigidMapping input="@.." output="@." index="1"/>
@@ -62,7 +62,7 @@
                 </Node>
                 
                 <Node name="Device_portal">
-                    <MeshObjLoader filename="./mesh/Haptic_device_portal.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_device_portal.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>                   
                     <RigidMapping input="@.." output="@." index="2"/>
@@ -73,7 +73,7 @@
                 </Node>
                 
                 <Node name="Grasper_shaft">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_shaft.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_grasper_shaft.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
                     
@@ -90,7 +90,7 @@
                 
                 
                 <Node name="Grasper_jaws_up">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_up.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_grasper_jaws_up.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
                     
@@ -107,7 +107,7 @@
                 
                 
                 <Node name="Grasper_jaws_down">
-                    <MeshObjLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
+                    <MeshOBJLoader filename="./mesh/Haptic_grasper_jaws_down.obj"  name="loader"/>
                     <MechanicalObject template="Vec3d" position="@loader.position" />
                     <MeshTopology src="@loader"/>
                     

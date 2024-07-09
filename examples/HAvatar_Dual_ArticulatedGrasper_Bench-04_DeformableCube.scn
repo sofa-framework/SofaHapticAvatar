@@ -19,10 +19,10 @@
     <RequiredPlugin name="SofaHapticAvatar"/>
     <RequiredPlugin name='SofaHaptics'/>
     
-    <DefaultPipeline name="pipeline" depth="6" verbose="0"/>
+    <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />
     <BVHNarrowPhase />
-    <DefaultContactManager name="response" response="FrictionContact" />
+    <CollisionResponse name="response" response="FrictionContact" />
     <LocalMinDistance name="proximity" alarmDistance="2" contactDistance="0.5" />
     <FreeMotionAnimationLoop/>
     <LCPConstraintSolver tolerance="0.001" maxIt="10000"/>
@@ -42,7 +42,7 @@
         <MechanicalObject src="@../grid_2" name="Volume" />
         
         <BoxROI name="boxRoi1" box="-100 -100 -1  100 100 1" drawBoxes="1"/>
-        <FixedConstraint indices="@boxRoi1.indices" />
+        <FixedProjectiveConstraint indices="@boxRoi1.indices" />
         
         <TetrahedronSetTopologyContainer name="Tetra_topo" />
         <TetrahedronSetTopologyModifier name="Modifier" />
