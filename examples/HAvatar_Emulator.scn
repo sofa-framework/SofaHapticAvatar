@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <Node name="root" gravity="0 0 0" dt="0.01" bbox="-200 -200 -200 200 200 200">
-    <RequiredPlugin name="SofaOpenglVisual"/>
-    <RequiredPlugin name="SofaHapticAvatar"/>
-    <RequiredPlugin name='SofaHaptics' />
-    <RequiredPlugin name='SofaSparseSolver'/>
+    <RequiredPlugin pluginName="SofaOpenglVisual"/>
+    <RequiredPlugin pluginName="SofaHapticAvatar"/>
+    <RequiredPlugin pluginName='SofaHaptics' />
+    <RequiredPlugin pluginName='SofaSparseSolver'/>
 	<VisualStyle displayFlags="showVisualModels showBehaviorModels hideCollisionModels" />
   
     <CollisionPipeline name="pipeline" depth="6" verbose="0"/>

@@ -3,21 +3,21 @@
     <VisualStyle displayFlags="showVisualModels hideBehaviorModels hideCollisionModels" />
     <DefaultVisualManagerLoop/>
     
-    <RequiredPlugin name="SofaBoundaryCondition"/> <!-- Needed to use components [FixedConstraint] -->
-    <RequiredPlugin name="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LinearSolverConstraintCorrection, LocalMinDistance] -->
-    <RequiredPlugin name="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
-    <RequiredPlugin name="SofaEngine"/> <!-- Needed to use components [BoxROI] -->
-    <RequiredPlugin name="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
-    <RequiredPlugin name="SofaSimpleFem"/> <!-- Needed to use components [TetrahedronFEMForceField] -->
-    <RequiredPlugin name="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
-    <RequiredPlugin name="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
-    <RequiredPlugin name="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
-    <RequiredPlugin name="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
-    <RequiredPlugin name="SofaRigid"/> <!-- Needed to use components [RigidMapping] -->
-    <RequiredPlugin name="SofaSparseSolver"/> <!-- Needed to use components [SparseLDLSolver] -->
-    <RequiredPlugin name="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
-    <RequiredPlugin name="SofaHapticAvatar"/>
-    <RequiredPlugin name='SofaHaptics'/>
+    <RequiredPlugin pluginName="SofaBoundaryCondition"/> <!-- Needed to use components [FixedConstraint] -->
+    <RequiredPlugin pluginName="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LinearSolverConstraintCorrection, LocalMinDistance] -->
+    <RequiredPlugin pluginName="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
+    <RequiredPlugin pluginName="SofaEngine"/> <!-- Needed to use components [BoxROI] -->
+    <RequiredPlugin pluginName="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
+    <RequiredPlugin pluginName="SofaSimpleFem"/> <!-- Needed to use components [TetrahedronFEMForceField] -->
+    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin pluginName="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
+    <RequiredPlugin pluginName="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
+    <RequiredPlugin pluginName="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
+    <RequiredPlugin pluginName="SofaRigid"/> <!-- Needed to use components [RigidMapping] -->
+    <RequiredPlugin pluginName="SofaSparseSolver"/> <!-- Needed to use components [SparseLDLSolver] -->
+    <RequiredPlugin pluginName="SofaTopologyMapping"/> <!-- Needed to use components [Hexa2TetraTopologicalMapping, Tetra2TriangleTopologicalMapping] -->
+    <RequiredPlugin pluginName="SofaHapticAvatar"/>
+    <RequiredPlugin pluginName='SofaHaptics'/>
     
     <CollisionPipeline name="pipeline" depth="6" verbose="0"/>
     <BruteForceBroadPhase />

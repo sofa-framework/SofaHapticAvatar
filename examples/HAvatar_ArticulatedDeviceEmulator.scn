@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <Node dt="0.01" gravity="0 0 0" name="root">
-    <RequiredPlugin name="SofaOpenglVisual"/>
-    <RequiredPlugin name='SofaBoundaryCondition'/>
-    <RequiredPlugin name='SofaGeneralRigid'/>
-    <RequiredPlugin name='SofaConstraint'/>
-    <RequiredPlugin name="SofaHapticAvatar"/>
+    <RequiredPlugin pluginName="SofaOpenglVisual"/>
+    <RequiredPlugin pluginName='SofaBoundaryCondition'/>
+    <RequiredPlugin pluginName='SofaGeneralRigid'/>
+    <RequiredPlugin pluginName='SofaConstraint'/>
+    <RequiredPlugin pluginName="SofaHapticAvatar"/>
     
     <BruteForceDetection />
     <CollisionResponse />
