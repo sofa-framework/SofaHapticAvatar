@@ -8,7 +8,7 @@
         
         <Node name="Articulation">
             <EulerImplicitSolver name="cg_odesolver"  />
-            <SparseLUSolver name="linear solver" tolerance="1e-09" />  
+            <SparseLUSolver name="linear_solver" tolerance="1e-09" />  
             
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
             <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="false"/>

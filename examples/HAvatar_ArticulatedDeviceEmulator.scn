@@ -17,7 +17,7 @@
     
     
     <EulerImplicitSolver name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
-    <CGLinearSolver iterations="100" name="linear solver" threshold="1e-20" tolerance="1e-20" />
+    <CGLinearSolver iterations="100" name="linear_solver" threshold="1e-20" tolerance="1e-20" />
     
     <Node name="Tool">
         
