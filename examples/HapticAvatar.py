@@ -29,7 +29,7 @@ def createArticulatedGrasper(root, toolPosition, toolRotation):
     tool.addObject('MechanicalObject', name="bati", template="Rigid3d", position=tPosition, rotation=toolRotation)
     
     articulations = tool.addChild('Articulation')
-    articulations.addObject('EulerImplicitSolver', name="cg_odesolver", rayleighStiffness=0.1, rayleighMass=0.1)
+    articulations.addObject('EulerImplicitIntegrationScheme', name="cg_odesolver", rayleighStiffness=0.1, rayleighMass=0.1)
     articulations.addObject('SparseLUSolver', name="solver", tolerance=1e-09)
     
     articulations.addObject('MechanicalObject', name="Articulations", template="Vec1d", position="0 0 0 0 0 0", rest_position="@../../HA_Emulator.toolPosition")
@@ -149,7 +149,7 @@ def createPortal(root, nodeName, portalId):
 
 
 def createRigidGrasper(root, toolPosition, toolRotation):
-    root.addObject('EulerImplicitSolver', name="cg_odesolver", rayleighStiffness=0.1, rayleighMass=0.1)
+    root.addObject('EulerImplicitIntegrationScheme', name="cg_odesolver", rayleighStiffness=0.1, rayleighMass=0.1)
     root.addObject('CGLinearSolver', name="solver", tolerance=1e-09, threshold=1e-09, iterations=25)
     
     instru = root.addChild('Instrument')

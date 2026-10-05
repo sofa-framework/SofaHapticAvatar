@@ -7,8 +7,8 @@
         <MechanicalObject name="bati" template="Rigid3d" position="-60 0 250  0 0 0 1" rotation="-20 0 0"/>
         
         <Node name="Articulation">
-            <EulerImplicitSolver name="cg_odesolver"  />
-            <SparseLUSolver name="linear_solver" tolerance="1e-09" />  
+            <EulerImplicitIntegrationScheme name="cg_odesolver"  />
+            <SparseLUSolver name="linearSolver" tolerance="1e-09" />  
             
             <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0 0 0 0" rest_position="@../../HA_Emulator.toolPosition"/>
             <RestShapeSpringsForceField points="0 1 2 3 4 5" stiffness="600000000 600000000 600000000 600000 600000000 600000000" printLog="false"/>

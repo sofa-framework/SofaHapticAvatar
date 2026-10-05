@@ -26,8 +26,8 @@
     </Node>
     
     
-    <EulerImplicitSolver name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
-    <CGLinearSolver name="linear_solver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
+    <EulerImplicitIntegrationScheme name="ODE solver" rayleighStiffness="0.05" rayleighMass="1.0" />
+    <CGLinearSolver name="linearSolver" iterations="25" tolerance="1e-10" threshold="10e-10" /> 
     
     <Node name="articulation">
         <MechanicalObject name="Articulations" template="Vec1d" position="0 0 0  0 0 0" />

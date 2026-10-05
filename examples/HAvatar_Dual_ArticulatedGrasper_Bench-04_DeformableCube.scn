@@ -9,7 +9,7 @@
     <RequiredPlugin pluginName="SofaEngine"/> <!-- Needed to use components [BoxROI] -->
     <RequiredPlugin pluginName="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
     <RequiredPlugin pluginName="SofaSimpleFem"/> <!-- Needed to use components [TetrahedronFEMForceField] -->
-    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitIntegrationScheme] -->
     <RequiredPlugin pluginName="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
     <RequiredPlugin pluginName="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin pluginName="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->
@@ -36,7 +36,7 @@
     <!-- Add obstacles -->
     <RegularGridTopology name="grid_2" n="6 6 6" min="-50 -50 0" max="50 50 100" />
     <Node name="Cube2">
-        <EulerImplicitSolver rayleighMass="0.01" rayleighStiffness="0.1" /> 
+        <EulerImplicitIntegrationScheme rayleighMass="0.01" rayleighStiffness="0.1" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
         <MechanicalObject src="@../grid_2" name="Volume" />

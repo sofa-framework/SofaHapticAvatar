@@ -8,7 +8,7 @@
     <RequiredPlugin pluginName="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
     <RequiredPlugin pluginName="SofaEngine"/> <!-- Needed to use components [BoxROI] -->
     <RequiredPlugin pluginName="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
-    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitIntegrationScheme] -->
     <RequiredPlugin pluginName="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
     <RequiredPlugin pluginName="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin pluginName="SofaMiscFem"/> <!-- Needed to use components [FastTetrahedralCorotationalForceField] -->
@@ -33,7 +33,7 @@
     
     <!-- Add obstacles -->  
     <Node name="Liver">
-        <EulerImplicitSolver rayleighStiffness="0.01" rayleighMass="0.0" /> 
+        <EulerImplicitIntegrationScheme rayleighStiffness="0.01" rayleighMass="0.0" /> 
 		<SparseLDLSolver template="CompressedRowSparseMatrixMat3x3d"/>
 
         <MeshGmshLoader filename="./mesh/liver2.msh" name="meshLoader" scale3d="100 100 100" rotation="-80 30 180" translation="-30 0 50"/>

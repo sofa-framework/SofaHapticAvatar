@@ -36,7 +36,7 @@ def createDeformableCube(root, nodeName, size3d, min3d, max3d, fixBox):
     grid.addObject('RegularGridTopology', name="grid_1", n=size3d, min=min3d, max=max3d)
     
     dCube = grid.addChild("Grid")
-    dCube.addObject('EulerImplicitSolver', name="cg_odesolver")
+    dCube.addObject('EulerImplicitIntegrationScheme', name="cg_odesolver")
     dCube.addObject('SparseLDLSolver', name="linear_solver", template="CompressedRowSparseMatrixMat3x3d")
     dCube.addObject('MechanicalObject', name="Volume", src="@../grid_1")
     
@@ -99,7 +99,7 @@ def createDeformableCactus(root, nodeName, translation, size3d, grid3d, fixBox):
         
     # create 3D tetrahedral model
     tCactus = cactus.addChild("Mecha")
-    tCactus.addObject('EulerImplicitSolver', name="cg_odesolver")
+    tCactus.addObject('EulerImplicitIntegrationScheme', name="cg_odesolver")
     tCactus.addObject('SparseLDLSolver', name="linear_solver", template="CompressedRowSparseMatrixMat3x3d")
     #tCactus.addObject('CGLinearSolver', name="linear_solver", iterations=30, tolerance="1e-9", threshold="1e-9", template="CompressedRowSparseMatrixMat3x3d")
     
@@ -141,7 +141,7 @@ def createDeformableCactus(root, nodeName, translation, size3d, grid3d, fixBox):
 
 def createLiver(root):
     liver = root.addChild('Liver')
-    liver.addObject('EulerImplicitSolver', name="cg_odesolver")
+    liver.addObject('EulerImplicitIntegrationScheme', name="cg_odesolver")
     liver.addObject('SparseLDLSolver', name="linear_solver")
     
     # create 3D tetrahedral model

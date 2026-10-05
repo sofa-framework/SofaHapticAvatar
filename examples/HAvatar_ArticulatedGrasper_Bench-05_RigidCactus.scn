@@ -6,7 +6,7 @@
     <RequiredPlugin pluginName="SofaConstraint"/> <!-- Needed to use components [FreeMotionAnimationLoop, LCPConstraintSolver, LinearSolverConstraintCorrection, LocalMinDistance] -->
     <RequiredPlugin pluginName="SofaDeformable"/> <!-- Needed to use components [RestShapeSpringsForceField] -->
     <RequiredPlugin pluginName="SofaGeneralRigid"/> <!-- Needed to use components [ArticulatedHierarchyContainer, ArticulatedSystemMapping, Articulation, ArticulationCenter] -->
-    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->
+    <RequiredPlugin pluginName="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitIntegrationScheme] -->
     <RequiredPlugin pluginName="SofaLoader"/> <!-- Needed to use components [MeshObjLoader] -->
     <RequiredPlugin pluginName="SofaMeshCollision"/> <!-- Needed to use components [LineCollisionModel, PointCollisionModel, TriangleCollisionModel] -->
     <RequiredPlugin pluginName="SofaOpenglVisual"/> <!-- Needed to use components [OglModel] -->

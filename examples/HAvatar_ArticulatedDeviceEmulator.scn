@@ -16,8 +16,8 @@
     <HapticAvatar_ArticulatedDeviceEmulator name="HA_Emulator" portName="//./COM3" portalManager="@portalMgr"/>
     
     
-    <EulerImplicitSolver name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
-    <CGLinearSolver iterations="100" name="linear_solver" threshold="1e-20" tolerance="1e-20" />
+    <EulerImplicitIntegrationScheme name="cg odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+    <CGLinearSolver iterations="100" name="linearSolver" threshold="1e-20" tolerance="1e-20" />
     
     <Node name="Tool">
         
